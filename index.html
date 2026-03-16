@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch 2025 - Farewell Memory Website</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CSS RESET & BASE STYLES
+           ============================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Color System */
+            --bg-primary: #0E0F12;
+            --surface-primary: #F6F1E8;
+            --accent-primary: #D7263D;
+            --accent-secondary: #F2A65A;
+            --ink-text: #102A43;
+            --muted: #7A8790;
+            --border-dark: #000000;
+            --border-navy: #102A43;
+            
+            /* Spacing */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --spacing-xxl: 5rem;
+            
+            /* Border & Shadow */
+            --border-thick: 6px;
+            --border-thicker: 8px;
+            --shadow-hard: 8px 8px 0px #000000;
+            --shadow-hover: 12px 12px 0px #000000;
+            
+            /* Typography */
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-primary);
+            color: var(--ink-text);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+           ============================================ */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        .section {
+            padding: var(--spacing-xxl) 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--spacing-lg);
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: var(--border-thick);
+            background: var(--accent-primary);
+        }
+
+        .btn {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: var(--accent-primary);
+            color: var(--surface-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+
+        .btn-secondary {
+            background: var(--accent-secondary);
+            color: var(--ink-text);
+        }
+
+        /* ============================================
+           SCROLL REVEAL ANIMATION
+           ============================================ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           SECTION 1 - HERO
+           ============================================ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-color: var(--bg-primary);
+            overflow: hidden;
+            padding: var(--spacing-xl);
+        }
+
+        .hero-stickers {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sticker {
+            position: absolute;
+            background: var(--accent-secondary);
+            border: var(--border-thick) solid var(--border-dark);
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            text-transform: uppercase;
+        }
+
+        .sticker-1 {
+            top: 10%;
+            left: 5%;
+            transform: rotate(-15deg);
+            background: var(--accent-primary);
+            color: var(--surface-primary);
+        }
+
+        .sticker-2 {
+            top: 20%;
+            right: 10%;
+            transform: rotate(10deg);
+            background: var(--surface-primary);
+            color: var(--ink-text);
+        }
+
+        .sticker-3 {
+            bottom: 30%;
+            left: 8%;
+            transform: rotate(-8deg);
+            background: var(--accent-secondary);
+            color: var(--ink-text);
+        }
+
+        .sticker-4 {
+            bottom: 15%;
+            right: 5%;
+            transform: rotate(12deg);
+            background: var(--surface-primary);
+            color: var(--ink-text);
+        }
+
+        .sticker-shape {
+            position: absolute;
+            border: var(--border-thick) solid var(--border-dark);
+        }
+
+        .shape-1 {
+            width: 60px;
+            height: 60px;
+            top: 15%;
+            right: 20%;
+            background: var(--accent-primary);
+            transform: rotate(45deg);
+        }
+
+        .shape-2 {
+            width: 40px;
+            height: 40px;
+            bottom: 25%;
+            left: 15%;
+            background: var(--accent-secondary);
+            border-radius: 50%;
+        }
+
+        .shape-3 {
+            width: 80px;
+            height: 30px;
+            top: 60%;
+            right: 15%;
+            background: var(--surface-primary);
+            transform: rotate(-5deg);
+        }
+
+        .hero-card {
+            background: var(--surface-primary);
+            border: var(--border-thicker) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            padding: var(--spacing-xl);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            border: var(--border-thicker) solid var(--border-dark);
+            box-shadow: 4px 4px 0px var(--border-dark);
+            margin: 0 auto var(--spacing-lg);
+            background: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-logo:hover {
+            transform: scale(1.05) rotate(3deg);
+        }
+
+        .hero-logo img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+        }
+
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            color: var(--ink-text);
+            margin-bottom: var(--spacing-sm);
+            text-transform: uppercase;
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-body);
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.6;
+        }
+
+        .hero-scroll-indicator {
+            margin-top: var(--spacing-lg);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* ============================================
+           SECTION 2 - ABOUT THE BATCH
+           ============================================ */
+        .about {
+            background: var(--surface-primary);
+        }
+
+        .about-grid {
+            display: grid;
+            gap: var(--spacing-lg);
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .about-card {
+            background: var(--surface-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            padding: var(--spacing-lg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .about-card p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--ink-text);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .stat-box {
+            background: var(--accent-secondary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: 4px 4px 0px var(--border-dark);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-box:hover {
+            transform: scale(1.05);
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--ink-text);
+            display: block;
+        }
+
+        .stat-label {
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ink-text);
+        }
+
+        /* ============================================
+           SECTION 3 - STUDENT COMMENTS
+           ============================================ */
+        .comments {
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .comments-container {
+            position: relative;
+        }
+
+        .comments-scroll {
+            display: flex;
+            gap: var(--spacing-lg);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: var(--spacing-md) 0;
+            scrollbar-width: none;
+        }
+
+        .comments-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .comment-card {
+            flex: 0 0 320px;
+            scroll-snap-align: center;
+            background: var(--surface-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            padding: var(--spacing-lg);
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .comment-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .comment-avatar {
+            width: 60px;
+            height: 60px;
+            border: var(--border-thick) solid var(--border-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .comment-info h4 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--ink-text);
+            margin-bottom: 2px;
+        }
+
+        .comment-info span {
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .comment-text {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--ink-text);
+            margin-bottom: var(--spacing-md);
+            font-style: italic;
+        }
+
+        .comment-text::before {
+            content: '"';
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            color: var(--accent-primary);
+            line-height: 0;
+            vertical-align: -0.5rem;
+            margin-right: 4px;
+        }
+
+        .comment-text::after {
+            content: '"';
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            color: var(--accent-primary);
+            line-height: 0;
+            vertical-align: -0.5rem;
+        }
+
+        .comment-reactions {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 3px solid var(--border-dark);
+        }
+
+        .reaction-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-secondary);
+            border: 3px solid var(--border-dark);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reaction-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .reaction-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reaction-btn.active {
+            background: var(--accent-primary);
+            color: var(--surface-primary);
+        }
+
+        .scroll-arrows {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        .scroll-arrows button {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--surface-primary);
+            transition: all 0.2s ease;
+        }
+
+        .scroll-arrows button:hover {
+            transform: scale(1.1);
+        }
+
+        .scroll-arrows .prev {
+            left: 0;
+        }
+
+        .scroll-arrows .next {
+            right: 0;
+        }
+
+        @media (min-width: 768px) {
+            .scroll-arrows {
+                display: flex;
+                gap: var(--spacing-sm);
+            }
+        }
+
+        /* ============================================
+           SECTION 4 - VIDEO DOCUMENTARY
+           ============================================ */
+        .video {
+            background: var(--surface-primary);
+        }
+
+        .video-card {
+            background: var(--surface-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            padding: var(--spacing-lg);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: 4px 4px 0px var(--border-dark);
+            margin-bottom: var(--spacing-md);
+            background: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-caption {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           SECTION 5 - IMAGE MOSAIC
+           ============================================ */
+        .mosaic {
+            background: var(--bg-primary);
+        }
+
+        .mosaic-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        @media (min-width: 768px) {
+            .mosaic-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .mosaic-item {
+            position: relative;
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .mosaic-item:nth-child(odd) {
+            transform: rotate(-2deg);
+        }
+
+        .mosaic-item:nth-child(even) {
+            transform: rotate(2deg);
+        }
+
+        .mosaic-item:hover {
+            transform: scale(1.05) rotate(0deg);
+            box-shadow: var(--shadow-hover);
+            z-index: 10;
+        }
+
+        .mosaic-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .mosaic-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .mosaic-item.tall {
+            grid-row: span 2;
+        }
+
+        @media (min-width: 768px) {
+            .mosaic-item.tall {
+                grid-row: span 2;
+            }
+        }
+
+        /* ============================================
+           SECTION 6 - TEACHERS
+           ============================================ */
+        .teachers {
+            background: var(--surface-primary);
+            overflow: hidden;
+        }
+
+        .teachers-scroll {
+            display: flex;
+            gap: var(--spacing-lg);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: var(--spacing-md) 0;
+            scrollbar-width: none;
+        }
+
+        .teachers-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .teacher-card {
+            flex: 0 0 280px;
+            scroll-snap-align: center;
+            background: var(--surface-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .teacher-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .teacher-photo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto var(--spacing-md);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: 4px 4px 0px var(--border-dark);
+            overflow: hidden;
+        }
+
+        .teacher-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .teacher-name {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--ink-text);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .teacher-subject {
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-primary);
+        }
+
+        .teachers-arrows {
+            display: none;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        @media (min-width: 768px) {
+            .teachers-arrows {
+                display: flex;
+            }
+        }
+
+        .teachers-arrows button {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-secondary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--ink-text);
+            transition: all 0.2s ease;
+        }
+
+        .teachers-arrows button:hover {
+            transform: scale(1.1);
+        }
+
+        /* ============================================
+           SECTION 7 - ALBUM LINKS
+           ============================================ */
+        .albums {
+            background: var(--bg-primary);
+        }
+
+        .album-card {
+            background: var(--surface-primary);
+            border: var(--border-thick) solid var(--border-dark);
+            box-shadow: var(--shadow-hard);
+            padding: var(--spacing-xl);
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .album-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .album-card h3 {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: var(--ink-text);
+            margin-bottom: var(--spacing-sm);
+            text-transform: uppercase;
+        }
+
+        .album-card p {
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.6;
+        }
+
+        .album-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 1.25rem;
+            padding: var(--spacing-md) var(--spacing-xl);
+        }
+
+        .album-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ============================================
+           SECTION 8 - FOOTER
+           ============================================ */
+        .footer {
+            background: var(--surface-primary);
+            border-top: var(--border-thick) solid var(--border-dark);
+            padding: var(--spacing-xxl) 0 var(--spacing-xl);
+            text-align: center;
+        }
+
+        .footer-quote {
+            font-family: var(--font-heading);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: var(--ink-text);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.4;
+        }
+
+        .footer-quote span {
+            color: var(--accent-primary);
+        }
+
+        .footer-credits {
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--muted);
+            padding-top: var(--spacing-lg);
+            border-top: 3px solid var(--border-dark);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .footer-credits p {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        /* ============================================
+           RESPONSIVE ADJUSTMENTS
+           ============================================ */
+        @media (max-width: 480px) {
+            .section {
+                padding: var(--spacing-xl) 0;
+            }
+
+            .hero-card {
+                padding: var(--spacing-md);
+            }
+
+            .comment-card {
+                flex: 0 0 280px;
+            }
+
+            .teacher-card {
+                flex: 0 0 240px;
+            }
+
+            .stat-box {
+                padding: var(--spacing-sm);
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        /* ============================================
+           ACCESSIBILITY
+           ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus states for accessibility */
+        button:focus-visible,
+        a:focus-visible {
+            outline: 3px solid var(--accent-primary);
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================
+         SECTION 1 - HERO
+         ============================================ -->
+    <section class="hero" id="hero">
+        <div class="hero-stickers">
+            <div class="sticker sticker-1">Est. 2019</div>
+            <div class="sticker sticker-2">Batch 2025</div>
+            <div class="sticker sticker-3">Forever</div>
+            <div class="sticker sticker-4">Legends</div>
+            <div class="sticker-shape shape-1"></div>
+            <div class="sticker-shape shape-2"></div>
+            <div class="sticker-shape shape-3"></div>
+        </div>
+        
+        <div class="hero-card reveal">
+            <div class="hero-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Batch Logo">
+            </div>
+            <h1 class="hero-title">The Story of Our Batch</h1>
+            <p class="hero-subtitle">Years of chaos, friendship and unforgettable memories.</p>
+            <a href="#about" class="btn">Explore Memories</a>
+            <div class="hero-scroll-indicator">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M19 12l-7 7-7-7"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 2 - ABOUT THE BATCH
+         ============================================ -->
+    <section class="section about" id="about">
+        <div class="container">
+            <h2 class="section-title reveal">About The Batch</h2>
+            <div class="about-grid">
+                <div class="about-card reveal">
+                    <p>We are more than just classmates. We are a family forged through late-night study sessions, shared laughter in crowded hallways, and countless memories that will last a lifetime. From our first awkward introductions to our final emotional goodbyes, every moment has shaped us into who we are today.</p>
+                </div>
+                <div class="about-card reveal">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-number">84</span>
+                            <span class="stat-label">Students</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">16</span>
+                            <span class="stat-label">Teachers</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">6</span>
+                            <span class="stat-label">Years Together</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">32</span>
+                            <span class="stat-label">Events</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 3 - STUDENT COMMENTS
+         ============================================ -->
+    <section class="section comments" id="comments">
+        <div class="container comments-container">
+            <h2 class="section-title reveal">Voices of Our Batch</h2>
+            <div class="scroll-arrows">
+                <button class="prev" aria-label="Scroll left">←</button>
+                <button class="next" aria-label="Scroll right">→</button>
+            </div>
+            <div class="comments-scroll" id="commentsScroll">
+                <!-- Comment Card 1 -->
+                <div class="comment-card reveal">
+                    <div class="comment-header">
+                        <div class="comment-avatar">
+                            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce" alt="Student Photo">
+                        </div>
+                        <div class="comment-info">
+                            <h4>Sarah Mitchell</h4>
+                            <span>Class Representative</span>
+                        </div>
+                    </div>
+                    <p class="comment-text">These six years have been the most transformative period of my life. I came here shy and uncertain, but I'm leaving with confidence, lifelong friends, and memories I'll cherish forever.</p>
+                    <div class="comment-reactions">
+                        <button class="reaction-btn" data-reaction="heart">
+                            <span>❤️</span>
+                            <span class="count">23</span>
+                        </button>
+                        <button class="reaction-btn" data-reaction="laugh">
+                            <span>😂</span>
+                            <span class="count">10</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Comment Card 2 -->
+                <div class="comment-card reveal">
+                    <div class="comment-header">
+                        <div class="comment-avatar">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" alt="Student Photo">
+                        </div>
+                        <div class="comment-info">
+                            <h4>James Chen</h4>
+                            <span>Sports Captain</span>
+                        </div>
+                    </div>
+                    <p class="comment-text">From winning championships to failing tests together, we've been through it all. This batch taught me that success means nothing without the people you share it with.</p>
+                    <div class="comment-reactions">
+                        <button class="reaction-btn" data-reaction="heart">
+                            <span>❤️</span>
+                            <span class="count">31</span>
+                        </button>
+                        <button class="reaction-btn" data-reaction="laugh">
+                            <span>😂</span>
+                            <span class="count">15</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Comment Card 3 -->
+                <div class="comment-card reveal">
+                    <div class="comment-header">
+                        <div class="comment-avatar">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" alt="Student Photo">
+                        </div>
+                        <div class="comment-info">
+                            <h4>Emma Rodriguez</h4>
+                            <span>Debate Team Lead</span>
+                        </div>
+                    </div>
+                    <p class="comment-text">Every argument in the cafeteria, every late-night project, every celebration - it all mattered. We didn't just learn from textbooks, we learned from each other.</p>
+                    <div class="comment-reactions">
+                        <button class="reaction-btn" data-reaction="heart">
+                            <span>❤️</span>
+                            <span class="count">28</span>
+                        </button>
+                        <button class="reaction-btn" data-reaction="laugh">
+                            <span>😂</span>
+                            <span class="count">8</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Comment Card 4 -->
+                <div class="comment-card reveal">
+                    <div class="comment-header">
+                        <div class="comment-avatar">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e" alt="Student Photo">
+                        </div>
+                        <div class="comment-info">
+                            <h4>Marcus Johnson</h4>
+                            <span>Music Club President</span>
+                        </div>
+                    </div>
+                    <p class="comment-text">The stage performances, the talent shows, the impromptu singing in empty classrooms - music brought us together. This batch has the best playlist of memories.</p>
+                    <div class="comment-reactions">
+                        <button class="reaction-btn" data-reaction="heart">
+                            <span>❤️</span>
+                            <span class="count">35</span>
+                        </button>
+                        <button class="reaction-btn" data-reaction="laugh">
+                            <span>😂</span>
+                            <span class="count">12</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Comment Card 5 -->
+                <div class="comment-card reveal">
+                    <div class="comment-header">
+                        <div class="comment-avatar">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80" alt="Student Photo">
+                        </div>
+                        <div class="comment-info">
+                            <h4>Priya Sharma</h4>
+                            <span>Art Club Lead</span>
+                        </div>
+                    </div>
+                    <p class="comment-text">We painted our dreams on these walls, literally and figuratively. Every corner of this school holds a piece of our story. Thank you for being my canvas.</p>
+                    <div class="comment-reactions">
+                        <button class="reaction-btn" data-reaction="heart">
+                            <span>❤️</span>
+                            <span class="count">26</span>
+                        </button>
+                        <button class="reaction-btn" data-reaction="laugh">
+                            <span>😂</span>
+                            <span class="count">7</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 4 - VIDEO DOCUMENTARY
+         ============================================ -->
+    <section class="section video" id="video">
+        <div class="container">
+            <h2 class="section-title reveal">Our Documentary</h2>
+            <div class="video-card reveal">
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Batch Documentary" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <p class="video-caption">A journey through six years of laughter, tears, growth, and unforgettable moments. Watch our story unfold.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 5 - IMAGE MOSAIC
+         ============================================ -->
+    <section class="section mosaic" id="mosaic">
+        <div class="container">
+            <h2 class="section-title reveal">Captured Moments</h2>
+            <div class="mosaic-grid">
+                <div class="mosaic-item tall reveal">
+                    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1" alt="Memory Photo 1">
+                </div>
+                <div class="mosaic-item reveal">
+                    <img src="https://images.unsplash.com/photo-1504198453319-5ce911bafcde" alt="Memory Photo 2">
+                </div>
+                <div class="mosaic-item reveal">
+                    <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7" alt="Memory Photo 3">
+                </div>
+                <div class="mosaic-item reveal">
+                    <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94" alt="Memory Photo 4">
+                </div>
+                <div class="mosaic-item tall reveal">
+                    <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac" alt="Memory Photo 5">
+                </div>
+                <div class="mosaic-item reveal">
+                    <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18" alt="Memory Photo 6">
+                </div>
+                <div class="mosaic-item reveal">
+                    <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad" alt="Memory Photo 7">
+                </div>
+                <div class="mosaic-item reveal">
+                    <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1" alt="Memory Photo 8">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 6 - TEACHERS
+         ============================================ -->
+    <section class="section teachers" id="teachers">
+        <div class="container">
+            <h2 class="section-title reveal">Those Who Shaped Our Future</h2>
+            <div class="teachers-scroll" id="teachersScroll">
+                <!-- Teacher Card 1 -->
+                <div class="teacher-card reveal">
+                    <div class="teacher-photo">
+                        <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe" alt="Teacher Photo">
+                    </div>
+                    <h3 class="teacher-name">Mr. Hasan Ali</h3>
+                    <p class="teacher-subject">Mathematics</p>
+                </div>
+                
+                <!-- Teacher Card 2 -->
+                <div class="teacher-card reveal">
+                    <div class="teacher-photo">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2" alt="Teacher Photo">
+                    </div>
+                    <h3 class="teacher-name">Ms. Rachel Green</h3>
+                    <p class="teacher-subject">English Literature</p>
+                </div>
+                
+                <!-- Teacher Card 3 -->
+                <div class="teacher-card reveal">
+                    <div class="teacher-photo">
+                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a" alt="Teacher Photo">
+                    </div>
+                    <h3 class="teacher-name">Dr. Michael Brown</h3>
+                    <p class="teacher-subject">Physics</p>
+                </div>
+                
+                <!-- Teacher Card 4 -->
+                <div class="teacher-card reveal">
+                    <div class="teacher-photo">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956" alt="Teacher Photo">
+                    </div>
+                    <h3 class="teacher-name">Mrs. Aisha Khan</h3>
+                    <p class="teacher-subject">Chemistry</p>
+                </div>
+                
+                <!-- Teacher Card 5 -->
+                <div class="teacher-card reveal">
+                    <div class="teacher-photo">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e" alt="Teacher Photo">
+                    </div>
+                    <h3 class="teacher-name">Mr. David Lee</h3>
+                    <p class="teacher-subject">History</p>
+                </div>
+            </div>
+            <div class="teachers-arrows">
+                <button class="prev" aria-label="Scroll left">←</button>
+                <button class="next" aria-label="Scroll right">→</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 7 - ALBUM LINKS
+         ============================================ -->
+    <section class="section albums" id="albums">
+        <div class="container">
+            <h2 class="section-title reveal">Photo Archive</h2>
+            <div class="album-card reveal">
+                <h3>Full Photo Archive</h3>
+                <p>Explore thousands of photos from our years together. From first day to farewell, every moment captured.</p>
+                <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" class="btn btn-secondary album-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    Open Albums
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 8 - FOOTER
+         ============================================ -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <blockquote class="footer-quote reveal">
+                We arrived as <span>strangers</span>.<br>
+                We leave as <span>legends</span>.
+            </blockquote>
+            <div class="footer-credits">
+                <p>Website designed for Batch 2025</p>
+                <p>Made with ❤️ by the Web Development Team</p>
+                <p>&copy; 2025 All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+        // ============================================
+        // SCROLL REVEAL ANIMATION
+        // ============================================
+        function initScrollReveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            const revealOnScroll = () => {
+                const windowHeight = window.innerHeight;
+                const elementVisible = 150;
+                
+                reveals.forEach((reveal) => {
+                    const elementTop = reveal.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - elementVisible) {
+                        reveal.classList.add('active');
+                    }
+                });
+            };
+            
+            window.addEventListener('scroll', revealOnScroll);
+            revealOnScroll(); // Trigger on load
+        }
+
+        // ============================================
+        // HORIZONTAL SCROLL ARROWS - COMMENTS
+        // ============================================
+        function initCommentsScroll() {
+            const scrollContainer = document.getElementById('commentsScroll');
+            const prevBtn = document.querySelector('.comments .scroll-arrows .prev');
+            const nextBtn = document.querySelector('.comments .scroll-arrows .next');
+            
+            if (!scrollContainer || !prevBtn || !nextBtn) return;
+            
+            const scrollAmount = 340;
+            
+            prevBtn.addEventListener('click', () => {
+                scrollContainer.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                scrollContainer.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Hide/show arrows based on scroll position
+            const updateArrows = () => {
+                const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                prevBtn.style.opacity = scrollContainer.scrollLeft > 0 ? '1' : '0.5';
+                nextBtn.style.opacity = scrollContainer.scrollLeft < maxScroll - 10 ? '1' : '0.5';
+            };
+            
+            scrollContainer.addEventListener('scroll', updateArrows);
+            updateArrows();
+        }
+
+        // ============================================
+        // HORIZONTAL SCROLL ARROWS - TEACHERS
+        // ============================================
+        function initTeachersScroll() {
+            const scrollContainer = document.getElementById('teachersScroll');
+            const prevBtn = document.querySelector('.teachers-arrows .prev');
+            const nextBtn = document.querySelector('.teachers-arrows .next');
+            
+            if (!scrollContainer || !prevBtn || !nextBtn) return;
+            
+            const scrollAmount = 300;
+            
+            prevBtn.addEventListener('click', () => {
+                scrollContainer.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                scrollContainer.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
+            });
+            
+            const updateArrows = () => {
+                const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                prevBtn.style.opacity = scrollContainer.scrollLeft > 0 ? '1' : '0.5';
+                nextBtn.style.opacity = scrollContainer.scrollLeft < maxScroll - 10 ? '1' : '0.5';
+            };
+            
+            scrollContainer.addEventListener('scroll', updateArrows);
+            updateArrows();
+        }
+
+        // ============================================
+        // REACTION BUTTONS
+        // ============================================
+        function initReactionButtons() {
+            const reactionBtns = document.querySelectorAll('.reaction-btn');
+            
+            reactionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const countSpan = this.querySelector('.count');
+                    let count = parseInt(countSpan.textContent);
+                    
+                    if (this.classList.contains('active')) {
+                        count--;
+                        this.classList.remove('active');
+                    } else {
+                        count++;
+                        this.classList.add('active');
+                        
+                        // Remove active from siblings
+                        const parent = this.parentElement;
+                        parent.querySelectorAll('.reaction-btn').forEach(sibling => {
+                            if (sibling !== this) {
+                                sibling.classList.remove('active');
+                                const siblingCount = sibling.querySelector('.count');
+                                siblingCount.textContent = parseInt(siblingCount.textContent) - 1;
+                            }
+                        });
+                    }
+                    
+                    countSpan.textContent = count;
+                    
+                    // Add animation
+                    this.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+        }
+
+        // ============================================
+        // SMOOTH SCROLL NAVIGATION
+        // ============================================
+        function initSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        const offsetTop = targetElement.offsetTop - 80;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+
+        // ============================================
+        // TOUCH SWIPE SUPPORT FOR MOBILE
+        // ============================================
+        function initTouchSwipe() {
+            const scrollContainers = document.querySelectorAll('.comments-scroll, .teachers-scroll');
+            
+            scrollContainers.forEach(container => {
+                let touchStartX = 0;
+                let touchEndX = 0;
+                let isScrolling = false;
+                
+                container.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                    isScrolling = true;
+                }, { passive: true });
+                
+                container.addEventListener('touchmove', (e) => {
+                    if (!isScrolling) return;
+                    touchEndX = e.changedTouches[0].screenX;
+                }, { passive: true });
+                
+                container.addEventListener('touchend', () => {
+                    isScrolling = false;
+                    handleSwipe(container, touchStartX, touchEndX);
+                }, { passive: true });
+            });
+            
+            function handleSwipe(container, start, end) {
+                const threshold = 50;
+                const diff = start - end;
+                
+                if (Math.abs(diff) > threshold) {
+                    const scrollAmount = 300;
+                    if (diff > 0) {
+                        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    } else {
+                        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // HERO PARALLAX EFFECT
+        // ============================================
+        function initHeroParallax() {
+            const hero = document.querySelector('.hero');
+            const stickers = document.querySelectorAll('.sticker, .sticker-shape');
+            
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const heroHeight = hero.offsetHeight;
+                
+                if (scrolled < heroHeight) {
+                    stickers.forEach((sticker, index) => {
+                        const speed = 0.1 + (index * 0.05);
+                        sticker.style.transform = `${sticker.style.transform.replace(/translateY\([^)]*\)/g, '')} translateY(${scrolled * speed}px)`;
+                    });
+                }
+            });
+        }
+
+        // ============================================
+        // INTERSECTION OBSERVER FOR BETTER PERFORMANCE
+        // ============================================
+        function initIntersectionObserver() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // ============================================
+        // KEYBOARD NAVIGATION FOR SCROLL CONTAINERS
+        // ============================================
+        function initKeyboardNavigation() {
+            const scrollContainers = document.querySelectorAll('.comments-scroll, .teachers-scroll');
+            
+            scrollContainers.forEach(container => {
+                container.addEventListener('keydown', (e) => {
+                    const scrollAmount = 300;
+                    
+                    if (e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    } else if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                    }
+                });
+                
+                container.setAttribute('tabindex', '0');
+                container.style.outline = 'none';
+            });
+        }
+
+        // ============================================
+        // INITIALIZE ALL FUNCTIONS
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initScrollReveal();
+            initCommentsScroll();
+            initTeachersScroll();
+            initReactionButtons();
+            initSmoothScroll();
+            initTouchSwipe();
+            initHeroParallax();
+            initIntersectionObserver();
+            initKeyboardNavigation();
+            
+            console.log('🎓 Batch 2025 Farewell Website Loaded');
+            console.log('Designed with Neo-Brutalist principles');
+        });
+
+        // ============================================
+        // HANDLE WINDOW RESIZE
+        // ============================================
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                // Re-initialize scroll positions if needed
+                const commentsScroll = document.getElementById('commentsScroll');
+                const teachersScroll = document.getElementById('teachersScroll');
+                
+                if (commentsScroll) commentsScroll.scrollLeft = 0;
+                if (teachersScroll) teachersScroll.scrollLeft = 0;
+            }, 250);
+        });
+    </script>
+</body>
+</html>
