@@ -7,7 +7,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
+<!-- ① Hind Siliguri added for Bengali auto-switching via unicode-range -->
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* =====================================================
 DESIGN TOKENS
@@ -39,6 +40,67 @@ DESIGN TOKENS
 --glow:          0 0 24px rgba(31,182,255,0.2);
 --ease:          0.3s cubic-bezier(0.4,0,0.2,1);
 }
+
+/* =====================================================
+② BILINGUAL FONT SYSTEM — CSS @font-face unicode-range
+Bengali text  → Hind Siliguri  (auto-selected by browser)
+English/Latin → DM Sans / Cormorant Garamond
+No JavaScript needed — the browser switches per character.
+
+@import already handled by the <link> tag above.
+These @font-face blocks define the unified 'CardFont' family.
+
+Bengali Unicode block reference: U+0980–U+09FF
+Spec: https://www.unicode.org/charts/PDF/U0980.pdf
+===================================================== */
+
+/* Bengali (normal) → Hind Siliguri */
+@font-face {
+  font-family: 'CardFont';
+  font-style:  normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/hindsiliguri/v18/jVyk7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Ttxkm8CjA.woff2') format('woff2'),
+       local('Hind Siliguri'), local('HindSiliguri-Regular');
+  /* Bengali Unicode block + joiners + Khanda Ta */
+  unicode-range: U+0980-09FF, U+200C-200D, U+09CE;
+}
+
+/* Bengali (italic) → Hind Siliguri (synthesized — no true italic exists) */
+@font-face {
+  font-family: 'CardFont';
+  font-style:  italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/hindsiliguri/v18/jVyk7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Ttxkm8CjA.woff2') format('woff2'),
+       local('Hind Siliguri'), local('HindSiliguri-Regular');
+  unicode-range: U+0980-09FF, U+200C-200D, U+09CE;
+}
+
+/* Latin/English (normal) → DM Sans */
+@font-face {
+  font-family: 'CardFont';
+  font-style:  normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: local('DM Sans'), local('DMSans-Regular');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC,
+                 U+02C6, U+02DA, U+02DC, U+2000-206F,
+                 U+20AC, U+2122, U+2212, U+FEFF, U+FFFD;
+}
+
+/* Latin/English (italic) → Cormorant Garamond (for message body) */
+@font-face {
+  font-family: 'CardFont';
+  font-style:  italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: local('Cormorant Garamond'), local('CormorantGaramond-Italic');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC,
+                 U+02C6, U+02DA, U+02DC, U+2000-206F,
+                 U+20AC, U+2122, U+2212, U+FEFF, U+FFFD;
+}
+
 /* =====================================================
 RESET
 ===================================================== */
@@ -160,9 +222,7 @@ REVEAL ANIMATION
 .reveal { opacity:0; transform:translateY(28px); transition:opacity .6s ease, transform .6s ease; }
 .reveal.in { opacity:1; transform:translateY(0); }
 /* =====================================================
-HIGHLIGHTS — TRUE CSS MASONRY
-Images keep natural aspect ratios.
-CSS columns = Pinterest/Adobe Stock style.
+HIGHLIGHTS — CSS MASONRY
 ===================================================== */
 .hl-grid {
 column-count:4; column-gap:16px;
@@ -228,33 +288,87 @@ flex-shrink:0; transition:all var(--ease);
 .sel-all-lbl input { width:16px; height:16px; accent-color:var(--accent); }
 .sel-clr-btn { font-size:.8rem; color:var(--error); padding:4px 10px; border-radius:6px; border:1px solid rgba(239,68,68,.2); background:rgba(239,68,68,.05); transition:all var(--ease); }
 .sel-clr-btn:hover { background:rgba(239,68,68,.1); }
-.album-grid { display:grid; gap:12px; grid-template-columns:repeat(3,1fr); }
-@media (max-width:700px) { .album-grid { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:400px) { .album-grid { grid-template-columns:1fr; } }
-.alb-img {
-position:relative; aspect-ratio:4/3; border-radius:10px; overflow:hidden;
-cursor:pointer; background:var(--panel);
-opacity:0; transform:scale(.92) translateY(12px);
-transition:opacity .4s ease, transform .4s ease;
+
+/* =====================================================
+③ ALBUM GRID — CSS MASONRY (same system as highlights)
+Images display at their NATURAL aspect ratio.
+No fixed aspect-ratio on the container.
+2 cols mobile · 3 cols tablet · 4 cols desktop.
+===================================================== */
+.album-grid {
+  column-count: 4;
+  column-gap: 12px;
 }
-.alb-img.loaded { opacity:1; transform:scale(1) translateY(0); }
-.alb-img:hover { transform:scale(1.02)!important; }
-.alb-img img, .alb-img video { width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
-.alb-img:hover img, .alb-img:hover video { transform:scale(1.06); }
-.alb-img.is-vid::after { content:'▶'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:44px; height:44px; background:rgba(31,182,255,.92); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--bg); z-index:5; }
+@media (max-width:1100px) { .album-grid { column-count: 3; } }
+@media (max-width:700px)  { .album-grid { column-count: 2; } }
+
+/* Each card breaks inside: never, so columns split cleanly */
+.alb-img {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--panel);
+  /* Fade in — no transform on container to keep masonry columns stable */
+  opacity: 0;
+  transition: opacity .45s ease, box-shadow .3s ease;
+}
+.alb-img.loaded { opacity: 1; }
+.alb-img:hover  { box-shadow: 0 10px 36px rgba(31,182,255,.22); }
+
+/* Images: natural height, fill column width */
+.alb-img img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  transition: transform .45s ease, filter .45s ease;
+}
+.alb-img:hover img { transform: scale(1.05); filter: brightness(.82); }
+
+/* Videos keep a 16:9 box since <video> has no natural rendered height */
+.alb-img.is-vid { aspect-ratio: 16 / 9; }
+.alb-img.is-vid video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .45s ease;
+}
+.alb-img.is-vid:hover video { transform: scale(1.05); }
+
+/* Video play-button overlay */
+.alb-img.is-vid::after {
+  content:'▶'; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:44px; height:44px;
+  background:rgba(31,182,255,.92); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; color:var(--bg); z-index:5;
+}
+
+/* Selection checkbox */
 .alb-check {
-position:absolute; top:8px; left:8px; z-index:10;
-width:26px; height:26px; border-radius:50%;
-background:rgba(3,4,10,.65); border:2px solid rgba(255,255,255,.5);
-display:flex; align-items:center; justify-content:center;
-transition:all .2s ease; opacity:0; pointer-events:none;
+  position:absolute; top:8px; left:8px; z-index:10;
+  width:26px; height:26px; border-radius:50%;
+  background:rgba(3,4,10,.65); border:2px solid rgba(255,255,255,.5);
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s ease; opacity:0; pointer-events:none;
 }
 .alb-img.selectable .alb-check { opacity:1; pointer-events:all; }
 .alb-check.on { background:var(--accent); border-color:var(--accent); }
 .alb-check svg { width:14px; height:14px; fill:#fff; opacity:0; transform:scale(.5); transition:all .2s ease; }
 .alb-check.on svg { opacity:1; transform:scale(1); }
+
+/* Selection tint overlay */
 .alb-img.selected::after { content:''; position:absolute; inset:0; background:rgba(31,182,255,.18); z-index:4; border-radius:10px; pointer-events:none; }
 .alb-img.is-vid.selected::after { z-index:6; }
+
 /* =====================================================
 LIGHTBOX
 ===================================================== */
@@ -374,8 +488,7 @@ pointer-events:none;
 .sel-cl { background:var(--panel); border:1px solid var(--gb); color:var(--text-2); }
 .sel-cl:hover { border-color:var(--error); color:var(--error); }
 /* =====================================================
-COMMENT SECTION — Clean Scroll Carousel
-No visible scrollbar. Cards slide in from the right.
+④ COMMENT SECTION — bilingual font applied
 ===================================================== */
 .com-wrap {
 display:flex; align-items:center; gap:16px;
@@ -396,15 +509,13 @@ gap:20px;
 overflow-x:auto;
 scroll-snap-type:x mandatory;
 -webkit-overflow-scrolling:touch;
-/* !! Hide the scrollbar — key fix for the "visible track" complaint !! */
-scrollbar-width:none;        /* Firefox */
-padding:8px 2px 16px;        /* room for shadow */
+scrollbar-width:none;
+padding:8px 2px 16px;
 }
-.com-track::-webkit-scrollbar { display:none; } /* Chrome / Safari */
-/* Progress bar under the carousel */
+.com-track::-webkit-scrollbar { display:none; }
 .com-prog { height:3px; background:var(--gb); border-radius:2px; margin-top:12px; overflow:hidden; }
 .com-bar { height:100%; background:var(--accent); border-radius:2px; width:0%; }
-/* ---- Comment Card ---- */
+
 .com-card {
 flex:0 0 360px;
 scroll-snap-align:start;
@@ -416,10 +527,8 @@ border:1px solid var(--gb);
 border-radius:var(--r-lg);
 position:relative;
 overflow:hidden;
-/* Slide-in from right — initial hidden state */
 opacity:0;
 transform:translateX(36px);
-/* No transition initially — added by JS to avoid premature fire */
 }
 .com-card.visible {
 opacity:1;
@@ -433,21 +542,33 @@ transition:opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,
 .cc-av { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--gb); }
 .cc-stars { position:absolute; bottom:-4px; right:-4px; background:var(--warning); color:#000; border-radius:10px; padding:1px 6px; font-size:.6rem; font-weight:700; box-shadow:0 2px 6px rgba(0,0,0,.3); }
 .cc-meta { flex:1; }
-.cc-name { font-weight:600; color:var(--text-1); font-size:.95rem; }
-.cc-grp { display:inline-block; margin-top:3px; font-size:.72rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:12px; background:var(--accent-dim); color:var(--accent); border:1px solid rgba(31,182,255,.15); }
+/* ④ cc-name, cc-grp, cc-msg — bilingual CardFont applied */
+.cc-name {
+  font-weight:600; color:var(--text-1); font-size:.95rem;
+  /* Bengali chars auto-switch to Hind Siliguri via unicode-range */
+  font-family:'CardFont','DM Sans','Hind Siliguri',sans-serif;
+}
+.cc-grp {
+  display:inline-block; margin-top:3px; font-size:.72rem; font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:12px;
+  background:var(--accent-dim); color:var(--accent); border:1px solid rgba(31,182,255,.15);
+  /* Bengali group names supported */
+  font-family:'CardFont','DM Sans','Hind Siliguri',sans-serif;
+}
 .cc-div { height:1px; background:var(--gb); margin:16px 0; flex-shrink:0; }
-/* Message grows to fill, social stays pinned at bottom */
 .cc-msg {
-font-family:var(--f-italic); font-style:italic;
-font-size:1.05rem; color:var(--text-2); line-height:1.65;
-flex:1;
-overflow:hidden;
+  /* English → Cormorant Garamond italic | Bengali → Hind Siliguri (synthesized italic) */
+  font-family:'CardFont','Cormorant Garamond','Hind Siliguri',Georgia,serif;
+  font-style:italic;
+  font-size:1.05rem; color:var(--text-2); line-height:1.65;
+  flex:1;
+  overflow:hidden;
 }
 .cc-social {
 display:flex; gap:10px;
-margin-top:20px;     /* guaranteed gap above social row */
-flex-shrink:0;       /* never squished */
-min-height:32px;     /* keeps cards without links same height as those with */
+margin-top:20px;
+flex-shrink:0;
+min-height:32px;
 }
 .cc-sl {
 width:32px; height:32px; display:flex; align-items:center; justify-content:center;
@@ -580,6 +701,8 @@ opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease,
 .m-x:hover { background:var(--error); }
 .m-x svg { width:16px; height:16px; fill:var(--text-2); }
 .m-body { color:var(--text-2); margin-bottom:22px; line-height:1.6; font-size:.92rem; }
+.m-body strong { color:var(--text-1); }
+.m-body em { color:var(--accent); font-style:normal; }
 .m-acts { display:flex; gap:10px; justify-content:flex-end; }
 .btn { padding:9px 22px; border-radius:8px; font-weight:500; font-size:.88rem; font-family:inherit; transition:all .2s ease; }
 .btn-p { background:var(--accent); color:var(--bg); border:none; }
@@ -588,6 +711,14 @@ opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease,
 .btn-s:hover { border-color:var(--gbh); }
 .prog-track { height:6px; background:var(--gb); border-radius:3px; overflow:hidden; margin-top:12px; margin-bottom:8px; }
 .prog-fill { height:100%; background:var(--accent); border-radius:3px; width:0; transition:width .3s ease; }
+
+/* ⑤ Duplicate modal — warning accent */
+#dupModal .m-box { border-color:rgba(245,158,11,.2); }
+#dupModal .m-title { color:var(--warning); }
+.dup-meta { display:flex; flex-direction:column; gap:6px; margin:12px 0 18px; padding:14px 16px; background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.15); border-radius:10px; font-size:.85rem; }
+.dup-meta span { display:flex; gap:8px; }
+.dup-meta .k { color:var(--muted); min-width:80px; }
+.dup-meta .v { color:var(--text-1); font-weight:500; }
 /* =====================================================
 LOADING
 ===================================================== */
@@ -892,6 +1023,29 @@ LIGHTBOX
 <div class="m-acts" style="margin-top:12px;"><button class="btn btn-s" id="dlCancel">Cancel</button></div>
 </div>
 </div>
+
+<!-- ⑤ DUPLICATE SUBMISSION MODAL
+     Shown when GAS returns { success:false, duplicate:true }
+     NOTE: For this to work, your GAS doPost must also handle action:'update'.
+     Add to your deployed Apps Script doPost():
+       if (data.action === 'update') { updateSubmission(sheet, data.existingRow, data); }
+===================================================== -->
+<div class="m-overlay" id="dupModal" role="dialog" aria-modal="true" aria-labelledby="dupTitle">
+<div class="m-box">
+<div class="m-head">
+<h3 class="m-title" id="dupTitle">⚠ Already Submitted</h3>
+<button class="m-x" id="dupX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+</div>
+<p class="m-body">We found an existing submission matching this roll number.</p>
+<div class="dup-meta" id="dupMeta"></div>
+<p class="m-body" style="margin-bottom:0;">Do you want to <strong>replace</strong> it with your new entry?</p>
+<div class="m-acts" style="margin-top:20px;">
+<button class="btn btn-s" id="dupCancel">Keep Original</button>
+<button class="btn btn-p" id="dupUpdate">Yes, Update</button>
+</div>
+</div>
+</div>
+
 <!-- Selection Badge -->
 <div id="selBadge" role="status" aria-live="polite">
 <span class="sel-n" id="selN">0</span>
@@ -907,50 +1061,35 @@ LIGHTBOX
 CONFIGURATION — GOOGLE SHEETS BACKEND
 ===================================================== */
 const CFG = {
-/* Your Google Spreadsheet ID */
 SHEET_ID: '1FI2WkDJ0dDDwV9KXYpWJmztQw0bw_THNY0XZ_pzuMps',
-/*
-* Sheet Tab (GID) to Album ID mapping.
-* Each album can have its own sheet tab.
-* Set to null to use static data for that album.
-* 
-* How to find GID:
-* 1. Open your Google Sheet
-* 2. Click on the tab you want
-* 3. Look at URL: .../edit#gid=XXXXXXXXX
-* 4. That number is your GID
-*/
 ALBUM_GIDS: {
-1: '979443307',  // Album 1 → Sheet Tab GID 979443307
-2: null,         // Album 2 → No tab configured, use static data
-3: null,         // Album 3 → No tab configured, use static data
-4: null          // Album 4 → No tab configured, use static data
+1: '979443307',
+2: null,
+3: null,
+4: null
 },
-/* ZIP download URLs for each album (optional) */
 ALBUM_ZIPS: {
 1: null, 2: null, 3: null, 4: null
 }
 };
 
 /* =====================================================
-STATIC DATA — FALLBACK ONLY
-Used ONLY when ALBUM_GIDS[albumId] is null or sheet fetch fails.
-Each album is independent — one failure doesn't affect others.
+STATIC DATA — FALLBACK
 ===================================================== */
 const ALBUMS_STATIC = [
 {
 id:1, title:'Campus Life', subtitle:'Daily moments on campus', count:24, type:'image',
 images:[
 { preview:'https://picsum.photos/seed/a1p/800/600', download:'https://picsum.photos/seed/a1/1920/1080', fileName:'campus-01.jpg' },
-{ preview:'https://picsum.photos/seed/a2p/800/600', download:'https://picsum.photos/seed/a2/1920/1080', fileName:'campus-02.jpg' },
-{ preview:'https://picsum.photos/seed/a3p/800/600', download:'https://picsum.photos/seed/a3/1920/1080', fileName:'campus-03.jpg' }
+{ preview:'https://picsum.photos/seed/a2p/800/800', download:'https://picsum.photos/seed/a2/1920/1920', fileName:'campus-02.jpg' },
+{ preview:'https://picsum.photos/seed/a3p/800/1100', download:'https://picsum.photos/seed/a3/1920/2640', fileName:'campus-03.jpg' }
 ]
 },
 {
 id:2, title:'Sports Day 2025', subtitle:'Athletic achievements', count:18, type:'image',
 images:[
 { preview:'https://picsum.photos/seed/b1p/800/600', download:'https://picsum.photos/seed/b1/1920/1080', fileName:'sports-01.jpg' },
-{ preview:'https://picsum.photos/seed/b2p/800/600', download:'https://picsum.photos/seed/b2/1920/1080', fileName:'sports-02.jpg' }
+{ preview:'https://picsum.photos/seed/b2p/800/1000', download:'https://picsum.photos/seed/b2/1920/2400', fileName:'sports-02.jpg' }
 ]
 },
 {
@@ -962,8 +1101,8 @@ images:[
 {
 id:4, title:'Cultural Events', subtitle:'Performances & celebrations', count:32, type:'image',
 images:[
-{ preview:'https://picsum.photos/seed/c1p/800/600', download:'https://picsum.photos/seed/c1/1920/1080', fileName:'culture-01.jpg' },
-{ preview:'https://picsum.photos/seed/c2p/800/600', download:'https://picsum.photos/seed/c2/1920/1080', fileName:'culture-02.jpg' }
+{ preview:'https://picsum.photos/seed/c1p/800/900', download:'https://picsum.photos/seed/c1/1920/2160', fileName:'culture-01.jpg' },
+{ preview:'https://picsum.photos/seed/c2p/800/500', download:'https://picsum.photos/seed/c2/1920/1200', fileName:'culture-02.jpg' }
 ]
 }
 ];
@@ -975,23 +1114,19 @@ const S = {
 heroIdx:    0,
 heroTimer:  null,
 albumsData: [],
-/* selection */
 selected:      new Set(),
 selectedDlMap: {},
 selectedFnMap: {},
 selectMode:    false,
 selectAlbum:   null,
 curAlbumId:    null,
-/* lightbox */
 lbItems:    [],
 lbIdx:      0,
 lbType:     'image',
 lbZoomed:   false,
 vidPlaying: false,
 vidMuted:   true,
-/* form */
 photoDataUrl: null,
-/* comments */
 comIdx:     0,
 comTimer:   null,
 comObs:     null
@@ -1016,8 +1151,26 @@ el.addEventListener('click', e => { if (e.target === el) el.classList.remove('ac
 );
 
 /* =====================================================
-DOWNLOAD ENGINE
+③ DOWNLOAD ENGINE — Mobile-Safe, No Flash, Drive Bypass
+=====================================================
+Strategy ladder:
+  1. Non-Drive URLs → fetch → Blob → object URL (silent, no flash)
+  2. Drive on mobile → CORS proxy → Blob → object URL (no deep-link)
+  3. Final fallback → hidden anchor (no target=_blank → no new tab flash)
+
+For Google Drive: uses drive.usercontent.google.com which sends
+proper Content-Disposition: attachment headers, bypassing the
+mobile OS intent / deep-link system in most cases.
 ===================================================== */
+
+/** Detect mobile/touch device */
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (typeof navigator.maxTouchPoints === 'number' &&
+     navigator.maxTouchPoints > 2 &&
+     /MacIntel/.test(navigator.platform));
+}
+
 function extractFileName(url, fallback = 'file') {
 try {
 const parts = new URL(url).pathname.split('/').filter(Boolean);
@@ -1026,58 +1179,19 @@ return last.includes('.') ? last : fallback;
 } catch { return fallback; }
 }
 
-function triggerAnchor(href, filename) {
-const a = document.createElement('a');
-a.href     = href;
-a.download = filename || '';
-a.rel      = 'noopener noreferrer';
-a.target   = '_blank';
-document.body.appendChild(a);
-a.click();
-requestAnimationFrame(() => { try { document.body.removeChild(a); } catch {} });
-}
-
-async function downloadFile(url, filename) {
-if (!url) { console.error('[DL] No URL provided'); return; }
-const fn = filename || extractFileName(url, 'download');
-const isDrive = /drive\.google\.com|docs\.google\.com/.test(url);
-if (!isDrive) {
-try {
-const resp = await fetch(url, { cache:'no-cache' });
-if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-const blob = await resp.blob();
-const ext  = blob.type.split('/')[1]?.split(';')[0] || 'jpg';
-const safe = fn.includes('.') ? fn : `${fn}.${ext}`;
-const burl = URL.createObjectURL(blob);
-triggerAnchor(burl, safe);
-setTimeout(() => URL.revokeObjectURL(burl), 30000);
-return;
-} catch (e) {
-console.warn(`[DL] fetch failed (${e.message}), falling back to anchor`);
-}
-}
-triggerAnchor(url, fn);
-}
-
-async function downloadQueue(urls, filenames, onProgress, onDone) {
-for (let i = 0; i < urls.length; i++) {
-if (!urls[i]) { onProgress?.(i + 1, urls.length); continue; }
-await downloadFile(urls[i], filenames?.[i]);
-onProgress?.(i + 1, urls.length);
-if (i < urls.length - 1) await delay(900);
-}
-onDone?.();
-}
-
-const delay = ms => new Promise(r => setTimeout(r, ms));
-
-/* =====================================================
-GOOGLE DRIVE URL HELPERS
-===================================================== */
 function extractDriveId(url) {
 if (!url) return null;
 const m = url.match(/(?:\/d\/|[?&]id=|open\?id=)([a-zA-Z0-9_-]{20,})/);
 return m ? m[1] : null;
+}
+
+/** Convert any Drive URL → drive.usercontent.google.com download URL.
+ *  This domain serves raw bytes with Content-Disposition: attachment,
+ *  which prevents the mobile OS from intercepting as a Drive deep-link. */
+function buildDriveDownloadUrl(url) {
+  const id = extractDriveId(url);
+  if (!id) return url;
+  return `https://drive.usercontent.google.com/download?id=${id}&export=download&authuser=0&confirm=t`;
 }
 
 function toDrivePreview(rawUrl, fileId) {
@@ -1089,7 +1203,7 @@ return '';
 
 function toDriveDownload(rawUrl, fileId) {
 const id = fileId || extractDriveId(rawUrl);
-if (id) return `https://drive.google.com/uc?export=download&id=${id}`;
+if (id) return buildDriveDownloadUrl(rawUrl);
 if (rawUrl && rawUrl.startsWith('http')) return rawUrl;
 return '';
 }
@@ -1100,280 +1214,169 @@ try { const u = new URL(s); return u.protocol === 'http:' || u.protocol === 'htt
 catch { return false; }
 }
 
+/** Silent hidden anchor — no target=_blank → no new-tab flash on desktop */
+function triggerAnchor(href, filename) {
+  const a = document.createElement('a');
+  a.href     = href;
+  a.download = filename || '';
+  a.rel      = 'noopener noreferrer';
+  /* Fixed off-screen — NOT target=_blank, so no new tab opens */
+  a.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  requestAnimationFrame(() => { try { document.body.removeChild(a); } catch {} });
+}
+
+/** Fetch URL → Blob → object URL → silent download.
+ *  No new tab. No OS intent intercept. Works everywhere CORS is open. */
+async function blobDownload(fetchUrl, filename) {
+  const resp = await fetch(fetchUrl, { cache: 'no-cache' });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const blob = await resp.blob();
+  const ext  = blob.type.split('/')[1]?.split(';')[0] || '';
+  const safe = filename && filename.includes('.') ? filename : (ext ? `${filename || 'file'}.${ext}` : filename || 'file');
+  const burl = URL.createObjectURL(blob);
+  triggerAnchor(burl, safe);
+  setTimeout(() => URL.revokeObjectURL(burl), 30_000);
+}
+
+async function downloadFile(url, filename) {
+if (!url) { console.error('[DL] No URL provided'); return; }
+const fn      = filename || extractFileName(url, 'download');
+const isDrive = /drive\.google\.com|docs\.google\.com/.test(url);
+const mobile  = isMobileDevice();
+
+/* Build best download URL */
+const dlUrl = isDrive ? buildDriveDownloadUrl(url) : url;
+
+/* ── Strategy 1: fetch → blob (non-Drive, CORS-open) ── */
+if (!isDrive) {
+  try {
+    await blobDownload(dlUrl, fn);
+    return;
+  } catch (e) {
+    console.warn('[DL] Direct blob failed:', e.message);
+  }
+}
+
+/* ── Strategy 2: Drive on mobile → CORS proxy → blob ──
+ *  corsproxy.io rewrites the Host header so the mobile OS sees
+ *  a non-Drive domain, bypassing the intent/deep-link system. */
+if (isDrive && mobile) {
+  try {
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(dlUrl)}`;
+    await blobDownload(proxyUrl, fn);
+    return;
+  } catch (e) {
+    console.warn('[DL] CORS-proxy blob failed:', e.message);
+  }
+}
+
+/* ── Strategy 3: Anchor fallback ──
+ *  Desktop Drive: browser handles natively (no new tab flash).
+ *  Mobile Drive:  usercontent URL often avoids the intent dialog. */
+triggerAnchor(dlUrl, fn);
+}
+
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+async function downloadQueue(urls, filenames, onProgress, onDone) {
+for (let i = 0; i < urls.length; i++) {
+if (!urls[i]) { onProgress?.(i + 1, urls.length); continue; }
+await downloadFile(urls[i], filenames?.[i]);
+onProgress?.(i + 1, urls.length);
+if (i < urls.length - 1) await delay(900);
+}
+onDone?.();
+}
+
 /* =====================================================
-GOOGLE SHEETS LOADER — REWRITTEN BACKEND
-=====================================================
-PURPOSE:
-Fetch album images from Google Sheet tab.
-
-SHEET COLUMN REQUIREMENTS (exact names):
-- File Name
-- Compressed Preview (Preview)  → Used for preview/src
-- Original 4K (Download)        → Used for download
-- File ID                       → Optional, for Drive files
-
-BEHAVIOR:
-1. Each album is fetched INDEPENDENTLY
-2. If GID is null → use static data for THAT album only
-3. If fetch fails → use static data for THAT album only
-4. Other albums are NOT affected by one album's failure
+GOOGLE SHEETS LOADER
 ===================================================== */
-/* =====================================================
-GOOGLE SHEETS LOADER — FIXED & SIMPLIFIED
-===================================================== */
-
-/* Normalize header names for reliable matching */
 function normalizeHeader(h) {
-    if (!h) return '';
-    return h
-        .replace(/^\uFEFF/, '')           // Remove BOM
-        .replace(/[\u00A0\u200B\u200C\u200D]/g, '') // Remove invisible chars
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, ' ');            // Normalize multiple spaces
+if (!h) return '';
+return h.replace(/^\uFEFF/,'').replace(/[\u00A0\u200B\u200C\u200D]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
 }
-
-/* Find column key by normalized name */
 function findColumnKey(row, expectedName) {
-    const normalizedExpected = normalizeHeader(expectedName);
-    for (const key of Object.keys(row)) {
-        if (normalizeHeader(key) === normalizedExpected) {
-            return key;
-        }
-    }
-    return null;
+const n = normalizeHeader(expectedName);
+for (const key of Object.keys(row)) { if (normalizeHeader(key) === n) return key; }
+return null;
 }
-
-/* Check if string is a valid HTTP URL */
 function isValidUrl(str) {
-    if (!str || typeof str !== 'string') return false;
-    const trimmed = str.trim();
-    return trimmed.startsWith('http://') || trimmed.startsWith('https://');
+if (!str || typeof str !== 'string') return false;
+const t = str.trim();
+return t.startsWith('http://') || t.startsWith('https://');
 }
-
-/* Clean URL - remove trailing spaces, decode if needed */
-function cleanUrl(url) {
-    if (!url) return '';
-    return url.trim().replace(/\s+$/, '');
-}
+function cleanUrl(url) { return url ? url.trim().replace(/\s+$/, '') : ''; }
 
 async function fetchAlbumSheet(albumId, gid) {
-    const TAG = `[Sheet Album ${albumId}]`;
-    console.log(`${TAG} ─────────────────────────────`);
-    console.log(`${TAG} Starting fetch for GID: ${gid}`);
-
-    const url = `https://docs.google.com/spreadsheets/d/${CFG.SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-    
-    let csvText;
-    try {
-        const resp = await fetch(url, { cache: 'no-cache' });
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status} - Sheet may not be publicly viewable`);
-        }
-        csvText = await resp.text();
-    } catch (err) {
-        console.error(`${TAG} ❌ Fetch failed:`, err.message);
-        throw err;
-    }
-
-    if (!csvText || csvText.trim().length < 10) {
-        throw new Error(`Empty sheet data — GID ${gid} may be empty`);
-    }
-
-    /* Parse CSV */
-    const parsed = Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: false
-    });
-
-    /* DEBUG: Log exact detected headers */
-    const firstRow = parsed.data[0] || {};
-    const detectedHeaders = Object.keys(firstRow);
-    console.log(`${TAG} 📋 Detected headers (${detectedHeaders.length}):`);
-    detectedHeaders.forEach(h => {
-        console.log(`${TAG}    "${h}" → normalized: "${normalizeHeader(h)}"`);
-    });
-    console.log(`${TAG} 📊 Total data rows: ${parsed.data.length}`);
-
-    /* Expected column names (case-insensitive matching will be used) */
-    const COL_NAME = 'File Name';
-    const COL_PREVIEW = 'Compressed Preview (Preview)';
-    const COL_DOWNLOAD = 'Original 4K (Download)';
-    const COL_FILEID = 'File ID';
-
-    /* Find actual column keys using fuzzy matching */
-    const keyName = findColumnKey(firstRow, COL_NAME);
-    const keyPreview = findColumnKey(firstRow, COL_PREVIEW);
-    const keyDownload = findColumnKey(firstRow, COL_DOWNLOAD);
-    const keyFileId = findColumnKey(firstRow, COL_FILEID);
-
-    console.log(`${TAG} 🔑 Mapped columns:`);
-    console.log(`${TAG}    File Name → "${keyName || 'NOT FOUND'}"`);
-    console.log(`${TAG}    Preview → "${keyPreview || 'NOT FOUND'}"`);
-    console.log(`${TAG}    Download → "${keyDownload || 'NOT FOUND'}"`);
-    console.log(`${TAG}    File ID → "${keyFileId || 'NOT FOUND'}"`);
-
-    /* Validate required columns */
-    if (!keyPreview || !keyDownload) {
-        const missing = [];
-        if (!keyPreview) missing.push(COL_PREVIEW);
-        if (!keyDownload) missing.push(COL_DOWNLOAD);
-        console.error(`${TAG} ❌ Missing required columns: ${missing.join(', ')}`);
-        throw new Error(`Missing columns: ${missing.join(', ')}`);
-    }
-
-    /* Build image array */
-    const images = [];
-    parsed.data.forEach((row, idx) => {
-        const lineNum = idx + 2;
-        
-        const fileName = keyName ? (row[keyName] || '').trim() : '';
-        const previewRaw = keyPreview ? (row[keyPreview] || '').trim() : '';
-        const downloadRaw = keyDownload ? (row[keyDownload] || '').trim() : '';
-        const fileId = keyFileId ? (row[keyFileId] || '').trim() : '';
-
-        /* Skip empty rows */
-        if (!previewRaw && !downloadRaw && !fileId) return;
-
-        /* SIMPLE URL LOGIC: Use direct URLs from sheet */
-        let previewUrl = '';
-        let downloadUrl = '';
-
-        /* Preview URL - prioritize direct URL from column */
-        if (isValidUrl(previewRaw)) {
-            previewUrl = cleanUrl(previewRaw);
-        } else if (fileId && !previewRaw) {
-            /* Fallback: construct from File ID only if no URL provided */
-            previewUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-        } else if (previewRaw && previewRaw.length > 20 && !previewRaw.includes(' ')) {
-            /* Might be a raw File ID */
-            previewUrl = `https://drive.google.com/uc?export=view&id=${previewRaw}`;
-        }
-
-        /* Download URL - prioritize direct URL from column */
-        if (isValidUrl(downloadRaw)) {
-            downloadUrl = cleanUrl(downloadRaw);
-        } else if (fileId && !downloadRaw) {
-            downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        } else if (downloadRaw && downloadRaw.length > 20 && !downloadRaw.includes(' ')) {
-            downloadUrl = `https://drive.google.com/uc?export=download&id=${downloadRaw}`;
-        } else if (previewUrl) {
-            /* Fallback to preview URL if no download specified */
-            downloadUrl = previewUrl;
-        }
-
-        /* Validate */
-        if (!previewUrl) {
-            console.warn(`${TAG} ⚠️ Row ${lineNum}: No valid preview URL. Skipping.`);
-            return;
-        }
-
-        images.push({
-            fileName: fileName || `image-${images.length + 1}.jpg`,
-            preview: previewUrl,
-            download: downloadUrl,
-            fileId: fileId || ''
-        });
-    });
-
-    if (images.length === 0) {
-        console.error(`${TAG} ❌ No valid image rows found in sheet`);
-        throw new Error('No valid images in sheet');
-    }
-
-    console.log(`${TAG} ✅ Loaded ${images.length} images successfully`);
-    console.log(`${TAG} First image preview: ${images[0]?.preview?.substring(0, 80)}...`);
-    console.log(`${TAG} ─────────────────────────────`);
-
-    /* Get static album metadata */
-    const staticAlbum = ALBUMS_STATIC.find(a => a.id === albumId);
-
-    return {
-        id: albumId,
-        title: staticAlbum?.title || `Album ${albumId}`,
-        subtitle: staticAlbum?.subtitle || 'Photo Collection',
-        count: images.length,
-        type: staticAlbum?.type || 'image',
-        images: images
-    };
+const TAG = `[Sheet Album ${albumId}]`;
+const url  = `https://docs.google.com/spreadsheets/d/${CFG.SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+let csvText;
+try {
+const resp = await fetch(url, { cache:'no-cache' });
+if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+csvText = await resp.text();
+} catch (err) { throw err; }
+if (!csvText || csvText.trim().length < 10) throw new Error(`Empty sheet GID ${gid}`);
+const parsed = Papa.parse(csvText, { header:true, skipEmptyLines:true, dynamicTyping:false });
+const firstRow = parsed.data[0] || {};
+const COL_NAME = 'File Name', COL_PREVIEW = 'Compressed Preview (Preview)', COL_DOWNLOAD = 'Original 4K (Download)', COL_FILEID = 'File ID';
+const keyName = findColumnKey(firstRow, COL_NAME), keyPreview = findColumnKey(firstRow, COL_PREVIEW), keyDownload = findColumnKey(firstRow, COL_DOWNLOAD), keyFileId = findColumnKey(firstRow, COL_FILEID);
+if (!keyPreview || !keyDownload) throw new Error(`Missing columns`);
+const images = [];
+parsed.data.forEach((row) => {
+const fileName = keyName ? (row[keyName] || '').trim() : '';
+const previewRaw = keyPreview ? (row[keyPreview] || '').trim() : '';
+const downloadRaw = keyDownload ? (row[keyDownload] || '').trim() : '';
+const fileId = keyFileId ? (row[keyFileId] || '').trim() : '';
+if (!previewRaw && !downloadRaw && !fileId) return;
+let previewUrl = '', downloadUrl = '';
+if (isValidUrl(previewRaw)) previewUrl = cleanUrl(previewRaw);
+else if (fileId && !previewRaw) previewUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+else if (previewRaw && previewRaw.length > 20 && !previewRaw.includes(' ')) previewUrl = `https://drive.google.com/uc?export=view&id=${previewRaw}`;
+if (isValidUrl(downloadRaw)) downloadUrl = cleanUrl(downloadRaw);
+else if (fileId && !downloadRaw) downloadUrl = buildDriveDownloadUrl(`https://drive.google.com/file/d/${fileId}`);
+else if (downloadRaw && downloadRaw.length > 20 && !downloadRaw.includes(' ')) downloadUrl = buildDriveDownloadUrl(`https://drive.google.com/file/d/${downloadRaw}`);
+else if (previewUrl) downloadUrl = previewUrl;
+if (!previewUrl) return;
+images.push({ fileName: fileName || `image-${images.length+1}.jpg`, preview: previewUrl, download: downloadUrl, fileId: fileId || '' });
+});
+if (images.length === 0) throw new Error('No valid images in sheet');
+const staticAlbum = ALBUMS_STATIC.find(a => a.id === albumId);
+return { id:albumId, title:staticAlbum?.title||`Album ${albumId}`, subtitle:staticAlbum?.subtitle||'Photo Collection', count:images.length, type:staticAlbum?.type||'image', images };
 }
 
-/* =====================================================
-LOAD ALL ALBUMS — INDEPENDENT FETCHING
-===================================================== */
 async function loadAllAlbums() {
-    console.log('📚 [Albums] Starting load...');
-    load.show();
-
-    const results = await Promise.all(
-        ALBUMS_STATIC.map(async (staticAlbum) => {
-            const albumId = staticAlbum.id;
-            const gid = CFG.ALBUM_GIDS[albumId];
-
-            /* Case 1: No GID → use static */
-            if (gid === null || gid === undefined) {
-                console.log(`[Album ${albumId}] No GID configured → using static data`);
-                return staticAlbum;
-            }
-
-            /* Case 2: GID configured → fetch from sheet */
-            try {
-                const sheetData = await fetchAlbumSheet(albumId, gid);
-                console.log(`[Album ${albumId}] ✅ Loaded from sheet (GID: ${gid})`);
-                return sheetData;
-            } catch (err) {
-                /* Case 3: Fetch failed → fallback to static for THIS album only */
-                console.error(`[Album ${albumId}] ❌ Sheet fetch failed: ${err.message}`);
-                console.warn(`[Album ${albumId}] ⚠️ Falling back to static data`);
-                return staticAlbum;
-            }
-        })
-    );
-
-    S.albumsData = results.filter(Boolean);
-    load.hide();
-    console.log(`📚 [Albums] All albums loaded: ${S.albumsData.length}`);
-    renderAlbums();
+load.show();
+const results = await Promise.all(ALBUMS_STATIC.map(async (staticAlbum) => {
+const albumId = staticAlbum.id, gid = CFG.ALBUM_GIDS[albumId];
+if (gid === null || gid === undefined) return staticAlbum;
+try { return await fetchAlbumSheet(albumId, gid); }
+catch (err) { console.error(`[Album ${albumId}] fallback:`, err.message); return staticAlbum; }
+}));
+S.albumsData = results.filter(Boolean);
+load.hide();
+renderAlbums();
 }
-/* =====================================================
-LOAD ALL ALBUMS — INDEPENDENT FETCHING
-=====================================================
-Each album is fetched independently:
-- If GID configured → fetch from sheet
-- If GID null → use static data
-- If fetch fails → use static data for THAT album only
-===================================================== */
-
 
 /* =====================================================
 NAVBAR
 ===================================================== */
 function initNavbar() {
-const hero   = $('heroSec');
-const navbar = $('navbar');
-new IntersectionObserver(([e]) =>
-navbar.classList.toggle('visible', !e.isIntersecting),
-{ threshold:0.05 }
-).observe(hero);
-
-const ham = $('navHam');
-const mob = $('navMob');
+const hero = $('heroSec'), navbar = $('navbar');
+new IntersectionObserver(([e]) => navbar.classList.toggle('visible', !e.isIntersecting), { threshold:0.05 }).observe(hero);
+const ham = $('navHam'), mob = $('navMob');
 ham.addEventListener('click', () => {
 const open = ham.classList.toggle('open');
 mob.classList.toggle('open', open);
 ham.setAttribute('aria-expanded', open);
 });
-
-mob.querySelectorAll('a, button').forEach(el =>
-el.addEventListener('click', () => {
-ham.classList.remove('open'); mob.classList.remove('open');
-ham.setAttribute('aria-expanded', 'false');
-})
-);
-
-$('navFormBtn').onclick     = openForm;
-$('navMobFormBtn').onclick  = openForm;
+mob.querySelectorAll('a, button').forEach(el => el.addEventListener('click', () => {
+ham.classList.remove('open'); mob.classList.remove('open'); ham.setAttribute('aria-expanded','false');
+}));
+$('navFormBtn').onclick    = openForm;
+$('navMobFormBtn').onclick = openForm;
 }
 
 /* =====================================================
@@ -1387,19 +1390,16 @@ const HERO_IMGS = [
 ];
 
 function initHero() {
-const ss   = $('heroSS');
-const dots = $('heroDots');
+const ss = $('heroSS'), dots = $('heroDots');
 HERO_IMGS.forEach((url, i) => {
 const slide = document.createElement('div');
-slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+slide.className = 'hero-slide' + (i===0?' active':'');
 const img = document.createElement('img');
-img.src = url; img.alt = `Memory ${i + 1}`;
-img.loading = i === 0 ? 'eager' : 'lazy';
-slide.appendChild(img);
-ss.appendChild(slide);
+img.src = url; img.alt = `Memory ${i+1}`; img.loading = i===0?'eager':'lazy';
+slide.appendChild(img); ss.appendChild(slide);
 const dot = document.createElement('button');
-dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
-dot.setAttribute('role','tab'); dot.setAttribute('aria-label',`Slide ${i + 1}`);
+dot.className = 'hero-dot' + (i===0?' active':'');
+dot.setAttribute('role','tab'); dot.setAttribute('aria-label',`Slide ${i+1}`);
 dot.onclick = () => heroGo(i);
 dots.appendChild(dot);
 });
@@ -1409,13 +1409,12 @@ heroStart();
 function heroGo(idx) {
 document.querySelectorAll('.hero-slide').forEach((s,i) => s.classList.toggle('active', i===idx));
 document.querySelectorAll('.hero-dot').forEach((d,i)  => d.classList.toggle('active', i===idx));
-S.heroIdx = idx;
-heroStart();
+S.heroIdx = idx; heroStart();
 }
 
 function heroStart() {
 clearInterval(S.heroTimer);
-S.heroTimer = setInterval(() => heroGo((S.heroIdx + 1) % HERO_IMGS.length), 4500);
+S.heroTimer = setInterval(() => heroGo((S.heroIdx+1) % HERO_IMGS.length), 4500);
 }
 
 /* =====================================================
@@ -1439,9 +1438,8 @@ const HIGHLIGHT_DATA = [
 function initHighlights() {
 const grid = $('hlGrid');
 HIGHLIGHT_DATA.forEach((item, i) => {
-const el  = document.createElement('div');
-el.className = 'hl-item';
-el.setAttribute('role','listitem');
+const el = document.createElement('div');
+el.className = 'hl-item'; el.setAttribute('role','listitem');
 el.style.transitionDelay = (i * 0.04) + 's';
 const img = document.createElement('img');
 img.src = item.url; img.alt = item.cap; img.loading = 'lazy';
@@ -1490,8 +1488,7 @@ tile.innerHTML = `
 <div class="album-footer" id="afooter-${album.id}">${hintHTML()}</div>
 </div>`;
 tile.querySelector('.alb-dl-btn').addEventListener('click', e => {
-e.stopPropagation();
-openAlbumDlModal(album);
+e.stopPropagation(); openAlbumDlModal(album);
 });
 const hdr = tile.querySelector('.album-hdr');
 hdr.addEventListener('click',   () => toggleAlbum(tile, album));
@@ -1502,16 +1499,12 @@ initReveal();
 }
 
 function hintHTML() {
-return `<span class="hint">
-<svg viewBox="0 0 24 24"><path d="M9 11.24V7.5a2.5 2.5 0 015 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>
-Long-press to select multiple</span>`;
+return `<span class="hint"><svg viewBox="0 0 24 24"><path d="M9 11.24V7.5a2.5 2.5 0 015 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>Long-press to select multiple</span>`;
 }
 
 function toggleAlbum(tile, album) {
 const expanded = tile.getAttribute('aria-expanded') === 'true';
-document.querySelectorAll('.album-tile[aria-expanded="true"]').forEach(t => {
-if (t !== tile) closeAlbum(t);
-});
+document.querySelectorAll('.album-tile[aria-expanded="true"]').forEach(t => { if (t !== tile) closeAlbum(t); });
 expanded ? closeAlbum(tile) : openAlbum(tile, album);
 }
 
@@ -1537,6 +1530,7 @@ if (S.selectAlbum === id) exitSelectMode();
 updateBadge();
 }
 
+/* ③ renderAlbumGrid — masonry, natural image ratio */
 function renderAlbumGrid(grid, items, albumId, albumType) {
 items.forEach((item, i) => {
 const isVid    = albumType === 'video' || (item.url || '').endsWith('.mp4');
@@ -1559,11 +1553,13 @@ if (isVid) {
 media = document.createElement('video');
 media.src = item.url; media.muted = true; media.playsInline = true; media.preload = 'metadata';
 if (poster) media.poster = poster;
-setTimeout(() => el.classList.add('loaded'), 300);
+/* Videos have a fixed aspect-ratio box so we mark loaded immediately */
+setTimeout(() => el.classList.add('loaded'), 200);
 } else {
 media = document.createElement('img');
 media.alt = fileName; media.loading = 'lazy';
 media.src = previewU;
+/* Fade in once image has loaded — this is when column height is known */
 media.addEventListener('load',  () => el.classList.add('loaded'), { once:true });
 media.addEventListener('error', () => el.classList.add('loaded'), { once:true });
 }
@@ -1582,23 +1578,20 @@ grid.appendChild(el);
 
 function setupLongPress(el, albumId, cb) {
 let t = null;
-const go = () => {
-t = setTimeout(() => {
+const go = () => { t = setTimeout(() => {
 navigator.vibrate?.(60);
 if (!S.selectMode) enterSelectMode(albumId, el, cb);
 else toggleSelect(albumId, el, cb);
-}, 550);
-};
+}, 550); };
 const cancel = () => { clearTimeout(t); t = null; };
-el.addEventListener('pointerdown',  go);
-el.addEventListener('pointerup',    cancel);
-el.addEventListener('pointerleave', cancel);
-el.addEventListener('pointercancel',cancel);
+el.addEventListener('pointerdown',   go);
+el.addEventListener('pointerup',     cancel);
+el.addEventListener('pointerleave',  cancel);
+el.addEventListener('pointercancel', cancel);
 }
 
 function enterSelectMode(albumId, firstEl, firstCb) {
-S.selectMode  = true;
-S.selectAlbum = albumId;
+S.selectMode = true; S.selectAlbum = albumId;
 const grid = $('agrid-' + albumId);
 if (grid) grid.querySelectorAll('.alb-img').forEach(el => el.classList.add('selectable'));
 const footer = $('afooter-' + albumId);
@@ -1617,46 +1610,30 @@ toggleSelect(albumId, firstEl, firstCb);
 
 function exitSelectMode() {
 S.selectMode = false;
-const id = S.selectAlbum;
-S.selectAlbum = null;
-S.selected.clear();
-S.selectedDlMap = {}; S.selectedFnMap = {};
+const id = S.selectAlbum; S.selectAlbum = null;
+S.selected.clear(); S.selectedDlMap = {}; S.selectedFnMap = {};
 document.querySelectorAll('.alb-img').forEach(el => {
 el.classList.remove('selectable','selected');
 el.querySelector('.alb-check')?.classList.remove('on');
 });
-if (id != null) {
-const footer = $('afooter-' + id);
-if (footer) footer.innerHTML = hintHTML();
-}
+if (id != null) { const f = $('afooter-' + id); if (f) f.innerHTML = hintHTML(); }
 updateBadge();
 }
 
 function clearSelection(el) {
 const url = el.dataset.preview;
-S.selected.delete(url);
-delete S.selectedDlMap[url];
-delete S.selectedFnMap[url];
-el.classList.remove('selected');
-el.querySelector('.alb-check')?.classList.remove('on');
+S.selected.delete(url); delete S.selectedDlMap[url]; delete S.selectedFnMap[url];
+el.classList.remove('selected'); el.querySelector('.alb-check')?.classList.remove('on');
 }
 
 function toggleSelect(albumId, el, cb) {
-const url = el.dataset.preview;
-const dlU = el.dataset.download;
-const fn  = el.dataset.filename;
+const url = el.dataset.preview, dlU = el.dataset.download, fn = el.dataset.filename;
 if (S.selected.has(url)) {
-S.selected.delete(url);
-delete S.selectedDlMap[url];
-delete S.selectedFnMap[url];
-el.classList.remove('selected');
-cb.classList.remove('on');
+S.selected.delete(url); delete S.selectedDlMap[url]; delete S.selectedFnMap[url];
+el.classList.remove('selected'); cb.classList.remove('on');
 } else {
-S.selected.add(url);
-S.selectedDlMap[url] = dlU || url;
-S.selectedFnMap[url] = fn  || extractFileName(dlU||url);
-el.classList.add('selected', 'selectable');
-cb.classList.add('on');
+S.selected.add(url); S.selectedDlMap[url] = dlU || url; S.selectedFnMap[url] = fn || extractFileName(dlU||url);
+el.classList.add('selected','selectable'); cb.classList.add('on');
 }
 const saEl = $('sa-' + albumId);
 if (saEl) {
@@ -1667,24 +1644,20 @@ saEl.checked       = all.every(e => S.selected.has(e.dataset.preview));
 saEl.indeterminate = !saEl.checked && all.some(e => S.selected.has(e.dataset.preview));
 }
 }
-updateBadge();
-updateLbSelBtn();
+updateBadge(); updateLbSelBtn();
 }
 
 function selectAllInAlbum(albumId, checked) {
 const grid = $('agrid-' + albumId);
 if (!grid) return;
 grid.querySelectorAll('.alb-img').forEach(el => {
-const url = el.dataset.preview;
-const cb  = el.querySelector('.alb-check');
+const url = el.dataset.preview, cb = el.querySelector('.alb-check');
 if (checked) {
-S.selected.add(url);
-S.selectedDlMap[url] = el.dataset.download || url;
-S.selectedFnMap[url] = el.dataset.filename || extractFileName(el.dataset.download||url);
+S.selected.add(url); S.selectedDlMap[url]=el.dataset.download||url;
+S.selectedFnMap[url]=el.dataset.filename||extractFileName(el.dataset.download||url);
 el.classList.add('selected','selectable'); cb?.classList.add('on');
 } else {
-S.selected.delete(url);
-delete S.selectedDlMap[url]; delete S.selectedFnMap[url];
+S.selected.delete(url); delete S.selectedDlMap[url]; delete S.selectedFnMap[url];
 el.classList.remove('selected'); cb?.classList.remove('on');
 }
 });
@@ -1720,8 +1693,8 @@ else { showMsg('Not Available', 'ZIP download is not configured for this album.'
 $('dlAllBtn').onclick = () => {
 $('dlAllBtn').disabled = true;
 downloadQueue(urls, names,
-(cur, tot) => { $('dlProg').style.width = (cur / tot * 100) + '%'; },
-() => { $('dlAllBtn').disabled = false; $('dlModal').classList.remove('active'); showMsg('Done!', `All ${urls.length} items downloaded.`); }
+(cur, tot) => { $('dlProg').style.width = (cur/tot*100) + '%'; },
+() => { $('dlAllBtn').disabled=false; $('dlModal').classList.remove('active'); showMsg('Done!',`All ${urls.length} items downloaded.`); }
 );
 };
 }
@@ -1729,7 +1702,7 @@ downloadQueue(urls, names,
 function openSelectionDlModal() {
 const urls  = [...S.selected].map(u => S.selectedDlMap[u] || u);
 const names = [...S.selected].map(u => S.selectedFnMap[u] || extractFileName(S.selectedDlMap[u]||u));
-if (!urls.length) { showMsg('Nothing selected', 'Long-press an image to start selecting.'); return; }
+if (!urls.length) { showMsg('Nothing selected','Long-press an image to start selecting.'); return; }
 $('dlTitle').textContent = `${urls.length} item${urls.length>1?'s':''} selected`;
 $('dlZipBtn').style.display = 'none';
 $('dlAllBtn').textContent = '📥 Download Selected';
@@ -1738,13 +1711,13 @@ $('dlModal').classList.add('active');
 $('dlAllBtn').onclick = () => {
 $('dlAllBtn').disabled = true;
 downloadQueue(urls, names,
-(cur, tot) => { $('dlProg').style.width = (cur / tot * 100) + '%'; },
-() => { $('dlAllBtn').disabled = false; $('dlModal').classList.remove('active'); showMsg('Done!', `${urls.length} items downloaded.`); exitSelectMode(); }
+(cur, tot) => { $('dlProg').style.width = (cur/tot*100) + '%'; },
+() => { $('dlAllBtn').disabled=false; $('dlModal').classList.remove('active'); showMsg('Done!',`${urls.length} items downloaded.`); exitSelectMode(); }
 );
 };
 }
 
-$('dlX').onclick     = () => $('dlModal').classList.remove('active');
+$('dlX').onclick      = () => $('dlModal').classList.remove('active');
 $('dlCancel').onclick = () => $('dlModal').classList.remove('active');
 
 /* =====================================================
@@ -1752,40 +1725,32 @@ VIDEO MODAL
 ===================================================== */
 let _vidDlUrl = '', _vidFn = '';
 function openVidModal(url, poster, fileName, dlUrl) {
-const vid = $('vidEl');
-vid.src = url;
+const vid = $('vidEl'); vid.src = url;
 if (poster) vid.poster = poster;
 $('vidTitle').textContent = fileName || 'Video Player';
-_vidDlUrl = dlUrl || url;
-_vidFn    = fileName || 'video.mp4';
+_vidDlUrl = dlUrl || url; _vidFn = fileName || 'video.mp4';
 $('vidModal').classList.add('active');
 document.body.style.overflow = 'hidden';
 vid.play().catch(() => {});
 }
-
 function closeVidModal() {
 $('vidEl').pause(); $('vidEl').src = '';
 $('vidModal').classList.remove('active');
 document.body.style.overflow = '';
 }
-
 function initVidModal() {
 $('vidClose').onclick    = closeVidModal;
 $('vidCloseBtn').onclick = closeVidModal;
 $('vidModal').addEventListener('click', e => { if (e.target.id==='vidModal') closeVidModal(); });
-$('vidDlBtn').onclick = () => downloadFile(_vidDlUrl, _vidFn);
+$('vidDlBtn').onclick    = () => downloadFile(_vidDlUrl, _vidFn);
 }
 
 /* =====================================================
 LIGHTBOX
 ===================================================== */
 function openLightbox(items, startIdx, type) {
-S.lbItems  = items;
-S.lbIdx    = startIdx;
-S.lbType   = type;
-S.lbZoomed = false;
-buildLbStrip();
-renderLb();
+S.lbItems=items; S.lbIdx=startIdx; S.lbType=type; S.lbZoomed=false;
+buildLbStrip(); renderLb();
 $('lb').classList.add('active');
 document.body.style.overflow = 'hidden';
 }
@@ -1795,141 +1760,101 @@ const item       = S.lbItems[S.lbIdx];
 const previewUrl = item.preview || item.url || '';
 const dlUrl      = item.download || item.url || previewUrl;
 const fileName   = item.fileName || extractFileName(dlUrl, `photo-${S.lbIdx+1}`);
-const isVid      = S.lbType === 'video' || (item.url||'').endsWith('.mp4');
-const img   = $('lbImg');
-const vid   = $('lbVid');
-const ctrls = $('lbVidCtrls');
-img.classList.remove('zoomed'); S.lbZoomed = false;
-$('lbZoomLbl').textContent = 'Zoom';
+const isVid      = S.lbType==='video' || (item.url||'').endsWith('.mp4');
+const img = $('lbImg'), vid = $('lbVid'), ctrls = $('lbVidCtrls');
+img.classList.remove('zoomed'); S.lbZoomed = false; $('lbZoomLbl').textContent='Zoom';
 if (isVid) {
 img.style.display='none'; img.src='';
 vid.style.display='block'; ctrls.style.display='flex';
 vid.src = item.url || dlUrl;
 if (item.poster) vid.poster = item.poster;
-vid.muted = S.vidMuted;
-vid.pause(); S.vidPlaying = false;
-updatePlayBtn();
+vid.muted = S.vidMuted; vid.pause(); S.vidPlaying=false; updatePlayBtn();
 } else {
 vid.pause(); vid.src=''; vid.style.display='none'; ctrls.style.display='none';
-img.style.display='block';
-img.src = previewUrl;
-img.alt = fileName;
+img.style.display='block'; img.src=previewUrl; img.alt=fileName;
 }
 const dlBtn = $('lbDlBtn');
-dlBtn.dataset.url      = dlUrl;
-dlBtn.dataset.filename = fileName;
+dlBtn.dataset.url=dlUrl; dlBtn.dataset.filename=fileName;
 $('lbCount').textContent = `${S.lbIdx+1} / ${S.lbItems.length}`;
 updateLbSelBtn();
 document.querySelectorAll('.lb-thumb').forEach((t,i) => t.classList.toggle('active', i===S.lbIdx));
-document.querySelector('.lb-thumb.active')
-?.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+document.querySelector('.lb-thumb.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
 }
 
 function closeLightbox() {
 $('lbVid').pause(); $('lbVid').src=''; $('lbImg').src='';
 $('lb').classList.remove('active');
-document.body.style.overflow = '';
-S.vidPlaying = false;
+document.body.style.overflow='';
+S.vidPlaying=false;
 }
 
-function lbNav(dir) {
-S.lbIdx = (S.lbIdx + dir + S.lbItems.length) % S.lbItems.length;
-S.lbZoomed = false; renderLb();
-}
+function lbNav(dir) { S.lbIdx=(S.lbIdx+dir+S.lbItems.length)%S.lbItems.length; S.lbZoomed=false; renderLb(); }
 
 function buildLbStrip() {
-const strip = $('lbStrip');
-strip.innerHTML = '';
-S.lbItems.forEach((item, i) => {
-const src   = item.poster || item.preview || item.url || '';
-const isVid = S.lbType==='video' || (item.url||'').endsWith('.mp4');
-const thumb = document.createElement('div');
-thumb.className = 'lb-thumb' + (i===S.lbIdx?' active':'');
+const strip=$('lbStrip'); strip.innerHTML='';
+S.lbItems.forEach((item,i) => {
+const src=item.poster||item.preview||item.url||'';
+const isVid=S.lbType==='video'||(item.url||'').endsWith('.mp4');
+const thumb=document.createElement('div');
+thumb.className='lb-thumb'+(i===S.lbIdx?' active':'');
 thumb.setAttribute('tabindex','0');
-if (isVid) {
-const v = document.createElement('video');
-v.src=item.url; v.muted=true; v.preload='metadata';
-if(item.poster) v.poster=item.poster;
-thumb.appendChild(v);
-} else {
-const ig = document.createElement('img');
-ig.src=src; ig.loading='lazy'; ig.alt='';
-thumb.appendChild(ig);
-}
-thumb.addEventListener('click', () => { S.lbIdx=i; S.lbZoomed=false; renderLb(); });
-thumb.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') thumb.click(); });
+if (isVid) { const v=document.createElement('video'); v.src=item.url; v.muted=true; v.preload='metadata'; if(item.poster)v.poster=item.poster; thumb.appendChild(v); }
+else { const ig=document.createElement('img'); ig.src=src; ig.loading='lazy'; ig.alt=''; thumb.appendChild(ig); }
+thumb.addEventListener('click',()=>{S.lbIdx=i;S.lbZoomed=false;renderLb();});
+thumb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')thumb.click();});
 strip.appendChild(thumb);
 });
 }
 
 function updatePlayBtn() {
-$('lbPlayBtn').innerHTML = S.vidPlaying
-? '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
-: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+$('lbPlayBtn').innerHTML=S.vidPlaying
+?'<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
 }
 
 function updateLbSelBtn() {
 if (!S.lbItems.length) return;
-const url      = S.lbItems[S.lbIdx]?.preview || S.lbItems[S.lbIdx]?.url || '';
-const isSelect = url && S.selected.has(url);
-$('lbSelBtn').classList.toggle('sel-on', !!isSelect);
-$('lbSelLbl').textContent = isSelect ? 'Selected ✓' : 'Select';
+const url=S.lbItems[S.lbIdx]?.preview||S.lbItems[S.lbIdx]?.url||'';
+const isSel=url&&S.selected.has(url);
+$('lbSelBtn').classList.toggle('sel-on', !!isSel);
+$('lbSelLbl').textContent=isSel?'Selected ✓':'Select';
 }
 
 function initLightbox() {
-$('lbClose').onclick = closeLightbox;
-$('lbPrev').onclick  = () => lbNav(-1);
-$('lbNext').onclick  = () => lbNav(1);
-$('lbDlBtn').onclick = () => {
-const btn = $('lbDlBtn');
-downloadFile(btn.dataset.url, btn.dataset.filename);
-};
-$('lbZoomBtn').onclick = () => {
-S.lbZoomed = !S.lbZoomed;
-$('lbImg').classList.toggle('zoomed', S.lbZoomed);
-$('lbZoomLbl').textContent = S.lbZoomed ? 'Unzoom' : 'Zoom';
-};
-$('lbSelBtn').onclick = () => {
-const item = S.lbItems[S.lbIdx];
-const url  = item?.preview || item?.url || '';
+$('lbClose').onclick=closeLightbox;
+$('lbPrev').onclick=()=>lbNav(-1);
+$('lbNext').onclick=()=>lbNav(1);
+$('lbDlBtn').onclick=()=>{ const btn=$('lbDlBtn'); downloadFile(btn.dataset.url,btn.dataset.filename); };
+$('lbZoomBtn').onclick=()=>{ S.lbZoomed=!S.lbZoomed; $('lbImg').classList.toggle('zoomed',S.lbZoomed); $('lbZoomLbl').textContent=S.lbZoomed?'Unzoom':'Zoom'; };
+$('lbSelBtn').onclick=()=>{
+const item=S.lbItems[S.lbIdx], url=item?.preview||item?.url||'';
 if (!url) return;
 if (!S.selectMode) {
-if (S.curAlbumId != null) {
-const grid = $('agrid-' + S.curAlbumId);
-const el   = grid?.querySelector(`.alb-img[data-preview="${CSS.escape(url)}"]`);
-if (el) enterSelectMode(S.curAlbumId, el, el.querySelector('.alb-check'));
-else { S.selected.add(url); S.selectedDlMap[url] = item.download||url; S.selectedFnMap[url]=item.fileName||extractFileName(item.download||url); updateBadge(); updateLbSelBtn(); }
+if (S.curAlbumId!=null) {
+const grid=$('agrid-'+S.curAlbumId);
+const el=grid?.querySelector(`.alb-img[data-preview="${CSS.escape(url)}"]`);
+if (el) enterSelectMode(S.curAlbumId,el,el.querySelector('.alb-check'));
+else { S.selected.add(url); S.selectedDlMap[url]=item.download||url; S.selectedFnMap[url]=item.fileName||extractFileName(item.download||url); updateBadge(); updateLbSelBtn(); }
+} else { S.selected.add(url); S.selectedDlMap[url]=item.download||url; S.selectedFnMap[url]=item.fileName||extractFileName(item.download||url); updateBadge(); updateLbSelBtn(); }
 } else {
-S.selected.add(url); S.selectedDlMap[url]=item.download||url; S.selectedFnMap[url]=item.fileName||extractFileName(item.download||url);
-updateBadge(); updateLbSelBtn();
-}
-} else {
-const grid = $('agrid-' + S.selectAlbum);
-const el   = grid?.querySelector(`.alb-img[data-preview="${CSS.escape(url)}"]`);
-if (el) toggleSelect(S.selectAlbum, el, el.querySelector('.alb-check'));
+const grid=$('agrid-'+S.selectAlbum);
+const el=grid?.querySelector(`.alb-img[data-preview="${CSS.escape(url)}"]`);
+if (el) toggleSelect(S.selectAlbum,el,el.querySelector('.alb-check'));
 }
 };
-$('lbPlayBtn').onclick = () => {
-const v = $('lbVid');
-S.vidPlaying ? v.pause() : v.play();
-S.vidPlaying = !S.vidPlaying; updatePlayBtn();
-};
-$('lbVid').onended = () => { S.vidPlaying=false; updatePlayBtn(); };
-$('lbMuteBtn').onclick = () => {
-S.vidMuted = !S.vidMuted;
-$('lbVid').muted = S.vidMuted;
-$('soundIco').style.opacity = S.vidMuted ? '0.4' : '1';
-};
-document.addEventListener('keydown', e => {
+$('lbPlayBtn').onclick=()=>{const v=$('lbVid');S.vidPlaying?v.pause():v.play();S.vidPlaying=!S.vidPlaying;updatePlayBtn();};
+$('lbVid').onended=()=>{S.vidPlaying=false;updatePlayBtn();};
+$('lbMuteBtn').onclick=()=>{S.vidMuted=!S.vidMuted;$('lbVid').muted=S.vidMuted;$('soundIco').style.opacity=S.vidMuted?'0.4':'1';};
+document.addEventListener('keydown',e=>{
 if (!$('lb').classList.contains('active')) return;
-if (e.key==='Escape')     { closeLightbox(); }
-if (e.key==='ArrowLeft')  { lbNav(-1); }
-if (e.key==='ArrowRight') { lbNav(1); }
+if (e.key==='Escape') closeLightbox();
+if (e.key==='ArrowLeft')  lbNav(-1);
+if (e.key==='ArrowRight') lbNav(1);
 if (e.key===' ') { e.preventDefault(); $('lbPlayBtn').click(); }
 });
 let tx0=0;
-$('lb').addEventListener('touchstart', e => { tx0=e.changedTouches[0].screenX; }, { passive:true });
-$('lb').addEventListener('touchend',   e => { const d=tx0-e.changedTouches[0].screenX; if(Math.abs(d)>40) lbNav(d>0?1:-1); });
+$('lb').addEventListener('touchstart',e=>{tx0=e.changedTouches[0].screenX;},{passive:true});
+$('lb').addEventListener('touchend',  e=>{const d=tx0-e.changedTouches[0].screenX;if(Math.abs(d)>40)lbNav(d>0?1:-1);});
 }
 
 /* =====================================================
@@ -1949,9 +1874,9 @@ message:'Grateful for every moment and every person who made this unforgettable.
 rating:5, social:{ instagram:'https://instagram.com' }
 },
 {
-name:'Rahul Verma', group:'Commerce',
+name:'রাহুল ভার্মা', group:'বাণিজ্য',
 avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=rahul&backgroundColor=0e4484',
-message:'Thank you to our teachers and batchmates for filling this journey with warmth and meaning. The late nights, exams, and celebrations — all worth every second.',
+message:'আমাদের শিক্ষক ও বন্ধুদের ধন্যবাদ — এই যাত্রাকে অর্থবহ করার জন্য। রাত জাগা, পরীক্ষা, উৎসব — সব কিছু মনে রাখব।',
 rating:4, social:{ facebook:'https://facebook.com', linkedin:'https://linkedin.com' }
 },
 {
@@ -1967,74 +1892,58 @@ message:'From the very first day to this farewell — what a ride! Wishing every
 rating:5, social:{ instagram:'https://instagram.com', facebook:'https://facebook.com' }
 },
 {
-name:'Ananya Reddy', group:'Commerce',
+name:'আনান্যা রেড্ডি', group:'বাণিজ্য',
 avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=ananya&backgroundColor=1a365d',
-message:'Every corridor, every classroom holds a piece of my heart. This place shaped who I am today. I will miss it more than words can say.',
+message:'Every corridor, every classroom holds a piece of my heart. আমার জীবনের সেরা দিনগুলো এখানেই কাটিয়েছি। I will miss it more than words can say.',
 rating:5, social:{ linkedin:'https://linkedin.com' }
 }
 ];
 
 function initComments() {
 const track = $('comTrack');
-COMMENTS_DATA.forEach(c => {
-track.appendChild(buildComCard(c));
-});
+COMMENTS_DATA.forEach(c => track.appendChild(buildComCard(c)));
 const avatarImgs = [...track.querySelectorAll('.cc-av')];
-const waitAll    = avatarImgs.map(img =>
-new Promise(res => {
+Promise.all(avatarImgs.map(img => new Promise(res => {
 if (img.complete && img.naturalHeight > 0) { res(); return; }
 img.addEventListener('load',  res, { once:true });
 img.addEventListener('error', res, { once:true });
-})
-);
-Promise.all(waitAll).then(() => {
-equalizeComCards();
-startCardObserver();
-});
+}))).then(() => { equalizeComCards(); startCardObserver(); });
 setTimeout(() => { equalizeComCards(); startCardObserver(); }, 1200);
-$('comPrev').onclick = () => { comStop(); comScrollTo(S.comIdx - 1); comStart(); };
-$('comNext').onclick = () => { comStop(); comScrollTo(S.comIdx + 1); comStart(); };
+$('comPrev').onclick=()=>{comStop();comScrollTo(S.comIdx-1);comStart();};
+$('comNext').onclick=()=>{comStop();comScrollTo(S.comIdx+1);comStart();};
 track.addEventListener('mouseenter', comStop);
 track.addEventListener('mouseleave', comStart);
 track.addEventListener('touchstart', comStop, { passive:true });
 track.addEventListener('touchend',   () => setTimeout(comStart, 2500));
 track.addEventListener('scroll', () => {
-const cards  = [...track.querySelectorAll('.com-card')];
+const cards=[...track.querySelectorAll('.com-card')];
 if (!cards.length) return;
-const trackL = track.scrollLeft;
-let nearest  = 0, minDist = Infinity;
-cards.forEach((c,i) => {
-const dist = Math.abs(c.offsetLeft - track.offsetLeft - trackL);
-if (dist < minDist) { minDist = dist; nearest = i; }
-});
-S.comIdx = nearest;
-}, { passive:true });
-new IntersectionObserver(([e]) => {
-if (e.isIntersecting) comStart();
-else comStop();
-}, { threshold:0.2 }).observe($('comments'));
+const trackL=track.scrollLeft; let nearest=0, minDist=Infinity;
+cards.forEach((c,i)=>{const d=Math.abs(c.offsetLeft-track.offsetLeft-trackL);if(d<minDist){minDist=d;nearest=i;}});
+S.comIdx=nearest;
+},{passive:true});
+new IntersectionObserver(([e])=>{if(e.isIntersecting)comStart();else comStop();},{threshold:.2}).observe($('comments'));
 }
 
 function buildComCard(c) {
 const card = document.createElement('div');
-card.className = 'com-card';
-card.setAttribute('role','listitem');
+card.className = 'com-card'; card.setAttribute('role','listitem');
 const hasSocial = c.social && Object.keys(c.social).length > 0;
-const socialLinks = hasSocial ? Object.entries(c.social).map(([k, v]) => {
+const socialLinks = hasSocial ? Object.entries(c.social).map(([k,v]) => {
 const icons = {
 facebook: '<svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>',
 instagram:'<svg viewBox="0 0 24 24"><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2z"/></svg>',
 linkedin: '<svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/></svg>',
 other:    '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>'
 };
-return `<a href="${v}" target="_blank" rel="noopener" class="cc-sl" aria-label="${k}">${icons[k] || icons.other}</a>`;
+return `<a href="${v}" target="_blank" rel="noopener" class="cc-sl" aria-label="${k}">${icons[k]||icons.other}</a>`;
 }).join('') : '';
 card.innerHTML = `
 <div class="cc-head">
 <div class="cc-av-wrap">
 <img src="${c.avatar}" alt="${c.name}" class="cc-av" loading="lazy"
 onerror="this.src='https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(c.name)}'">
-${c.rating ? `<span class="cc-stars">${c.rating}★</span>` : ''}
+${c.rating?`<span class="cc-stars">${c.rating}★</span>`:''}
 </div>
 <div class="cc-meta">
 <div class="cc-name">${c.name}</div>
@@ -2048,260 +1957,357 @@ return card;
 }
 
 function equalizeComCards() {
-const cards = [...document.querySelectorAll('.com-card')];
+const cards=[...document.querySelectorAll('.com-card')];
 if (!cards.length) return;
-cards.forEach(c => c.style.height = 'auto');
-const maxH = Math.max(...cards.map(c => c.scrollHeight));
-if (maxH > 50) cards.forEach(c => c.style.height = maxH + 'px');
+cards.forEach(c=>c.style.height='auto');
+const maxH=Math.max(...cards.map(c=>c.scrollHeight));
+if (maxH>50) cards.forEach(c=>c.style.height=maxH+'px');
 }
 
 function startCardObserver() {
 if (S.comObs) S.comObs.disconnect();
-const track = $('comTrack');
-S.comObs = new IntersectionObserver(entries => {
-entries.forEach(e => {
-if (e.isIntersecting && !e.target.classList.contains('visible')) {
-e.target.classList.add('visible');
-}
-});
-}, { root: track, threshold: 0.35 });
-track.querySelectorAll('.com-card').forEach(c => S.comObs.observe(c));
+const track=$('comTrack');
+S.comObs=new IntersectionObserver(entries=>{
+entries.forEach(e=>{if(e.isIntersecting&&!e.target.classList.contains('visible'))e.target.classList.add('visible');});
+},{root:track,threshold:.35});
+track.querySelectorAll('.com-card').forEach(c=>S.comObs.observe(c));
 }
 
 function comScrollTo(idx) {
-const track = $('comTrack');
-const cards = [...track.querySelectorAll('.com-card')];
+const track=$('comTrack'), cards=[...track.querySelectorAll('.com-card')];
 if (!cards.length) return;
-const total = cards.length;
-idx = ((idx % total) + total) % total;
-S.comIdx = idx;
-const card  = cards[idx];
-const left  = card.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
-track.scrollTo({ left, behavior:'smooth' });
+const total=cards.length; idx=((idx%total)+total)%total; S.comIdx=idx;
+const card=cards[idx];
+const left=card.getBoundingClientRect().left-track.getBoundingClientRect().left+track.scrollLeft;
+track.scrollTo({left,behavior:'smooth'});
 }
 
-const CFG_COM_DWELL = 3000;
-
-function comBarStart() {
-const bar = $('comBar');
-bar.style.transition = 'none';
-bar.style.width      = '0%';
-bar.offsetHeight;
-bar.style.transition = `width ${CFG_COM_DWELL}ms linear`;
-bar.style.width      = '100%';
-}
-
-function comBarStop() {
-const bar    = $('comBar');
-const curPct = (parseFloat(getComputedStyle(bar).width) / (bar.parentElement?.clientWidth || 1) * 100) || 0;
-bar.style.transition = 'none';
-bar.style.width      = curPct + '%';
-}
-
-function comStart() {
-comStop();
-comBarStart();
-S.comTimer = setTimeout(() => {
-comScrollTo(S.comIdx + 1);
-comStart();
-}, CFG_COM_DWELL);
-}
-
-function comStop() {
-clearTimeout(S.comTimer);
-S.comTimer = null;
-comBarStop();
-}
+const CFG_COM_DWELL=3000;
+function comBarStart() { const b=$('comBar'); b.style.transition='none'; b.style.width='0%'; b.offsetHeight; b.style.transition=`width ${CFG_COM_DWELL}ms linear`; b.style.width='100%'; }
+function comBarStop()  { const b=$('comBar'); const p=(parseFloat(getComputedStyle(b).width)/(b.parentElement?.clientWidth||1)*100)||0; b.style.transition='none'; b.style.width=p+'%'; }
+function comStart() { comStop(); comBarStart(); S.comTimer=setTimeout(()=>{comScrollTo(S.comIdx+1);comStart();},CFG_COM_DWELL); }
+function comStop()  { clearTimeout(S.comTimer); S.comTimer=null; comBarStop(); }
 
 /* =====================================================
-FORM
+FORM — Matches GAS backend exactly
+=====================================================
+CORS notes for LOCAL DEVELOPMENT:
+  ▸ First fetch() attempt uses normal CORS mode.
+  ▸ If blocked (common on localhost), falls back to mode:'no-cors'
+    which sends data but cannot read the response.
+  ▸ In that case, handleFormSuccess(..., unconfirmed=true) shows a
+    "sent but unconfirmed" message — this is expected locally.
+  ▸ On a deployed domain (GitHub Pages, Netlify, etc.) the GAS
+    endpoint with "Anyone" access works with full CORS.
+
+DUPLICATE HANDLING:
+  ▸ GAS returns { success:false, duplicate:true, existingData:{...} }
+  ▸ This triggers showDuplicateModal().
+  ▸ User confirms → POST with action:'update' to the same endpoint.
+  ▸ !! Your GAS doPost must handle action:'update' — add this block:
+       if (data.action === 'update') {
+         const sheet = getGenderSheet(data.gender);
+         updateSubmission(sheet, data.existingRow, data);
+         return jsonResponse({ success:true, message:'Updated' });
+       }
 ===================================================== */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzubqsirbqk9ev2W_GuokgbRs3YBiBDf97Y0gNfJ88gT39DrswFAi29EY0R0sxOBs/exec';
+
+/* Pending payload for the "Yes, Update" confirmation button */
+let _pendingUpdate = null;
+
 function openForm()  { $('fmOverlay').classList.add('active'); document.body.style.overflow='hidden'; loadFormCache(); }
 function closeForm() { $('fmOverlay').classList.remove('active'); document.body.style.overflow=''; }
 
 function showFormStatus(type, text) {
-const el = $('formStatus');
-el.className = `form-status ${type}`;
-el.textContent = text;
+const el=$('formStatus'); el.className=`form-status ${type}`; el.textContent=text;
+}
+function hideFormStatus() { $('formStatus').className='form-status'; $('formStatus').textContent=''; }
+
+/* ⑤ Duplicate modal — show existing submission info */
+function showDuplicateModal(serverResp, originalPayload) {
+const ed = serverResp.existingData || {};
+const rawDate = ed['Submitted At'] || ed.submittedAt || ed.timestamp || '';
+const date = rawDate
+  ? (() => { try { return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'}); } catch { return rawDate; } })()
+  : 'Unknown';
+
+$('dupMeta').innerHTML = `
+<span><span class="k">Name</span>    <span class="v">${ed.name    || ed.Name    || '—'}</span></span>
+<span><span class="k">Roll</span>    <span class="v">${ed.roll    || ed.Roll    || '—'}</span></span>
+<span><span class="k">Group</span>   <span class="v">${ed.group   || ed.Group   || '—'}</span></span>
+<span><span class="k">Submitted</span><span class="v">${date}</span></span>`;
+
+/* Enrich payload: action='update', carry the row reference from server */
+_pendingUpdate = {
+  ...originalPayload,
+  action:      'update',
+  existingRow: ed.row || ed.Row || null
+};
+
+$('dupModal').classList.add('active');
 }
 
-function hideFormStatus() {
-$('formStatus').className = 'form-status';
-$('formStatus').textContent = '';
-}
+/* Duplicate modal — button bindings */
+$('dupX').onclick      = () => { $('dupModal').classList.remove('active'); _pendingUpdate = null; };
+$('dupCancel').onclick = () => { $('dupModal').classList.remove('active'); _pendingUpdate = null; };
 
+$('dupUpdate').onclick = async () => {
+$('dupModal').classList.remove('active');
+if (!_pendingUpdate) return;
+const payload = _pendingUpdate; _pendingUpdate = null;
+
+load.show(); $('fSubmit').disabled = true;
+showFormStatus('warn', 'Updating your submission…');
+closeForm();   /* close form modal so spinner is visible */
+
+try {
+  const resp = await fetch(SCRIPT_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload)
+  });
+  let data = {}; try { data = await resp.json(); } catch {}
+  load.hide(); $('fSubmit').disabled = false;
+  if (resp.ok && data.success !== false) {
+    handleFormSuccess(payload.name, payload);
+  } else {
+    showMsg('Update Error', data.message || `Server returned ${resp.status}.`);
+  }
+} catch (corsErr) {
+  /* Localhost CORS fallback — no-cors can't read the response */
+  try {
+    await fetch(SCRIPT_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'application/text' },
+      body:    JSON.stringify(payload)
+    });
+    load.hide(); $('fSubmit').disabled = false;
+    handleFormSuccess(payload.name, payload, true);
+  } catch (netErr) {
+    load.hide(); $('fSubmit').disabled = false;
+    showMsg('Network Error', 'Could not reach the server. Please check your connection.');
+  }
+}
+};
+
+/* =====================================================
+FORM INIT
+===================================================== */
 function initForm() {
-$('openFormBtn').onclick  = openForm;
+$('openFormBtn').onclick   = openForm;
 $('footerFormBtn').onclick = openForm;
 $('fmClose').onclick       = closeForm;
-$('fmOverlay').addEventListener('click', e => { if(e.target.id==='fmOverlay') closeForm(); });
+$('fmOverlay').addEventListener('click', e => { if (e.target.id === 'fmOverlay') closeForm(); });
 
+/* Star rating display */
 document.querySelectorAll('input[name="rating"]').forEach(r =>
-r.addEventListener('change', () => { $('starVal').textContent = r.value + ' / 5'; })
+  r.addEventListener('change', () => { $('starVal').textContent = r.value + ' / 5'; })
 );
 
-const imgUp  = $('imgUp');
-const fPhoto = $('fPhoto');
-const imgPr  = $('imgPrev');
+/* Photo upload */
+const imgUp = $('imgUp'), fPhoto = $('fPhoto'), imgPr = $('imgPrev');
 ['dragenter','dragover','dragleave','drop'].forEach(ev =>
-imgUp.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); })
+  imgUp.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); })
 );
 imgUp.addEventListener('dragenter', () => imgUp.classList.add('over'));
 imgUp.addEventListener('dragleave', () => imgUp.classList.remove('over'));
 imgUp.addEventListener('drop', e => {
-imgUp.classList.remove('over');
-const f = e.dataTransfer.files[0];
-if (f) handlePhoto(f);
+  imgUp.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f) handlePhoto(f);
 });
 fPhoto.addEventListener('change', e => { if (e.target.files[0]) handlePhoto(e.target.files[0]); });
 
 function handlePhoto(file) {
-const reader = new FileReader();
-reader.onload = ev => {
-const img = new Image();
-img.onload = () => {
-const ratio = img.width / img.height;
-const photoErr = $('photoErr');
-if (img.width < 300) {
-photoErr.textContent = 'Image must be at least 300×300 pixels.';
-photoErr.classList.add('show');
-imgUp.classList.remove('has-img'); S.photoDataUrl = null; return;
-}
-if (Math.abs(ratio - 1) >= 0.15) {
-photoErr.textContent = 'Image must be square (1:1 ratio).';
-photoErr.classList.add('show');
-imgUp.classList.remove('has-img'); S.photoDataUrl = null; return;
-}
-photoErr.classList.remove('show');
-imgPr.src = ev.target.result;
-imgUp.classList.add('has-img');
-S.photoDataUrl = ev.target.result;
-};
-img.src = ev.target.result;
-};
-reader.readAsDataURL(file);
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = img.width / img.height;
+      const photoErr = $('photoErr');
+      if (img.width < 300) {
+        photoErr.textContent = 'Image must be at least 300×300 pixels.';
+        photoErr.classList.add('show');
+        imgUp.classList.remove('has-img'); S.photoDataUrl = null; return;
+      }
+      if (Math.abs(ratio - 1) >= 0.15) {
+        photoErr.textContent = 'Image must be square (1:1 ratio).';
+        photoErr.classList.add('show');
+        imgUp.classList.remove('has-img'); S.photoDataUrl = null; return;
+      }
+      photoErr.classList.remove('show');
+      imgPr.src = ev.target.result;
+      imgUp.classList.add('has-img');
+      S.photoDataUrl = ev.target.result;
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 const setErr = (id, msg, visible) => {
-const el = $(id);
-el.textContent = msg;
-el.classList.toggle('show', visible);
+  const el = $(id);
+  el.textContent = msg;
+  el.classList.toggle('show', visible);
 };
 
+/* =====================================================
+FORM SUBMIT — matches GAS backend field names exactly
+===================================================== */
 $('fareForm').addEventListener('submit', async e => {
-e.preventDefault();
-hideFormStatus();
-let ok = true;
-const rating = document.querySelector('input[name="rating"]:checked');
-if (!rating)                     { setErr('ratingErr', 'Please select a rating.',        true); ok=false; } else { setErr('ratingErr','',false); }
-const name = $('fName').value.trim();
-if (!name)                        { setErr('nameErr',   'Name is required.',              true); ok=false; } else { setErr('nameErr','',false); }
-const roll = $('fRoll').value.trim();
-if (!/^\d{1,3}$/.test(roll))     { setErr('rollErr',   'Enter a valid roll (digits).',   true); ok=false; } else { setErr('rollErr','',false); }
-const group = $('fGroup').value;
-if (!group)                       { setErr('groupErr',  'Select your group.',             true); ok=false; } else { setErr('groupErr','',false); }
-const gender = $('fGender').value;
-if (!gender)                      { setErr('genderErr', 'Select your gender.',            true); ok=false; } else { setErr('genderErr','',false); }
-const email = $('fEmail').value.trim();
-if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-showFormStatus('err', 'Please enter a valid email address.'); ok=false;
-}
-const msg = $('fMsg').value.trim();
-if (!msg)                         { setErr('msgErr',    'Message is required.',           true); ok=false; } else { setErr('msgErr','',false); }
-if (!$('fPriv').checked)          { setErr('privErr',   'You must agree to continue.',    true); ok=false; } else { setErr('privErr','',false); }
-if (!ok) { showFormStatus('err', 'Please fix the errors above.'); return; }
+  e.preventDefault();
+  hideFormStatus();
+  let ok = true;
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCi3nWiLN-o1J5md1NFsnkp-aDhzmgpzDaRhGZu2aNtruHya_MgzIs7dEkKDuK8nTN/exec';
+  const rating = document.querySelector('input[name="rating"]:checked');
+  if (!rating)                     { setErr('ratingErr','Please select a rating.',       true);  ok=false; } else { setErr('ratingErr','',false); }
 
-const payload = {
-action: 'submit',
-name, roll, group, gender,
-rating:   parseInt(rating.value),
-message:  msg,
-rollKey:  (gender==='boy'?'B-':'G-') + roll,
-social: {
-email,
-facebook:  $('fFb').value.trim(),
-instagram: $('fIg').value.trim(),
-other:     $('fOther').value.trim()
-},
-profileImageUrl: S.photoDataUrl,
-timestamp: new Date().toISOString()
-};
+  const name = $('fName').value.trim();
+  if (!name)                        { setErr('nameErr',  'Name is required.',             true);  ok=false; } else { setErr('nameErr','',false); }
 
-load.show();
-$('fSubmit').disabled = true;
-showFormStatus('warn', 'Submitting…');
+  const roll = $('fRoll').value.trim();
+  if (!/^\d{1,3}$/.test(roll))     { setErr('rollErr',  'Enter a valid roll (digits).',  true);  ok=false; } else { setErr('rollErr','',false); }
 
-try {
-const resp = await fetch(SCRIPT_URL, {
-method:  'POST',
-headers: { 'Content-Type': 'application/json' },
-body:    JSON.stringify(payload)
+  const group = $('fGroup').value;
+  if (!group)                       { setErr('groupErr', 'Select your group.',            true);  ok=false; } else { setErr('groupErr','',false); }
+
+  const gender = $('fGender').value;
+  if (!gender)                      { setErr('genderErr','Select your gender.',           true);  ok=false; } else { setErr('genderErr','',false); }
+
+  const email = $('fEmail').value.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showFormStatus('err','Please enter a valid email address.'); ok=false;
+  }
+
+  const msg = $('fMsg').value.trim();
+  if (!msg)                         { setErr('msgErr',   'Message is required.',          true);  ok=false; } else { setErr('msgErr','',false); }
+
+  if (!$('fPriv').checked)          { setErr('privErr',  'You must agree to continue.',   true);  ok=false; } else { setErr('privErr','',false); }
+
+  if (!ok) { showFormStatus('err','Please fix the errors above.'); return; }
+
+  /* Build payload — mirrors GAS validateForm() field names */
+  const payload = {
+    action:   'submit',
+    name, roll, group, gender,
+    rating:   parseInt(rating.value),
+    message:  msg,
+    rollKey:  (gender === 'boy' ? 'B-' : 'G-') + roll,
+    social: {
+      email,
+      facebook:  $('fFb').value.trim(),
+      instagram: $('fIg').value.trim(),
+      other:     $('fOther').value.trim()
+    },
+    profileImageUrl: S.photoDataUrl,
+    timestamp: new Date().toISOString()
+  };
+
+  load.show(); $('fSubmit').disabled = true;
+  showFormStatus('warn','Submitting…');
+
+  /* ── Attempt 1: Full CORS fetch (works on deployed domains) ── */
+  try {
+    const resp = await fetch(SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+    let data = {}; try { data = await resp.json(); } catch {}
+    load.hide(); $('fSubmit').disabled = false;
+
+    /* ── Duplicate detected ── */
+    if (!resp.ok && data.duplicate) {
+      hideFormStatus();
+      showDuplicateModal(data, payload);
+      return;
+    }
+    if (data.duplicate) {
+      hideFormStatus();
+      showDuplicateModal(data, payload);
+      return;
+    }
+
+    if (resp.ok && data.success !== false) {
+      handleFormSuccess(name, payload);
+    } else {
+      showFormStatus('err', `Submission error: ${data.message || 'Server returned ' + resp.status}`);
+      console.error('[Form] Server error:', data);
+    }
+
+  } catch (corsOrNetworkErr) {
+    /*
+     * ── Attempt 2: no-cors fallback (localhost / restricted origin) ──
+     * In no-cors mode we cannot read the response, so we can't detect
+     * duplicates server-side. We treat any completion as success and
+     * flag it as "unconfirmed" in the UI message.
+     */
+    console.warn('[Form] CORS blocked — falling back to no-cors:', corsOrNetworkErr.message);
+    try {
+      await fetch(SCRIPT_URL, {
+        method:  'POST',
+        mode:    'no-cors',
+        headers: { 'Content-Type': 'application/text' },
+        body:    JSON.stringify(payload)
+      });
+      load.hide(); $('fSubmit').disabled = false;
+      handleFormSuccess(name, payload, true);   /* unconfirmed=true */
+    } catch (netErr) {
+      load.hide(); $('fSubmit').disabled = false;
+      showFormStatus('err','Network error. Please check your internet connection and try again.');
+      console.error('[Form] Network error:', netErr);
+    }
+  }
 });
-let data = {};
-try { data = await resp.json(); } catch { }
-load.hide(); $('fSubmit').disabled = false;
-if (resp.ok && data.success !== false) {
-handleFormSuccess(name, payload);
-} else {
-const errMsg = data.message || `Server returned ${resp.status}.`;
-showFormStatus('err', `Submission error: ${errMsg}`);
-console.error('[Form] Server error:', data);
-}
-} catch (corsOrNetworkErr) {
-console.warn('[Form] CORS / network error — falling back to no-cors:', corsOrNetworkErr.message);
-try {
-await fetch(SCRIPT_URL, {
-method:  'POST',
-mode:    'no-cors',
-headers: { 'Content-Type': 'application/text' },
-body:    JSON.stringify(payload)
-});
-load.hide(); $('fSubmit').disabled = false;
-handleFormSuccess(name, payload, true);
-} catch (netErr) {
-load.hide(); $('fSubmit').disabled = false;
-showFormStatus('err', 'Network error. Please check your internet connection and try again.');
-console.error('[Form] Network error:', netErr);
-}
-}
-});
-}
+}   /* end initForm() */
 
+/* =====================================================
+FORM SUCCESS HANDLER
+===================================================== */
 function handleFormSuccess(name, payload, unconfirmed = false) {
 cacheForm(payload);
 $('fareForm').reset();
 $('imgUp').classList.remove('has-img');
 $('starVal').textContent = '0 / 5';
 S.photoDataUrl = null;
+
 const note = unconfirmed
-? `Thank you, ${name}! Your memory has been submitted and will appear on the wall after review.
-(Note: server confirmation unavailable — your entry was sent.)`
-: `Thank you, ${name}! Your memory is now part of SSC 26's legacy. 🎓`;
+  ? `Thank you, ${name}! Your memory has been submitted and will appear on the wall after review.\n(Note: server confirmation unavailable — your entry was sent.)`
+  : `Thank you, ${name}! Your memory is now part of SSC 26's legacy. 🎓`;
+
 showFormStatus('ok', note);
 setTimeout(closeForm, 3500);
 }
 
+/* =====================================================
+FORM CACHE — restore from localStorage between visits
+===================================================== */
 function cacheForm(d) {
 try { localStorage.setItem('ssc26-form', JSON.stringify(d)); } catch {}
 }
 
 function loadFormCache() {
 try {
-const d = JSON.parse(localStorage.getItem('ssc26-form') || 'null');
-if (!d) return;
-const map = { name:'fName', roll:'fRoll', group:'fGroup', gender:'fGender', message:'fMsg' };
-Object.entries(map).forEach(([k,id]) => { if (d[k] && $(id)) $(id).value = d[k]; });
-if (d.social) {
-const sm = { email:'fEmail', facebook:'fFb', instagram:'fIg', other:'fOther' };
-Object.entries(sm).forEach(([k,id]) => { if (d.social[k] && $(id)) $(id).value = d.social[k]; });
-}
-if (d.profileImageUrl) {
-$('imgPrev').src = d.profileImageUrl;
-$('imgUp').classList.add('has-img');
-S.photoDataUrl = d.profileImageUrl;
-}
+  const d = JSON.parse(localStorage.getItem('ssc26-form') || 'null');
+  if (!d) return;
+  const map = { name:'fName', roll:'fRoll', group:'fGroup', gender:'fGender', message:'fMsg' };
+  Object.entries(map).forEach(([k,id]) => { if (d[k] && $(id)) $(id).value = d[k]; });
+  if (d.social) {
+    const sm = { email:'fEmail', facebook:'fFb', instagram:'fIg', other:'fOther' };
+    Object.entries(sm).forEach(([k,id]) => { if (d.social[k] && $(id)) $(id).value = d.social[k]; });
+  }
+  if (d.profileImageUrl) {
+    $('imgPrev').src = d.profileImageUrl;
+    $('imgUp').classList.add('has-img');
+    S.photoDataUrl = d.profileImageUrl;
+  }
+  /* Restore star rating visually */
+  if (d.rating) {
+    const r = document.querySelector(`input[name="rating"][value="${d.rating}"]`);
+    if (r) { r.checked = true; $('starVal').textContent = d.rating + ' / 5'; }
+  }
 } catch {}
 }
 
@@ -2310,19 +2316,21 @@ SCROLL REVEAL ANIMATION
 ===================================================== */
 function initReveal() {
 const obs = new IntersectionObserver(
-entries => entries.forEach(e => e.target.classList.toggle('in', e.isIntersecting)),
-{ threshold:0.1, rootMargin:'0px 0px -40px 0px' }
+  entries => entries.forEach(e => e.target.classList.toggle('in', e.isIntersecting)),
+  { threshold:0.1, rootMargin:'0px 0px -40px 0px' }
 );
 document.querySelectorAll('.reveal, .hl-item').forEach(el => obs.observe(el));
 }
 
 /* =====================================================
-INIT
+INIT — DOMContentLoaded
 ===================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+
+/* Intro overlay fade-out */
 setTimeout(() => {
-$('introOverlay').classList.add('done');
-setTimeout(() => { $('introOverlay').style.display='none'; }, 700);
+  $('introOverlay').classList.add('done');
+  setTimeout(() => { $('introOverlay').style.display = 'none'; }, 700);
 }, 1400);
 
 initNavbar();
@@ -2337,21 +2345,26 @@ loadAllAlbums();
 
 setTimeout(initComments, 100);
 
+/* Global keyboard shortcuts (when no modal open) */
 document.addEventListener('keydown', e => {
-if ($('lb').classList.contains('active') || $('vidModal').classList.contains('active')) return;
-if (e.key==='ArrowLeft')  heroGo((S.heroIdx - 1 + HERO_IMGS.length) % HERO_IMGS.length);
-if (e.key==='ArrowRight') heroGo((S.heroIdx + 1) % HERO_IMGS.length);
+  if ($('lb').classList.contains('active'))       return;
+  if ($('vidModal').classList.contains('active')) return;
+  if ($('fmOverlay').classList.contains('active'))return;
+  if (e.key === 'ArrowLeft')  heroGo((S.heroIdx - 1 + HERO_IMGS.length) % HERO_IMGS.length);
+  if (e.key === 'ArrowRight') heroGo((S.heroIdx + 1) % HERO_IMGS.length);
 });
 
+/* Debounced resize → re-equalize comment cards */
 let resizeT;
 window.addEventListener('resize', () => {
-clearTimeout(resizeT);
-resizeT = setTimeout(equalizeComCards, 250);
+  clearTimeout(resizeT);
+  resizeT = setTimeout(equalizeComCards, 250);
 });
 
+/* Footer form button (also wired here in case footer renders after initForm) */
 $('footerFormBtn').onclick = openForm;
 });
+
 </script>
 </body>
 </html>
-
