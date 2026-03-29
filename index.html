@@ -1704,7 +1704,7 @@ async function fetchCommentsFromSheet() {
 const gid = CFG.COMMENTS_GID;
 if (!gid) {
 console.warn('[Comments] No GID configured, using fallback data');
-return COMMENTS_FALLBACK_DATA;
+return COMMENTS_DATA; /* Return static fallback */
 }
 try {
 const url = `https://docs.google.com/spreadsheets/d/${CFG.SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
@@ -1712,10 +1712,8 @@ console.log('[Comments] Fetching from:', url);
 const resp = await fetch(url, { cache: 'no-cache' });
 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 const csvText = await resp.text();
-console.log('[Comments] Raw CSV length:', csvText.length);
 if (!csvText || csvText.trim().length < 10) throw new Error('Empty sheet');
 const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true, dynamicTyping: false });
-console.log('[Comments] Parsed rows:', parsed.data.length);
 const comments = [];
 parsed.data.forEach((row, idx) => {
 const name = (row['Name'] || '').trim();
@@ -1749,11 +1747,11 @@ special
 });
 });
 console.log('[Comments] Successfully loaded', comments.length, 'comments');
-return comments.length > 0 ? comments : COMMENTS_FALLBACK_DATA;
+return comments.length > 0 ? comments : COMMENTS_DATA; /* Fallback if empty */
 } catch (err) {
 console.error('[Comments Sheet] Error:', err.message);
 console.warn('[Comments] Using fallback data');
-return COMMENTS_FALLBACK_DATA;
+return COMMENTS_DATA; /* Always return fallback on error */
 }
 }
 async function loadAllAlbums() {
@@ -2342,10 +2340,13 @@ COMMENTS — FIXED: No progress bar inside cards, auto-collapse on scroll
 ===================================================== */
 async function initComments() {
 const track = $('comTrack');
-/* Fetch comments from sheet (with fallback) */
+/* Fetch comments from sheet first */
 const sheetComments = await fetchCommentsFromSheet();
+/* Use sheet data if available, otherwise fallback to static */
+const finalComments = sheetComments.length > 0 ? sheetComments : COMMENTS_DATA;
+console.log('[Comments] Rendering', finalComments.length, 'comments');
 /* Render comments */
-sheetComments.forEach(c => track.appendChild(buildComCard(c)));
+finalComments.forEach(c => track.appendChild(buildComCard(c)));
 /* Observer starts immediately */
 startCardObserver();
 /* Setup after fonts and images load */
@@ -2362,12 +2363,10 @@ img.addEventListener('load', res, { once: true });
 img.addEventListener('error', res, { once: true });
 }))).then(() => requestAnimationFrame(doSetup));
 setTimeout(doSetup, 1600);
-/* Button handlers */
 $('comPrev').onclick = () => { comStop(); comScrollTo(S.comIdx - 1); comStart(); };
 $('comNext').onclick = () => { comStop(); comScrollTo(S.comIdx + 1); comStart(); };
 $('comFirst').onclick = () => { comStop(); comScrollTo(0); comStart(); };
 $('comLast').onclick = () => { const cards = [...$('comTrack').querySelectorAll('.com-card')]; comStop(); comScrollTo(cards.length - 1); comStart(); };
-/* Track interactions */
 const t = $('comTrack');
 t.addEventListener('mouseenter', comStop);
 t.addEventListener('mouseleave', () => { if (!S.comExpandedCard) comStart(); });
@@ -2555,12 +2554,12 @@ else{formLoadAbort();showFormStatus('err',result.message||'Resubmit failed.');}
 };
 async function gasPost(payload){
 try{
-const resp=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+const resp=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
 let data={};try{data=await resp.json();}catch{}
 return{ok:resp.ok&&data.success!==false,...data};
 }catch(corsErr){console.warn('[GAS] CORS:',corsErr.message);}
 try{
-await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/text'},body:JSON.stringify(payload)});
+await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
 return{ok:true,unconfirmed:true};
 }catch(netErr){return{ok:false,message:'Network error. Please check your connection.'};}
 }
