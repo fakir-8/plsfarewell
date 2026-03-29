@@ -798,6 +798,10 @@ opacity:0; transform:translateX(36px);
   border: 1px solid rgba(66,133,244,.2); overflow: visible;
   transition: all 0.3s ease;
 }
+/* Expanded card must not clip its own growing content */
+.com-card.is-expanded {
+  overflow: visible;
+}
 
 
 .com-card.special .cc-av-wrap {
@@ -1619,6 +1623,7 @@ CONFIGURATION
 ===================================================== */
 const CFG = {
   SHEET_ID:           '1FI2WkDJ0dDDwV9KXYpWJmztQw0bw_THNY0XZ_pzuMps',
+  COMMENTS_GID:       '1472368977',           /* ← ⚠️ PASTE YOUR COMMENTS TAB GID HERE */
   /*
    * ALBUM_GIDS: Add or remove albums here.
    * Each key is an album ID. Set to a GID string to load from Google Sheets.
@@ -1661,7 +1666,7 @@ const ALBUMS_META = {
   5: { title:'New Album Title',      subtitle:'Album subtitle here',           type:'image' }, */
 };
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdct4qGyOgy8YT4dAfL5SYzbzQHEWCF_ooYaLRaNbyZllXmEafMSBRdPcTbZCc05yA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOMCZHzQvlIwANLZFTrZHeG_COi0rYvkbCF546ymMuJ2zcJKlQ7kqxKMHaHgZsnuMI/exec';
 
 /* Special identity modals */
 const SPECIAL_IDENTITIES = [
@@ -1711,7 +1716,9 @@ const HIGHLIGHT_STATIC = [
 /* =====================================================
 APP STATE
 ===================================================== */
+let _equalizedCardHeight = 0; /* stores last good equalized height */
 const S = {
+
   heroIdx:0, heroTimer:null, albumsData:[], hlItems:HIGHLIGHT_STATIC,
   selected:new Set(), selectedDlMap:{}, selectedFnMap:{},
   selectMode:false,
@@ -1865,25 +1872,79 @@ async function loadHighlightSheet(){
   }catch(err){console.warn('[Highlight sheet] using static fallback:',err.message);}
 }
 
-async function loadAllAlbums(){
-  load.show();
-  const albumIds=Object.keys(CFG.ALBUM_GIDS).map(Number).sort((a,b)=>a-b);
-  const[,albumResults]=await Promise.all([
-    loadHighlightSheet(),
-    Promise.all(albumIds.map(async id=>{
-      const gid=CFG.ALBUM_GIDS[id];
-      const meta=ALBUMS_META[id]||{title:`Album ${id}`,subtitle:'Photo Collection',type:'image'};
-      const fallbackImages=(ALBUMS_STATIC_FALLBACK[id]||{}).images||[];
-      const staticAlbum={id,title:meta.title,subtitle:meta.subtitle,count:fallbackImages.length,type:meta.type,images:fallbackImages};
-      if(gid===null||gid===undefined)return staticAlbum;
-      try{return await fetchAlbumSheet(id,gid);}
-      catch(err){console.error(`[Album ${id}] fallback:`,err.message);return staticAlbum;}
-    }))
-  ]);
-  S.albumsData=albumResults.filter(Boolean);
-  load.hide();
-  renderAlbums();
-  initHighlights();
+/* =====================================================
+COMMENTS SHEET LOADER
+===================================================== */
+async function fetchCommentsFromSheet() {
+const gid = CFG.COMMENTS_GID;
+if (!gid) {
+console.warn('[Comments] No GID configured, using empty array');
+return [];
+}
+try {
+const url = `https://docs.google.com/spreadsheets/d/${CFG.SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+const resp = await fetch(url, { cache: 'no-cache' });
+if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+const csvText = await resp.text();
+if (!csvText || csvText.trim().length < 10) throw new Error('Empty sheet');
+const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true, dynamicTyping: false });
+const comments = [];
+parsed.data.forEach((row, idx) => {
+const name = (row['Name'] || '').trim();
+const group = (row['Group'] || '').trim();
+const avatar = (row['Avatar'] || '').trim();
+const message = (row['Message'] || '').trim();
+const rating = parseInt(row['Rating'] || '5', 10);
+const facebook = (row['Facebook'] || '').trim();
+const instagram = (row['Instagram'] || '').trim();
+const linkedin = (row['LinkedIn'] || '').trim();
+const website = (row['Website'] || '').trim();
+const specialRaw = (row['Special'] || '').toString().toLowerCase().trim();
+const special = specialRaw === 'true' || specialRaw === 'yes' || specialRaw === '1';
+if (!name || !message) return; /* Skip invalid rows */
+const social = {};
+if (facebook) social.facebook = facebook;
+if (instagram) social.instagram = instagram;
+if (linkedin) social.linkedin = linkedin;
+if (website) social.website = website;
+comments.push({
+name,
+group,
+avatar: avatar || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(name)}`,
+message,
+rating,
+social,
+special
+});
+});
+return comments;
+} catch (err) {
+console.error('[Comments Sheet] Error:', err.message);
+return [];
+}
+}
+
+async function loadAllAlbums() {
+load.show();
+const albumIds = Object.keys(CFG.ALBUM_GIDS).map(Number).sort((a, b) => a - b);
+const [, albumResults] = await Promise.all([
+loadHighlightSheet(),
+Promise.all(albumIds.map(async id => {
+const gid = CFG.ALBUM_GIDS[id];
+const meta = ALBUMS_META[id] || { title: `Album ${id}`, subtitle: 'Photo Collection', type: 'image' };
+const fallbackImages = (ALBUMS_STATIC_FALLBACK[id] || {}).images || [];
+const staticAlbum = { id, title: meta.title, subtitle: meta.subtitle, count: fallbackImages.length, type: meta.type, images: fallbackImages };
+if (gid === null || gid === undefined) return staticAlbum;
+try { return await fetchAlbumSheet(id, gid); }
+catch (err) { console.error(`[Album ${id}] fallback:`, err.message); return staticAlbum; }
+}))
+]);
+S.albumsData = albumResults.filter(Boolean);
+load.hide();
+renderAlbums();
+initHighlights();
+/* Load comments after albums */
+initComments();
 }
 
 /* =====================================================
@@ -2469,38 +2530,63 @@ const COMMENTS_DATA=[
   {name:'আনান্যা রেড্ডি',group:'বাণিজ্য',avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=ananya&backgroundColor=1a365d',message:'Every corridor, every classroom holds a piece of my heart. আমার জীবনের সেরা দিনগুলো এখানেই কাটিয়েছি। I will miss it more than words can say.',rating:5,social:{linkedin:'https://linkedin.com'}}
 ];
 
-function initComments(){
-  const track=$('comTrack');
-  COMMENTS_DATA.forEach(c=>track.appendChild(buildComCard(c)));
-  const avatarImgs=[...track.querySelectorAll('.cc-av')];
-  Promise.all(avatarImgs.map(img=>new Promise(res=>{
-    if(img.complete&&img.naturalHeight>0){res();return;}
-    img.addEventListener('load',res,{once:true});img.addEventListener('error',res,{once:true});
-  }))).then(()=>{equalizeComCards();startCardObserver();setupSeeMoreToggles();});
-  setTimeout(()=>{equalizeComCards();startCardObserver();setupSeeMoreToggles();},1200);
-  $('comPrev').onclick=()=>{comStop();comScrollTo(S.comIdx-1);comStart();};
-  $('comNext').onclick=()=>{comStop();comScrollTo(S.comIdx+1);comStart();};
-  $('comFirst').onclick=()=>{comStop();comScrollTo(0);comStart();};
-  $('comLast').onclick=()=>{const cards=[...$('comTrack').querySelectorAll('.com-card')];comStop();comScrollTo(cards.length-1);comStart();};
-  const t=$('comTrack');
-  t.addEventListener('mouseenter',comStop);
-  t.addEventListener('mouseleave',()=>{if(!S.comExpandedCard)comStart();});
-  t.addEventListener('touchstart',comStop,{passive:true});
-  t.addEventListener('touchend',()=>{if(!S.comExpandedCard)setTimeout(comStart,2500);});
-  t.addEventListener('scroll',()=>{
-    const cards=[...t.querySelectorAll('.com-card')];if(!cards.length)return;
-    const tl=t.scrollLeft;let nearest=0,minDist=Infinity;
-    cards.forEach((c,i)=>{const d=Math.abs(c.offsetLeft-t.offsetLeft-tl);if(d<minDist){minDist=d;nearest=i;}});
-    S.comIdx=nearest;
-  },{passive:true});
-  new IntersectionObserver(([e])=>{if(e.isIntersecting&&!S.comExpandedCard)comStart();else comStop();},{threshold:.2}).observe($('comments'));
+async function initComments() {
+const track = $('comTrack');
+/* Fetch comments from sheet first */
+const sheetComments = await fetchCommentsFromSheet();
+/* Use sheet data if available, otherwise fallback to empty */
+COMMENTS_DATA = sheetComments.length > 0 ? sheetComments : [];
+/* Render comments */
+COMMENTS_DATA.forEach(c => track.appendChild(buildComCard(c)));
+/* Observer starts immediately — cards animate in without waiting for images */
+startCardObserver();
+/* The correct order: toggles measured FIRST, then heights equalized around them */
+const doSetup = () => {
+setupSeeMoreToggles();   /* 1: reveal toggle buttons that need showing */
+equalizeComCards();      /* 2: measure including toggle button heights */
+};
+/* Primary: wait for fonts so text metrics are final */
+(document.fonts ? document.fonts.ready : Promise.resolve())
+.then(() => requestAnimationFrame(() => requestAnimationFrame(doSetup)));
+/* Secondary: after avatar images paint (may change card height slightly) */
+const avatarImgs = [...track.querySelectorAll('.cc-av')];
+Promise.all(avatarImgs.map(img => new Promise(res => {
+if (img.complete && img.naturalHeight > 0) { res(); return; }
+img.addEventListener('load', res, { once: true });
+img.addEventListener('error', res, { once: true });
+}))).then(() => requestAnimationFrame(doSetup));
+/* Belt-and-suspenders: absolute fallback at 1.6 s */
+setTimeout(doSetup, 1600);
+$('comPrev').onclick = () => { comStop(); comScrollTo(S.comIdx - 1); comStart(); };
+$('comNext').onclick = () => { comStop(); comScrollTo(S.comIdx + 1); comStart(); };
+$('comFirst').onclick = () => { comStop(); comScrollTo(0); comStart(); };
+$('comLast').onclick = () => { const cards = [...$('comTrack').querySelectorAll('.com-card')]; comStop(); comScrollTo(cards.length - 1); comStart(); };
+const t = $('comTrack');
+t.addEventListener('mouseenter', comStop);
+t.addEventListener('mouseleave', () => { if (!S.comExpandedCard) comStart(); });
+t.addEventListener('touchstart', comStop, { passive: true });
+t.addEventListener('touchend', () => { if (!S.comExpandedCard) setTimeout(comStart, 2500); });
+t.addEventListener('scroll', () => {
+const cards = [...t.querySelectorAll('.com-card')]; if (!cards.length) return;
+const tl = t.scrollLeft; let nearest = 0, minDist = Infinity;
+cards.forEach((c, i) => { const d = Math.abs(c.offsetLeft - t.offsetLeft - tl); if (d < minDist) { minDist = d; nearest = i; } });
+S.comIdx = nearest;
+}, { passive: true });
+new IntersectionObserver(([e]) => { if (e.isIntersecting && !S.comExpandedCard) comStart(); else comStop(); }, { threshold: .2 }).observe($('comments'));
 }
 
 function setupSeeMoreToggles(){
   document.querySelectorAll('.com-card').forEach(card=>{
     const msgEl=card.querySelector('.cc-msg'),toggleEl=card.querySelector('.cc-toggle');
     if(!msgEl||!toggleEl)return;
-    if(msgEl.scrollHeight>msgEl.clientHeight+3)toggleEl.style.display='inline';
+    /* Reset first, then re-evaluate */
+    toggleEl.style.display='none';
+    /* Force any previous inline-height off for accurate measure */
+    const prev=msgEl.style.maxHeight;
+    msgEl.style.maxHeight='';
+    const sh=msgEl.scrollHeight;
+    msgEl.style.maxHeight=prev||'';
+    if(sh>msgEl.clientHeight+4)toggleEl.style.display='inline';
   });
 }
 
@@ -2549,10 +2635,11 @@ function buildComCard(c){
 function expandComCard(card,msgEl,toggleEl){
   msgEl=msgEl||card.querySelector('.cc-msg');
   toggleEl=toggleEl||card.querySelector('.cc-toggle');
-  // Release the JS-pinned fixed height so the card can grow with its content
-  card.dataset.savedHeight=card.style.height;
+  /* Tag the card so equalizeComCards skips it + CSS allows overflow */
+  card.classList.add('is-expanded');
   card.style.height='auto';
-  msgEl.classList.add('expanded');toggleEl.textContent='see less';
+  msgEl.classList.add('expanded');
+  toggleEl.textContent='see less';
   comStop();S.comExpandedCard=card;
   const mainBar=$('comBar');
   const computed=parseFloat(getComputedStyle(mainBar).width);
@@ -2571,17 +2658,28 @@ function collapseComCard(card){
   if(msgEl)msgEl.classList.remove('expanded');
   if(toggleEl)toggleEl.textContent='see more';
   if(progCard)progCard.remove();
-  // Restore the equalized fixed height
-  card.style.height=card.dataset.savedHeight||'';
-  delete card.dataset.savedHeight;
+  /* Remove expanded tag — CSS restores overflow:hidden */
+  card.classList.remove('is-expanded');
+  /* Restore from the reliable global store, never from stale dataset */
+  card.style.height=_equalizedCardHeight>0?_equalizedCardHeight+'px':'auto';
   if(S.comExpandedCard===card)S.comExpandedCard=null;
   comStart();
 }
 function equalizeComCards(){
-  const cards=[...document.querySelectorAll('.com-card')];if(!cards.length)return;
-  cards.forEach(c=>c.style.height='auto');
-  const maxH=Math.max(...cards.map(c=>c.scrollHeight));
-  if(maxH>50)cards.forEach(c=>c.style.height=maxH+'px');
+  /* Only measure cards that are NOT currently expanded */
+  const all=[...document.querySelectorAll('.com-card')];
+  if(!all.length)return;
+  const collapsed=all.filter(c=>!c.classList.contains('is-expanded'));
+  if(!collapsed.length)return;
+  /* Reset to natural height for accurate measurement */
+  collapsed.forEach(c=>{c.style.height='auto';});
+  /* Synchronous layout flush */
+  void collapsed[0].offsetHeight;
+  const maxH=Math.max(...collapsed.map(c=>c.scrollHeight));
+  if(maxH>80){
+    _equalizedCardHeight=maxH;
+    collapsed.forEach(c=>{c.style.height=maxH+'px';});
+  }
 }
 function startCardObserver(){
   if(S.comObs)S.comObs.disconnect();
@@ -2764,7 +2862,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 }
   setTimeout(()=>{$('introOverlay').classList.add('done');setTimeout(()=>{$('introOverlay').style.display='none';},700);},1400);
   initNavbar();initHero();initTypewriter();initHighlights();initLightbox();initVidModal();initForm();initReveal();
-  loadAllAlbums();setTimeout(initComments,100);
+  loadAllAlbums();
   document.addEventListener('keydown',e=>{
     if($('lb').classList.contains('active'))return;
     if($('vidModal').classList.contains('active'))return;
