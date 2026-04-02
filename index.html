@@ -59,6 +59,8 @@
 ]
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -773,6 +775,29 @@ transition: all 0.3s ease;
 
 @keyframes rotateAura { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 @keyframes flowRight { 0%{transform:translateX(-50%)} 100%{transform:translateX(0%)} }
+
+/* COM CARD SPECIAL BACKGROUND */
+/* Special card bottom-stacked background */
+.com-card-special-bg {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 38%;
+  background: 
+    radial-gradient(ellipse at 50% 100%, rgba(31,182,255,0.15) 0%, transparent 70%),
+    url('https://drive.google.com/thumbnail?id=1fkI4pfKXX0z7On0R7b7YSJNjSqPubWCJ&sz=w1000') center bottom / cover no-repeat;
+  pointer-events: none;
+  z-index: 0;
+  mask-image: linear-gradient(to top, rgba(0,0,0,0.85) 15%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.85) 15%, transparent 100%);
+  opacity: 0.8;
+  transition: opacity 0.3s ease, height 0.4s ease;
+}
+
+/* Subtle adjustment when card expands */
+.com-card.is-expanded .com-card-special-bg {
+  height: 48%;
+  opacity: 0.6;
+}
 
 
 .cc-sl { width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--glass); border:1px solid var(--gb); border-radius:8px; transition:all .2s ease; }
@@ -1779,14 +1804,38 @@ if(isDrive&&mobile){try{await blobDownload('https://corsproxy.io/?'+encodeURICom
 triggerAnchor(dlUrl,fn);
 }
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-async function downloadQueue(urls,filenames,onProgress,onDone){
-for(let i=0;i<urls.length;i++){
-if(!urls[i]){onProgress&&onProgress(i+1,urls.length);continue;}
-await downloadFile(urls[i],filenames&&filenames[i]);
-onProgress&&onProgress(i+1,urls.length);
-if(i<urls.length-1)await delay(900);
-}
-onDone&&onDone();
+async function downloadAsZip(urls, filenames, folderName, onProgress, onDone) {
+  const zip = new JSZip();
+  const imgFolder = zip.folder(folderName || 'SSC2026_Memories');
+  let completed = 0;
+  const total = urls.length;
+
+  for (let i = 0; i < total; i++) {
+    const url = urls[i];
+    const name = filenames[i] || `image-${i+1}.jpg`;
+    if (!url) { completed++; onProgress?.(completed, total); continue; }
+
+    try {
+      // Bypass Drive CORS restrictions safely
+      const isDrive = /drive\.google\.com/.test(url);
+      const fetchUrl = isDrive 
+        ? `https://corsproxy.io/?${encodeURIComponent(buildDriveDownloadUrl(url))}` 
+        : url;
+
+      const resp = await fetch(fetchUrl, { cache: 'no-store' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      imgFolder.file(name, blob);
+    } catch (e) {
+      console.warn(`[ZIP] Skipped ${name}:`, e.message);
+    }
+    completed++;
+    onProgress?.(completed, total);
+  }
+
+  const content = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+  saveAs(content, `${folderName || 'SSC2026_Memories'}.zip`);
+  onDone?.();
 }
 
 /* =====================================================
@@ -2250,18 +2299,24 @@ const names=album.images.map(function(i){return i.fileName||extractFileName(i.do
 $('dlTitle').textContent=album.title;
 $('dlBody').textContent=album.count+' item'+(album.count!==1?'s':'')+' ready to download:';
 $('dlProgWrap').style.display='none';$('dlZipBtn').style.display='flex';
-const dlAllBtn=$('dlAllBtn');
-dlAllBtn.querySelector('.dl-opt-label').textContent='Download All';dlAllBtn.disabled=false;
-$('dlModal').classList.add('active');
-$('dlZipBtn').onclick=function(){
-const zip=CFG.ALBUM_ZIPS[album.id];
-if(zip){downloadFile(zip,album.title.replace(/\s+/g,'-')+'.zip');$('dlModal').classList.remove('active');}
-else{showMsg('Not Available','ZIP download is not configured for this album.');}
-};
-dlAllBtn.onclick=function(){
-dlAllBtn.disabled=true;
-downloadQueue(urls,names,null,function(){dlAllBtn.disabled=false;$('dlModal').classList.remove('active');showMsg('Done!','All '+urls.length+' items downloaded.');});
-};
+dlAllBtn.onclick = function() {
+  dlAllBtn.disabled = true;
+  const urls = [...S.selected].map(u => S.selectedDlMap[u] || u);
+  const names = [...S.selected].map(u => S.selectedFnMap[u] || extractFileName(S.selectedDlMap[u] || u));
+  
+  downloadAsZip(urls, names, 'My_Selected_Photos',
+    (cur, tot) => {
+      const pct = Math.round(cur / tot * 100);
+      $('dlProg').style.width = pct + '%';
+      $('dlProgPct').textContent = pct + '%';
+    },
+    () => {
+      dlAllBtn.disabled = false;
+      $('dlModal').classList.remove('active');
+      showMsg('Done!', urls.length + ' images packaged & downloaded.');
+      exitSelectMode();
+    }
+  );
 }
 function openSelectionDlModal(){
 const urls=[...S.selected].map(function(u){return S.selectedDlMap[u]||u;});
@@ -2626,6 +2681,12 @@ function buildComCard(c){
 const card = document.createElement('div');
 card.className = 'com-card' + (c.special ? ' special' : '');
 card.setAttribute('role', 'listitem');
+if (c.special) {
+  const bgDiv = document.createElement('div');
+  bgDiv.className = 'com-card-special-bg';
+  bgDiv.setAttribute('aria-hidden', 'true');
+  card.appendChild(bgDiv);
+}
 const hasSocial = c.social && Object.keys(c.social).length > 0;
 const icons = {
 facebook: '<svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>',
