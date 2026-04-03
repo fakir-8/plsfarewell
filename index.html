@@ -25,9 +25,37 @@
 {
 "@context":"https://schema.org",
 "@graph":[
-{"@type":"Event","name":"SSC Farewell 2026 — Songshoptok 26","alternateName":"Songshoptok 26","description":"Official farewell celebration of SSC Batch 2026 at Police Line Secondary School, Jashore.","eventStatus":"https://schema.org/EventScheduled","organizer":{"@type":"EducationalOrganization","name":"Police Line Secondary School, Jashore","url":"https://plsfarewell2026.vercel.app"},"location":{"@type":"Place","name":"Police Line Secondary School","address":{"@type":"PostalAddress","addressLocality":"Jashore","addressCountry":"BD"}},"startDate":"2026"},
-{"@type":"EducationalOrganization","name":"Police Line Secondary School, Jashore","alternateName":"PLSJ","url":"https://plsfarewell2026.vercel.app","address":{"@type":"PostalAddress","addressLocality":"Jashore","addressCountry":"BD"}},
-{"@type":"WebSite","name":"SSC Batch 2026 — PLSJ Farewell","url":"https://plsfarewell2026.vercel.app","description":"SSC Batch 2026 farewell memorial page — Police Line Secondary School, Jashore"}
+{
+"@type":"Event",
+"name":"SSC Farewell 2026 — Songshoptok 26",
+"alternateName":"Songshoptok 26",
+"description":"Official farewell celebration of SSC Batch 2026 at Police Line Secondary School, Jashore.",
+"eventStatus":"https://schema.org/EventScheduled",
+"organizer":{
+"@type":"EducationalOrganization",
+"name":"Police Line Secondary School, Jashore",
+"url":"https://plsfarewell2026.vercel.app"
+},
+"location":{
+"@type":"Place",
+"name":"Police Line Secondary School",
+"address":{"@type":"PostalAddress","addressLocality":"Jashore","addressCountry":"BD"}
+},
+"startDate":"2026"
+},
+{
+"@type":"EducationalOrganization",
+"name":"Police Line Secondary School, Jashore",
+"alternateName":"PLSJ",
+"url":"https://plsfarewell2026.vercel.app",
+"address":{"@type":"PostalAddress","addressLocality":"Jashore","addressCountry":"BD"}
+},
+{
+"@type":"WebSite",
+"name":"SSC Batch 2026 — PLSJ Farewell",
+"url":"https://plsfarewell2026.vercel.app",
+"description":"SSC Batch 2026 farewell memorial page — Police Line Secondary School, Jashore"
+}
 ]
 }
 </script>
@@ -36,6 +64,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
 <style>
+
+/* ===================================================
+   CUSTOM HERO-TAG FONT
+   Place your font files in a /fonts/ folder next to index.html
+   =================================================== */
+@font-face {
+  font-family: 'HeroTagFont';
+  src: url('./fonts/herotag.ttf') format('ttf'),
+       url('./fonts/herotag.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 /* =====================================================
 DESIGN TOKENS
 ===================================================== */
@@ -141,7 +182,9 @@ transform:translateY(0); opacity:1;
 .nav-ham.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
 .nav-mob {
 position:fixed; top:59px; left:0; right:0;
-background:rgba(3,4,10,.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+/* REPLACE WITH: */
+background:rgba(3,4,10,.72);
+backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
 border-bottom:1px solid var(--gb);
 padding:16px 24px 24px; z-index:799;
 display:flex; flex-direction:column; gap:4px;
@@ -194,9 +237,9 @@ padding:24px; width:100%; max-width:600px;
 padding-top:80px;
 }
 .hero-logo { height:180px; width:auto; object-fit:contain; margin-bottom:24px; filter:drop-shadow(0 4px 20px rgba(0,0,0,.7)); animation:fadeUp .8s ease 1.5s both; }
-.hero-title { font-family:var(--f-head); font-size:clamp(2rem,6vw,4rem); font-weight:700; letter-spacing:-.01em; margin-bottom:10px; text-shadow:0 4px 24px rgba(0,0,0,.6); animation:fadeUp .8s ease 1.7s both; }
+.hero-title { font-family:'Playfair Display',Georgia,serif; font-size:clamp(2rem,6vw,4rem); font-weight:600; letter-spacing:-.01em; margin-bottom:10px; text-shadow:0 4px 24px rgba(0,0,0,.6); animation:fadeUp .8s ease 1.7s both; }
 .hero-tag {
-font-family: var(--f-bn), sans-serif;
+font-family: 'HeroTagFont', var(--f-bn), sans-serif;
 font-size: clamp(1rem,2.8vw,1.45rem);
 font-weight: 500;
 color: var(--text-2);
@@ -497,14 +540,7 @@ transition:all .2s ease;
 .lb-close-btn:hover { background:var(--error); border-color:var(--error); }
 .lb-close-btn svg { width:20px; height:20px; fill:var(--text-2); }
 .lb-close-btn:hover svg { fill:#fff; }
-.lb-zoom-hint {
-position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-background:rgba(0,0,0,.65); color:rgba(255,255,255,.7);
-font-size:.75rem; padding:6px 12px; border-radius:20px;
-pointer-events:none; opacity:0; transition:opacity .3s ease;
-z-index:20; white-space:nowrap;
-}
-.lb-zoom-hint.show { opacity:1; }
+
 .lb-view {
 flex:1; position:relative; display:flex; align-items:center; justify-content:center;
 overflow:hidden; cursor:default;
@@ -647,11 +683,13 @@ padding:28px; background:var(--panel);
 border:1px solid var(--gb); border-radius:var(--r-lg);
 position:relative; overflow:hidden;
 opacity:0; transform:translateX(36px);
+/* FIX: Do NOT set height here; equalization sets it via JS */
 }
 .com-card.visible { opacity:1; transform:translateX(0); transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1); }
 .com-card:hover { box-shadow:0 12px 40px rgba(31,182,255,.12); border-color:rgba(31,182,255,.18); }
 .com-card::before { content:'❝'; position:absolute; top:10px; right:16px; font-size:4rem; color:var(--accent); opacity:.07; font-family:Georgia,serif; line-height:1; pointer-events:none; }
-.com-card.is-expanded { overflow:visible; height:auto !important; }
+/* When expanded, allow natural height and don't clip content */
+.com-card.is-expanded { overflow:hidden; height:auto !important; }
 .cc-head { display:flex; align-items:center; gap:14px; flex-shrink:0; }
 .cc-av-wrap { position:relative; flex-shrink:0; }
 .cc-av { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--gb); }
@@ -719,6 +757,7 @@ background:rgba(60,64,67,.8); position:relative; overflow:hidden;
 content:''; position:absolute; top:0; left:0; width:200%; height:100%;
 background:linear-gradient(90deg, #00d4ff, #0055ff, #00d4ff);
 background-size:50% 100%; animation:flowRight 3s linear infinite;
+/* Added glow effect using box-shadow to match the gradient flow */
 box-shadow: 0 0 8px 1px rgba(0, 150, 255, 0.6);
 }
 .com-card.special .cc-name { margin-bottom:0 !important; }
@@ -731,32 +770,43 @@ letter-spacing:.08em; font-size:.72rem; text-transform:uppercase; margin-top:-4p
 font-family:'CardFont','Cormorant Garamond','Hind Siliguri',Georgia,serif;
 font-style:italic; font-size:1.05rem; color:var(--text-2); line-height:1.65;
 }
-/* Emerald green on social link hover */
-.com-card.special .sl a:hover,
-.com-card.special a:hover {
-color: #50C878 !important;
-text-shadow: 0 0 10px rgba(80, 200, 120, 0.5);
-transition: all 0.3s ease;
+
+/* Emerald green on special card social icon hover */
+.com-card.special .cc-sl:hover {
+  background: rgba(80,200,120,.12) !important;
+  border-color: rgba(80,200,120,.35) !important;
 }
+.com-card.special .cc-sl:hover svg {
+  fill: #50C878 !important;
+}
+
 @keyframes rotateAura { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 @keyframes flowRight { 0%{transform:translateX(-50%)} 100%{transform:translateX(0%)} }
 
-/* COM CARD SPECIAL BACKGROUND */
-.com-card-special-bg {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 38%;
-  /* Use a reliable direct image link instead of Drive thumbnail for CSS background */
-  background: 
-    radial-gradient(ellipse at 50% 100%, rgba(31,182,255,0.15) 0%, transparent 70%),
-    url('https://images.unsplash.com/photo-1557683316-973673baf926?w=600&q=80') center bottom / cover no-repeat;
+/* Special card — bottom stacked image */
+.cc-special-img {
+  display: block;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   pointer-events: none;
-  z-index: 1; /* CHANGED FROM 0 TO 1 */
-  mask-image: linear-gradient(to top, rgba(0,0,0,0.85) 15%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.85) 15%, transparent 100%);
-  opacity: 0.8;
-  transition: opacity 0.3s ease, height 0.4s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  flex-shrink: 0;
+  transition: height .45s ease, margin-top .45s ease;
+  margin-top: 0;
 }
+.com-card.is-expanded .cc-special-img {
+  height: 150px;
+  margin-top: 14px;
+}
+
 
 .cc-sl { width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--glass); border:1px solid var(--gb); border-radius:8px; transition:all .2s ease; }
 .cc-sl:hover { background:var(--accent); border-color:var(--accent); }
@@ -764,17 +814,19 @@ transition: all 0.3s ease;
 .cc-sl:hover svg { fill:var(--bg); }
 @media (max-width:580px) {
 .com-card { flex:0 0 85vw; padding:22px 18px; }
-.cc-msg { font-size:1.14rem; line-height:1.7; }
+.cc-msg { font-size:1.22rem; line-height:1.74; }
 .rating-section-box { padding:26px 20px 20px; }
-.rating-section-box .rating-label { font-size:1.14rem; }
-.rating-section-box .star-grp label { font-size:2.35rem; }
-.cc-stars { font-size:.65rem; padding:2px 7px; }
+.rating-section-box .rating-label { font-size:1.16rem; }
+.rating-section-box .star-grp label { font-size:2.6rem; }
+.cc-stars { font-size:.72rem; padding:2px 8px; }
+}
 }
 @media (max-width:380px) {
 .com-card { flex:0 0 92vw; padding:18px 14px; }
 .cc-msg { font-size:1.08rem; }
 .rating-section-box .star-grp label { font-size:2.25rem; }
 }
+
 /* =====================================================
 FORM TRIGGER
 ===================================================== */
@@ -876,21 +928,17 @@ display:flex; flex-direction:column; align-items:center; gap:14px;
 .form-status.err { display:block; background:rgba(239,68,68,.10);   border:1px solid rgba(239,68,68,.25);  color:var(--error);   }
 .form-status.warn{ display:block; background:rgba(245,158,11,.10);  border:1px solid rgba(245,158,11,.25); color:var(--warning); }
 
-@keyframes shakeError {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+/* Form error shake */
+@keyframes formShake {
+  0%,100%{ transform:translateX(0); }
+  10%,50%,90%{ transform:translateX(-7px); }
+  30%,70%{ transform:translateX(7px); }
 }
-.form-status.err {
-  display: block;
-  background: rgba(239,68,68,0.15);
-  border: 1px solid rgba(239,68,68,0.5);
-  color: var(--error);
-  margin-bottom: 15px; /* Space between error and button */
-  animation: shakeError 0.4s ease-in-out;
+.form-status.err.shake {
+  animation: formShake .5s ease;
 }
 /* =====================================================
-FOOTER
+FOOTER — FIX: Responsive text + reordered
 ===================================================== */
 .footer {
 padding:70px 24px 44px; border-top:1px solid var(--gb);
@@ -909,12 +957,14 @@ width:68px; height:68px; object-fit:contain; margin:0 auto 20px; opacity:.75;
 transition:transform .3s ease,opacity .3s ease;
 }
 .footer-logo:hover { transform:scale(1.12); opacity:1; }
+/* FIX: batch text now shown first (before school name) */
 .footer-batch {
 color:var(--muted); margin-bottom:10px; font-size:.92rem;
 }
 .footer-school-link { text-decoration:none; color:inherit; }
 .footer-school {
 font-family:var(--f-head);
+/* FIX: responsive font size using clamp */
 font-size:clamp(1.1rem, 3.8vw, 1.66rem);
 line-height:1.25;
 margin-bottom:28px;
@@ -923,6 +973,9 @@ word-break:break-word;
 padding:0 8px;
 }
 .footer-school-link:hover .footer-school { color:var(--accent); }
+/* FIX: footer-nav now only contains the Leave Message button */
+
+.footer-leave-btn:hover { transform:translateY(-2px); box-shadow:0 6px 26px var(--accent-glow); filter:brightness(1.08); }
 .footer-fb-wrap { margin-bottom:28px; display:flex; justify-content:center; }
 .footer-fb-group {
 display:inline-flex; align-items:center; gap:12px;
@@ -1058,6 +1111,9 @@ transition:transform .5s cubic-bezier(.17,.84,.44,1);
 #specialModal_12_girl .succ-tick-inner { background:linear-gradient(135deg,#9d174d,#ec4899); box-shadow:0 4px 18px rgba(236,72,153,.35); }
 #specialModal_12_girl .succ-tick-outer { background:rgba(236,72,153,.12); }
 /* =====================================================
+RESPONSIVE
+===================================================== */
+/* =====================================================
 MOBILE COMMENT NAV BUTTONS
 ===================================================== */
 .com-mob-nav {
@@ -1092,6 +1148,8 @@ width: 22px; height: 22px;
 fill: currentColor;
 pointer-events: none;
 }
+
+
 @media (max-width:600px) {
 html { font-size:14px; }
 section { padding:56px 16px; }
@@ -1108,9 +1166,11 @@ section { padding:56px 16px; }
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
+<!-- Intro -->
 <div id="introOverlay" aria-hidden="true">
 <img src="https://drive.google.com/thumbnail?id=1fkI4pfKXX0z7On0R7b7YSJNjSqPubWCJ&sz=w1000" alt="Police Line Secondary School Jashore logo" class="intro-logo">
 </div>
+<!-- Navbar -->
 <nav id="navbar" role="navigation" aria-label="Main navigation">
 <a href="#" class="nav-brand" aria-label="Police Line Secondary School, Jashore — SSC 2026">
 <img src="https://drive.google.com/thumbnail?id=1fkI4pfKXX0z7On0R7b7YSJNjSqPubWCJ&sz=w1000" alt="PLSJ School Logo" class="nav-logo">
@@ -1131,31 +1191,35 @@ section { padding:56px 16px; }
 <a href="#comments"   class="nav-mob-link">Student Wall</a>
 <button class="nav-mob-link nav-mob-cta" id="navMobFormBtn">✦ Leave a Message</button>
 </nav>
+<!-- Hero -->
 <header class="hero" id="heroSec" role="banner" aria-label="SSC Batch 2026 — Police Line Secondary School, Jashore">
 <div class="hero-ss" id="heroSS" aria-hidden="true"></div>
 <div class="hero-dots" id="heroDots" role="tablist" aria-label="Slideshow navigation"></div>
 <div class="hero-body">
 <img src="https://drive.google.com/thumbnail?id=1utQ252tAraRy-F9SYwcjXMbw48ovgboP&sz=w1000" alt="SSC Batch 2026 Police Line Secondary School Jashore farewell logo" class="hero-logo">
 <h1 class="hero-title">SSC Batch 2026</h1>
-<p class="hero-tag" id="heroTag" aria-label="An Unforgettable Journey of Friendship and Excellence"></p>
+<p class="hero-tag" id="heroTag" aria-label="বিদায় নয়, হৃদয়ে চিরকাল..."></p>
 </div>
 <div class="hero-scroll-hint" aria-hidden="true">
 <span></span><span></span>
 </div>
 </header>
 <main id="main">
+<!-- Highlights -->
 <section id="highlights" aria-labelledby="hl-title">
 <div class="eyebrow reveal"><div class="eyebrow-line"></div><span class="eyebrow-txt">Gallery</span><div class="eyebrow-line"></div></div>
 <h2 class="sec-title reveal" id="hl-title">Highlight Moments</h2>
 <p class="sec-sub reveal">Capturing the best memories of our journey together</p>
 <div class="hl-grid" id="hlGrid" role="list" aria-label="Highlight photo gallery"></div>
 </section>
+<!-- Albums -->
 <section id="albums" aria-labelledby="alb-title">
 <div class="eyebrow reveal"><div class="eyebrow-line"></div><span class="eyebrow-txt">Categories</span><div class="eyebrow-line"></div></div>
 <h2 class="sec-title reveal" id="alb-title">Photo Albums</h2>
 <p class="sec-sub reveal">Browse our memories by category</p>
 <div class="albums-wrap" id="albumsWrap" role="list" aria-label="Photo album collection"></div>
 </section>
+<!-- Bulk actions -->
 <div class="bulk-section">
 <div class="bulk-wrap reveal">
 <button class="bulk-box" id="openDlAllBtn" aria-label="Download all albums">
@@ -1177,6 +1241,7 @@ section { padding:56px 16px; }
 </a>
 </div>
 </div>
+<!-- Student Wall -->
 <section id="comments" aria-labelledby="com-title">
 <div class="eyebrow reveal"><div class="eyebrow-line"></div><span class="eyebrow-txt">Student Wall</span><div class="eyebrow-line"></div></div>
 <h2 class="sec-title reveal" id="com-title">Voices of the Batch</h2>
@@ -1200,6 +1265,7 @@ Last
 <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
 </button>
 </div>
+<!-- Mobile-only navigation buttons -->
 <div class="com-mob-nav" id="comMobNav" aria-label="Comment navigation" aria-hidden="true">
 <button class="com-mob-arrow" id="comMobPrev" aria-label="Previous comment">
 <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -1212,6 +1278,7 @@ Last
 <div class="com-prog"><div class="com-bar" id="comBar"></div></div>
 </div>
 </section>
+<!-- Form Trigger -->
 <div class="form-trig">
 <button class="form-trig-btn" id="openFormBtn" aria-label="Leave your memory and message">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
@@ -1219,6 +1286,8 @@ Leave Your Message &amp; Memory
 </button>
 </div>
 </main>
+
+<!-- Footer — FIX: Batch before school name, section links removed -->
 <footer class="footer" role="contentinfo">
 <div class="footer-geo" aria-hidden="true">
 <div class="fg-orb-1"></div><div class="fg-orb-2"></div>
@@ -1226,10 +1295,13 @@ Leave Your Message &amp; Memory
 <div class="fg-ring-2"></div><div class="fg-tri"></div>
 </div>
 <img src="https://image.qwenlm.ai/public_source/81734978-1c69-4d1d-b77f-e902a3c47564/1bd13492a-d829-4845-9c26-21b4f4364013.png" alt="Police Line Secondary School Jashore crest" class="footer-logo reveal">
+<!-- FIX: Batch line BEFORE school name -->
 <p class="footer-batch reveal">An Unforgettable Journey — SSC Batch 2026</p>
 <a href="https://plsj.edu.bd" target="_blank" rel="noopener noreferrer" class="footer-school-link reveal" aria-label="Visit Police Line Secondary School, Jashore official website">
 <p class="footer-school">Police Line Secondary School, Jashore</p>
 </a>
+<!-- FIX: Only Leave Message button, section links removed -->
+
 <div class="footer-fb-wrap reveal">
 <a href="#" class="footer-fb-group" aria-label="Join our SSC 2026 Facebook Group">
 <div class="footer-fb-circle">
@@ -1241,6 +1313,10 @@ Leave Your Message &amp; Memory
 <div class="footer-divider reveal"></div>
 <p class="footer-copy">© 2026 SSC Batch — Police Line Secondary School, Jashore. All Memories Preserved.</p>
 </footer>
+
+<!-- =====================================================
+LIGHTBOX
+===================================================== -->
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Media viewer">
 <div class="lb-bar">
 <span class="lb-count" id="lbCount">1 / 1</span>
@@ -1274,11 +1350,12 @@ Leave Your Message &amp; Memory
 <button class="lb-vid-btn" id="lbPlayBtn" aria-label="Play/Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
 <button class="lb-vid-btn" id="lbMuteBtn" aria-label="Mute/Unmute"><svg viewBox="0 0 24 24"><path id="soundIco" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 3.04-1.73 5.68-4.25 7V5c2.52 1.32 4.25 3.95 4.25 7zm-13.5 3H9v2H7l-2.5 2.5v-13L7 7h2v2H5.5v6z"/></svg></button>
 </div>
-<div class="lb-zoom-hint" id="lbZoomHint">Double-click to zoom</div>
+
 <button class="lb-nav lb-next" id="lbNext" aria-label="Next image"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
 </div>
 <div class="lb-strip" id="lbStrip"></div>
 </div>
+<!-- Video Modal -->
 <div class="vid-overlay" id="vidModal" role="dialog" aria-modal="true" aria-labelledby="vidTitle">
 <div class="vid-modal">
 <div class="vid-hdr">
@@ -1292,6 +1369,7 @@ Leave Your Message &amp; Memory
 </div>
 </div>
 </div>
+<!-- Form Modal -->
 <div class="fm-overlay" id="fmOverlay" role="dialog" aria-modal="true" aria-labelledby="fmTitle">
 <div class="fm-modal">
 <div class="fm-hdr">
@@ -1358,7 +1436,7 @@ Leave Your Message &amp; Memory
 <input type="url" id="fIg" class="fi" placeholder="Instagram URL">
 </div>
 <div class="soc-wrap">
-<svg class="soc-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.523 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+<svg class="soc-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
 <input type="url" id="fOther" class="fi" placeholder="LinkedIn / Other">
 </div>
 </div>
@@ -1394,6 +1472,7 @@ Leave Your Message &amp; Memory
 </form>
 </div>
 </div>
+<!-- Generic Message Modal -->
 <div class="m-overlay" id="msgModal" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
 <div class="m-box">
 <div class="m-head"><h3 class="m-title" id="msgTitle">Notice</h3><button class="m-x" id="msgX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>
@@ -1401,11 +1480,13 @@ Leave Your Message &amp; Memory
 <div class="m-acts"><button class="btn btn-p" id="msgOk">OK</button></div>
 </div>
 </div>
+<!-- Download Modal -->
 <div class="m-overlay" id="dlModal" role="dialog" aria-modal="true" aria-labelledby="dlTitle">
 <div class="m-box dl-box">
 <div class="m-head"><h3 class="m-title" id="dlTitle">Download</h3><button class="m-x" id="dlX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>
 <p class="m-body" id="dlBody" style="margin-bottom:16px;">Choose how to download your photos:</p>
 <div class="dl-opts">
+<button class="dl-opt" id="dlZipBtn"><span class="dl-opt-icon">📦</span><span class="dl-opt-label">ZIP Archive</span><span class="dl-opt-sub">Bundle in one file</span></button>
 <button class="dl-opt dl-opt-primary" id="dlAllBtn"><span class="dl-opt-icon">📥</span><span class="dl-opt-label">Download All</span><span class="dl-opt-sub">One by one</span></button>
 </div>
 <div class="dl-prog-wrap" id="dlProgWrap" style="display:none;">
@@ -1415,6 +1496,7 @@ Leave Your Message &amp; Memory
 <div class="m-acts" style="margin-top:8px;"><button class="btn btn-s" id="dlCancel">Cancel</button></div>
 </div>
 </div>
+<!-- Download All Albums Modal -->
 <div class="m-overlay" id="dlAllModal" role="dialog" aria-modal="true">
 <div class="m-box dl-box">
 <div class="m-head">
@@ -1423,6 +1505,7 @@ Leave Your Message &amp; Memory
 </div>
 <p class="m-body">Choose your download method for all albums:</p>
 <div class="dl-opts">
+<button class="dl-opt" id="dlAllZipBtn"><span class="dl-opt-icon">📦</span><span class="dl-opt-label">Download as ZIP</span><span class="dl-opt-sub">All albums in one file</span></button>
 <button class="dl-opt dl-opt-primary" id="dlAllOneByOneBtn"><span class="dl-opt-icon">📥</span><span class="dl-opt-label">One by One</span><span class="dl-opt-sub">Auto-downloads all images</span></button>
 </div>
 <div class="dl-prog-wrap" id="dlAllProgWrap" style="display:none;">
@@ -1432,6 +1515,7 @@ Leave Your Message &amp; Memory
 <div class="m-acts"><button class="btn btn-s" id="dlAllCancel">Cancel</button></div>
 </div>
 </div>
+<!-- Duplicate Modal -->
 <div class="m-overlay" id="dupModal" role="dialog" aria-modal="true" aria-labelledby="dupTitle">
 <div class="m-box">
 <div class="m-head"><h3 class="m-title" id="dupTitle">⚠ Already Submitted</h3><button class="m-x" id="dupX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>
@@ -1444,6 +1528,7 @@ Leave Your Message &amp; Memory
 </div>
 </div>
 </div>
+<!-- Success Modal -->
 <div class="succ-overlay" id="successOverlay" role="dialog" aria-modal="true" aria-labelledby="succTitle">
 <div class="succ-card">
 <div class="succ-geo succ-orb"></div>
@@ -1456,6 +1541,7 @@ Leave Your Message &amp; Memory
 </div>
 </div>
 </div>
+<!-- Special Modal: Roll 12 Boy -->
 <div id="specialModal_12_boy" class="succ-overlay" role="dialog" aria-modal="true">
 <div class="succ-card">
 <div class="succ-geo succ-orb" style="background:radial-gradient(circle,rgba(255,160,0,.1),transparent 65%)"></div>
@@ -1472,6 +1558,7 @@ Leave Your Message &amp; Memory
 </div>
 </div>
 </div>
+<!-- Special Modal: Roll 12 Girl -->
 <div id="specialModal_12_girl" class="succ-overlay" role="dialog" aria-modal="true">
 <div class="succ-card">
 <div class="succ-geo succ-orb" style="background:radial-gradient(circle,rgba(236,72,153,.1),transparent 65%)"></div>
@@ -1488,12 +1575,14 @@ Leave Your Message &amp; Memory
 </div>
 </div>
 </div>
+<!-- Selection Badge -->
 <div id="selBadge" role="status" aria-live="polite" aria-label="Selection status">
 <span class="sel-n" id="selN">0</span>
 <span class="sel-lbl">selected</span>
 <button class="sel-act sel-dl" id="selDlBtn" aria-label="Download selected">⬇ Save</button>
 <button class="sel-act sel-cl" id="selClrBtn" aria-label="Clear selection">✕</button>
 </div>
+<!-- Loading Overlay -->
 <div id="loadOver" aria-live="polite" aria-label="Loading">
 <div class="ld-wrap">
 <svg class="ld-svg" viewBox="0 0 80 80" width="80" height="80">
@@ -1503,37 +1592,86 @@ Leave Your Message &amp; Memory
 <span class="ld-pct" id="ldPct"></span>
 </div>
 </div>
+
 <script>
 'use strict';
+/* =====================================================
+SCROLL POSITION RESTORATION — Robust across all sections
+===================================================== */
 (function(){
 const KEY = 'ssc26-scroll-pos';
+// Save on every scroll (throttled) for maximum accuracy
 let _scrollSaveTimer = null;
-function savePos(){ sessionStorage.setItem(KEY, Math.round(window.scrollY).toString()); }
-window.addEventListener('scroll', function(){ clearTimeout(_scrollSaveTimer); _scrollSaveTimer = setTimeout(savePos, 80); }, { passive: true });
-window.addEventListener('beforeunload', savePos); window.addEventListener('pagehide', savePos);
+function savePos(){
+sessionStorage.setItem(KEY, Math.round(window.scrollY).toString());
+}
+window.addEventListener('scroll', function(){
+clearTimeout(_scrollSaveTimer);
+_scrollSaveTimer = setTimeout(savePos, 80);
+}, { passive: true });
+// Also save on beforeunload/pagehide for reliability
+window.addEventListener('beforeunload', savePos);
+window.addEventListener('pagehide', savePos);
+// Restore after page load — wait for layout to settle
 function restorePos(){
 const pos = sessionStorage.getItem(KEY);
-if(pos && pos !== '0'){ const y = parseInt(pos, 10); window.scrollTo(0, y); setTimeout(function(){ window.scrollTo(0, y); }, 350); setTimeout(function(){ if(Math.abs(window.scrollY - y) > 50) window.scrollTo(0, y); sessionStorage.removeItem(KEY); }, 900); }
+if(pos && pos !== '0'){
+const y = parseInt(pos, 10);
+// Instant scroll first, then smooth verify
+window.scrollTo(0, y);
+// Second attempt after images/fonts settle
+setTimeout(function(){
+window.scrollTo(0, y);
+}, 350);
+// Third attempt as final safety net
+setTimeout(function(){
+if(Math.abs(window.scrollY - y) > 50){
+window.scrollTo(0, y);
 }
-if(document.readyState === 'complete'){ restorePos(); } else { window.addEventListener('load', restorePos); }
+sessionStorage.removeItem(KEY);
+}, 900);
+}
+}
+if(document.readyState === 'complete'){
+restorePos();
+} else {
+window.addEventListener('load', restorePos);
+}
 })();
+
+/* =====================================================
+CONFIGURATION
+===================================================== */
 const CFG = {
-SHEET_ID: '1FI2WkDJ0dDDwV9KXYpWJmztQw0bw_THNY0Z_pzuMps',
-COMMENTS_GID: '1472368977',
-ALBUM_GIDS: { 1: '979443307', 2: null, 3: null, 4: null },
-ALBUM_ZIPS: { 1:null, 2:null, 3:null, 4:null },
+SHEET_ID:           '1FI2WkDJ0dDDwV9KXYpWJmztQw0bw_THNY0XZ_pzuMps',
+COMMENTS_GID:       '1472368977',
+ALBUM_GIDS:  {
+1: '979443307',
+2: null,
+3: null,
+4: null
+},
+ALBUM_ZIPS:  { 1:null, 2:null, 3:null, 4:null },
 HIGHLIGHT_GID: '979443307',
 ALL_ALBUMS_GDRIVE_URL: 'https://drive.google.com',
-ALL_ALBUMS_ZIP_URL: null
+ALL_ALBUMS_ZIP_URL:    null
 };
 const ALBUMS_META = {
-1: { title:'Campus Life', subtitle:'Daily moments on campus', type:'image' },
-2: { title:'Sports Day 2025', subtitle:'Athletic achievements', type:'image' },
-3: { title:'Farewell Ceremony', subtitle:'Official documentary', type:'video' },
-4: { title:'Cultural Events', subtitle:'Performances & celebrations', type:'image' }
+1: { title:'Campus Life',         subtitle:'Daily moments on campus',       type:'image' },
+2: { title:'Sports Day 2025',     subtitle:'Athletic achievements',         type:'image' },
+3: { title:'Farewell Ceremony',   subtitle:'Official documentary',          type:'video' },
+4: { title:'Cultural Events',     subtitle:'Performances & celebrations',   type:'image' },
 };
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOMCZHzQvlIwANLZFTrZHeG_COi0rYvkbCF546ymMuJ2zcJKlQ7kqxKMHaHgZsnuMI/exec';
-const SPECIAL_IDENTITIES = [ { roll: '12', gender: 'boy' }, { roll: '12', gender: 'girl' } ];
+const SPECIAL_IDENTITIES = [
+{ roll: '12', gender: 'boy'  },
+{ roll: '12', gender: 'girl' }
+];
+
+/* =====================================================
+STATIC FALLBACK DATA — Comments
+FIX: Variable name standardised to COMMENTS_FALLBACK_DATA
+===================================================== */
 const COMMENTS_FALLBACK_DATA = [
 {name:'Aditya Sharma',group:'Science',avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=aditya&backgroundColor=1a365d',message:'These four years have been the best of my life. The friendships, the lessons, the laughter — I will carry all of it forever. Thank you to every person who made this journey beautiful.',rating:5,social:{facebook:'https://facebook.com',instagram:'https://instagram.com'}},
 {name:'Mubtasim Munim',group:'Science',avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=priya&backgroundColor=1a365d',message:'Grateful for every moment and every person who made this unforgettable. I leave carrying a piece of this place in my heart forever. The late nights, the shared dreams, the silent support from friends who became family — all of it becomes a part of who we are.',rating:5,social:{instagram:'https://instagram.com',website:'https://instagram.com'},special:true},
@@ -1542,15 +1680,29 @@ const COMMENTS_FALLBACK_DATA = [
 {name:'Arjun Singh',group:'Arts',avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=arjun&backgroundColor=0e4484',message:'From the very first day to this farewell — what a ride! Wishing everyone in SSC 26 a bright, bold, and successful future. This batch is truly special and I know each of us will go on to do incredible things.',rating:5,social:{instagram:'https://instagram.com',facebook:'https://facebook.com'}},
 {name:'আনান্যা রেড্ডি',group:'বাণিজ্য',avatar:'https://api.dicebear.com/7.x/thumbs/svg?seed=ananya&backgroundColor=1a365d',message:'Every corridor, every classroom holds a piece of my heart. আমার জীবনের সেরা দিনগুলো এখানেই কাটিয়েছি। I will miss it more than words can say.',rating:5,social:{linkedin:'https://linkedin.com'}}
 ];
+
 const ALBUMS_STATIC_FALLBACK = {
-1: { images:[ {preview:'https://picsum.photos/seed/a1p/800/600',download:'https://picsum.photos/seed/a1/1920/1080',fileName:'campus-01.jpg',alt:'Students in campus grounds'}, {preview:'https://picsum.photos/seed/a2p/800/800',download:'https://picsum.photos/seed/a2/1920/1920',fileName:'campus-02.jpg',alt:'Classroom activities'}, {preview:'https://picsum.photos/seed/a3p/800/1100',download:'https://picsum.photos/seed/a3/1920/2640',fileName:'campus-03.jpg',alt:'School corridors'} ]},
-2: { images:[ {preview:'https://picsum.photos/seed/b1p/800/600',download:'https://picsum.photos/seed/b1/1920/1080',fileName:'sports-01.jpg',alt:'Sports day athletics'}, {preview:'https://picsum.photos/seed/b2p/800/1000',download:'https://picsum.photos/seed/b2/1920/2400',fileName:'sports-02.jpg',alt:'Team sports competition'} ]},
-3: { images:[ {url:'https://www.w3schools.com/html/mov_bbb.mp4',poster:'https://picsum.photos/seed/v1/800/600',download:'https://www.w3schools.com/html/mov_bbb.mp4',fileName:'farewell.mp4',alt:'Farewell ceremony video'} ]},
-4: { images:[ {preview:'https://picsum.photos/seed/c1p/800/900',download:'https://picsum.photos/seed/c1/1920/2160',fileName:'culture-01.jpg',alt:'Cultural performance'}, {preview:'https://picsum.photos/seed/c2p/800/500',download:'https://picsum.photos/seed/c2/1920/1200',fileName:'culture-02.jpg',alt:'Stage celebration'} ]}
+1: { images:[
+{preview:'https://picsum.photos/seed/a1p/800/600',download:'https://picsum.photos/seed/a1/1920/1080',fileName:'campus-01.jpg',alt:'Students in campus grounds'},
+{preview:'https://picsum.photos/seed/a2p/800/800',download:'https://picsum.photos/seed/a2/1920/1920',fileName:'campus-02.jpg',alt:'Classroom activities'},
+{preview:'https://picsum.photos/seed/a3p/800/1100',download:'https://picsum.photos/seed/a3/1920/2640',fileName:'campus-03.jpg',alt:'School corridors'}
+]},
+2: { images:[
+{preview:'https://picsum.photos/seed/b1p/800/600',download:'https://picsum.photos/seed/b1/1920/1080',fileName:'sports-01.jpg',alt:'Sports day athletics'},
+{preview:'https://picsum.photos/seed/b2p/800/1000',download:'https://picsum.photos/seed/b2/1920/2400',fileName:'sports-02.jpg',alt:'Team sports competition'}
+]},
+3: { images:[
+{url:'https://www.w3schools.com/html/mov_bbb.mp4',poster:'https://picsum.photos/seed/v1/800/600',download:'https://www.w3schools.com/html/mov_bbb.mp4',fileName:'farewell.mp4',alt:'Farewell ceremony video'}
+]},
+4: { images:[
+{preview:'https://picsum.photos/seed/c1p/800/900',download:'https://picsum.photos/seed/c1/1920/2160',fileName:'culture-01.jpg',alt:'Cultural performance'},
+{preview:'https://picsum.photos/seed/c2p/800/500',download:'https://picsum.photos/seed/c2/1920/1200',fileName:'culture-02.jpg',alt:'Stage celebration'}
+]}
 };
+
 const HIGHLIGHT_STATIC = [
 {preview:'https://picsum.photos/seed/hl1/600/800', download:'https://picsum.photos/seed/hl1/1200/1600', fileName:'highlight-01.jpg', alt:'Graduation day ceremony', cap:'Graduation Day'},
-{preview:'https://picsum.photos/seed/hl2/700/470', download:'https://picsum.photos/seed/hl2/1400/940', fileName:'highlight-02.jpg', alt:'Friends posing together', cap:'Friends Forever'},
+{preview:'https://picsum.photos/seed/hl2/700/470', download:'https://picsum.photos/seed/hl2/1400/940',  fileName:'highlight-02.jpg', alt:'Friends posing together', cap:'Friends Forever'},
 {preview:'https://picsum.photos/seed/hl3/600/600', download:'https://picsum.photos/seed/hl3/1200/1200', fileName:'highlight-03.jpg', alt:'Last day school bell', cap:'Last Bell'},
 {preview:'https://picsum.photos/seed/hl4/500/750', download:'https://picsum.photos/seed/hl4/1000/1500', fileName:'highlight-04.jpg', alt:'Campus memories', cap:'Campus Memories'},
 {preview:'https://picsum.photos/seed/hl5/800/540', download:'https://picsum.photos/seed/hl5/1600/1080', fileName:'highlight-05.jpg', alt:'Students studying together', cap:'Study Sessions'},
@@ -1558,66 +1710,146 @@ const HIGHLIGHT_STATIC = [
 {preview:'https://picsum.photos/seed/hl7/700/500', download:'https://picsum.photos/seed/hl7/1400/1000', fileName:'highlight-07.jpg', alt:'Sports day highlights', cap:'Sports Day'},
 {preview:'https://picsum.photos/seed/hl8/600/800', download:'https://picsum.photos/seed/hl8/1200/1600', fileName:'highlight-08.jpg', alt:'Annual function stage', cap:'Annual Function'},
 {preview:'https://picsum.photos/seed/hl9/800/600', download:'https://picsum.photos/seed/hl9/1600/1200', fileName:'highlight-09.jpg', alt:'Farewell night event', cap:'Farewell Night'},
-{preview:'https://picsum.photos/seed/hl10/560/740',download:'https://picsum.photos/seed/hl10/1120/1480',fileName:'highlight-10.jpg', alt:'Classroom moments', cap:'Classroom Moments'},
-{preview:'https://picsum.photos/seed/hl11/700/460',download:'https://picsum.photos/seed/hl11/1400/920', fileName:'highlight-11.jpg', alt:'Teacher appreciation', cap:'Teacher Thanks'},
-{preview:'https://picsum.photos/seed/hl12/600/620',download:'https://picsum.photos/seed/hl12/1200/1240',fileName:'highlight-12.jpg', alt:'Final examination hall', cap:'Final Exams'}
+{preview:'https://picsum.photos/seed/hl10/560/740',download:'https://picsum.photos/seed/hl10/1120/1480',fileName:'highlight-10.jpg', alt:'Classroom moments',     cap:'Classroom Moments'},
+{preview:'https://picsum.photos/seed/hl11/700/460',download:'https://picsum.photos/seed/hl11/1400/920', fileName:'highlight-11.jpg', alt:'Teacher appreciation',   cap:'Teacher Thanks'},
+{preview:'https://picsum.photos/seed/hl12/600/620',download:'https://picsum.photos/seed/hl12/1200/1240',fileName:'highlight-12.jpg', alt:'Final examination hall',  cap:'Final Exams'}
 ];
+
+/* =====================================================
+APP STATE
+===================================================== */
 let _equalizedCardHeight = 0;
 const S = {
 heroIdx:0, heroTimer:null, albumsData:[], hlItems:HIGHLIGHT_STATIC,
 selected:new Set(), selectedDlMap:{}, selectedFnMap:{},
-selectMode:false, curAlbumId:null, lbItems:[], lbIdx:0,
+selectMode:false,
+curAlbumId:null, lbItems:[], lbIdx:0,
 lbType:'image', lbZoomed:false, vidPlaying:false, vidMuted:true,
 photoDataUrl:null, comIdx:0, comTimer:null, comObs:null,
-lbPanX:0, lbPanY:0, lbScale:1, lbDragging:false, lbDragStartX:0, lbDragStartY:0, lbPanStartX:0, lbPanStartY:0, lbLastTap:0, comExpandedCard:null
+lbPanX:0, lbPanY:0, lbScale:1,
+lbDragging:false, lbDragStartX:0, lbDragStartY:0, lbPanStartX:0, lbPanStartY:0,
+lbLastTap:0,
+comExpandedCard:null
 };
+
+/* =====================================================
+UTILITIES
+===================================================== */
 const $  = id => document.getElementById(id);
 const qs = s  => document.querySelector(s);
+
 function showMsg(title,body){ $('msgTitle').textContent=title; $('msgBody').textContent=body; $('msgModal').classList.add('active'); }
 $('msgOk').onclick=()=>$('msgModal').classList.remove('active');
 $('msgX').onclick =()=>$('msgModal').classList.remove('active');
-document.querySelectorAll('.m-overlay').forEach(el=> el.addEventListener('click',e=>{ if(e.target===el)el.classList.remove('active'); }));
-document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO') e.preventDefault(); });
+document.querySelectorAll('.m-overlay').forEach(el=>
+el.addEventListener('click',e=>{ if(e.target===el)el.classList.remove('active'); })
+);
+document.addEventListener('contextmenu', e => {
+if (e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO') e.preventDefault();
+});
+
+/* =====================================================
+SVG CIRCULAR PROGRESS
+===================================================== */
 const LD_CIRC = 2*Math.PI*36;
 let _ldTimer=null, _ldVal=0;
 function setLoadProgress(pct){ const p=Math.min(Math.max(pct,0),100); _ldVal=p; const off=LD_CIRC-(p/100)*LD_CIRC; $('ldBar').style.strokeDashoffset=off; $('ldPct').textContent=p>0?Math.round(p)+'%':''; }
-function progressTo(target,speed,onDone){ speed = speed || 1.2; clearInterval(_ldTimer); _ldTimer=setInterval(()=>{ if(_ldVal<target){ _ldVal=Math.min(_ldVal+speed,target); setLoadProgress(_ldVal); }else{ clearInterval(_ldTimer); _ldTimer=null; onDone && onDone(); } },16); }
-const load={ show(){ setLoadProgress(0); $('loadOver').classList.add('active'); progressTo(85,0.6); }, hide(){ clearInterval(_ldTimer); progressTo(100,3,()=>{ setTimeout(()=>{ $('loadOver').classList.remove('active'); setLoadProgress(0); },260); }); } };
-function formLoadShow(){ setLoadProgress(0); $('loadOver').classList.add('active'); progressTo(25, 1.5); }
-function formLoadHide(onDone){ clearInterval(_ldTimer); progressTo(100,4,()=>{ setTimeout(()=>{ $('loadOver').classList.remove('active'); setLoadProgress(0); onDone && onDone(); },300); }); }
-function formLoadAbort(){ clearInterval(_ldTimer); $('loadOver').classList.remove('active'); setLoadProgress(0); }
+function progressTo(target,speed,onDone){
+speed = speed || 1.2;
+clearInterval(_ldTimer);
+_ldTimer=setInterval(()=>{
+if(_ldVal<target){
+_ldVal=Math.min(_ldVal+speed,target);
+setLoadProgress(_ldVal);
+}else{
+clearInterval(_ldTimer);
+_ldTimer=null;
+onDone && onDone();
+}
+},16);
+}
+
+const load={
+show(){ setLoadProgress(0); $('loadOver').classList.add('active'); progressTo(85,0.6); },
+hide(){ clearInterval(_ldTimer); progressTo(100,3,()=>{ setTimeout(()=>{ $('loadOver').classList.remove('active'); setLoadProgress(0); },260); }); }
+};
+
+function formLoadShow(){
+setLoadProgress(0);
+$('loadOver').classList.add('active');
+progressTo(25, 1.5); /* Start visible progress immediately */
+}
+function formLoadHide(onDone){
+clearInterval(_ldTimer);
+progressTo(100,4,()=>{
+setTimeout(()=>{
+$('loadOver').classList.remove('active');
+setLoadProgress(0);
+onDone && onDone();
+},300);
+});
+}
+function formLoadAbort(){
+clearInterval(_ldTimer);
+$('loadOver').classList.remove('active');
+setLoadProgress(0);
+}
+
+/* =====================================================
+DOWNLOAD ENGINE
+===================================================== */
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||(typeof navigator.maxTouchPoints==='number'&&navigator.maxTouchPoints>2&&/MacIntel/.test(navigator.platform)); }
-function extractFileName(url,fallback){ fallback = fallback || 'file'; try{const parts=new URL(url).pathname.split('/').filter(Boolean);const last=decodeURIComponent(parts[parts.length-1]||'');return last.includes('.')?last:fallback;}catch{return fallback;} }
+function extractFileName(url,fallback){
+fallback = fallback || 'file';
+try{const parts=new URL(url).pathname.split('/').filter(Boolean);const last=decodeURIComponent(parts[parts.length-1]||'');return last.includes('.')?last:fallback;}catch{return fallback;}
+}
 function extractDriveId(url){ if(!url)return null;const m=url.match(/(?:\/d\/|[?&]id=|open\?id=)([a-zA-Z0-9_-]{20,})/);return m?m[1]:null; }
 function buildDriveDownloadUrl(url){ const id=extractDriveId(url);if(!id)return url;return `https://drive.usercontent.google.com/download?id=${id}&export=download&authuser=0&confirm=t`; }
+function toDrivePreview(rawUrl,fileId){ const id=fileId||extractDriveId(rawUrl);if(id)return `https://drive.google.com/uc?export=view&id=${id}`;if(rawUrl&&rawUrl.startsWith('http'))return rawUrl;return ''; }
+function toDriveDownload(rawUrl,fileId){ const id=fileId||extractDriveId(rawUrl);if(id)return buildDriveDownloadUrl(rawUrl);if(rawUrl&&rawUrl.startsWith('http'))return rawUrl;return ''; }
 function isUrlValid(s){ if(!s)return false;try{const u=new URL(s);return u.protocol==='http:'||u.protocol==='https:';}catch{return false;} }
 function cleanUrlStr(url){ return url?url.trim().replace(/\s+$/,''):''; }
 function cleanAltText(s){ return (s||'').replace(/\.[a-z0-9]{2,5}$/i,'').trim(); }
 function triggerAnchor(href,filename){ const a=document.createElement('a');a.href=href;a.download=filename||'';a.rel='noopener noreferrer';a.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';document.body.appendChild(a);a.click();requestAnimationFrame(()=>{try{document.body.removeChild(a);}catch{}}); }
 async function blobDownload(fetchUrl,filename){ const resp=await fetch(fetchUrl,{cache:'no-cache'});if(!resp.ok)throw new Error('HTTP '+resp.status);const blob=await resp.blob();const ext=blob.type.split('/')[1]&&blob.type.split('/')[1].split(';')[0]||'';const safe=filename&&filename.includes('.')?filename:(ext?((filename||'file')+'.'+ext):(filename||'file'));const burl=URL.createObjectURL(blob);triggerAnchor(burl,safe);setTimeout(()=>URL.revokeObjectURL(burl),30000); }
+// REPLACE WITH:
 async function downloadFile(url,filename){
 if(!url)return;
 const fn=filename||extractFileName(url,'download');
-const isDrive=/drive\.google\.com|docs\.google\.com/.test(url);
-const mobile=isMobileDevice();
-const dlUrl=isDrive?buildDriveDownloadUrl(url):url;
-if(!isDrive){try{await blobDownload(dlUrl,fn);return;}catch(e){console.warn('[DL]',e.message);}}
-if(isDrive&&mobile){try{await blobDownload('https://corsproxy.io/?'+encodeURIComponent(dlUrl),fn);return;}catch(e){console.warn('[DL] proxy fail',e.message);}}
-triggerAnchor(dlUrl,fn);
+const driveId=extractDriveId(url);
+/* Build ordered fetch-candidates. Thumbnail API is CORS-accessible for public Drive files. */
+const candidates=[];
+if(driveId){
+  candidates.push('https://drive.google.com/thumbnail?id='+driveId+'&sz=w4096');
+  candidates.push('https://drive.google.com/uc?export=view&id='+driveId);
+}
+candidates.push(url);
+/* 1) Direct blob fetch */
+for(const c of candidates){try{await blobDownload(c,fn);return;}catch(e){}}
+/* 2) CORS proxy fallback */
+for(const c of candidates.slice(0,2)){
+  try{await blobDownload('https://corsproxy.io/?'+encodeURIComponent(c),fn);return;}catch(e){}
+}
+/* 3) Last resort — may behave as navigation on some browsers */
+triggerAnchor(url,fn);
 }
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-/* ✅ ONE-BY-ONE QUEUE - RELIABLE & MOBILE FRIENDLY */
-async function downloadQueue(urls, filenames, onProgress, onDone) {
-for(let i = 0; i < urls.length; i++) {
-if(!urls[i]) { onProgress?.(i+1, urls.length); continue; }
-try { await downloadFile(urls[i], filenames?.[i]); } catch(e) { console.warn('[Queue] Failed:', e.message); }
-onProgress?.(i+1, urls.length);
-if(i < urls.length - 1) await delay(800);
+async function downloadQueue(urls,filenames,onProgress,onDone){
+for(let i=0;i<urls.length;i++){
+if(!urls[i]){onProgress&&onProgress(i+1,urls.length);continue;}
+await downloadFile(urls[i],filenames&&filenames[i]);
+onProgress&&onProgress(i+1,urls.length);
+if(i<urls.length-1)await delay(1400);
 }
-onDone?.();
+onDone&&onDone();
 }
+
+/* =====================================================
+GOOGLE SHEETS LOADER
+===================================================== */
 function normalizeHeader(h){ if(!h)return '';return h.replace(/^\uFEFF/,'').replace(/[\u00A0\u200B\u200C\u200D]/g,'').toLowerCase().trim().replace(/\s+/g,' '); }
 function findColumnKey(row,name){ const n=normalizeHeader(name);for(const k of Object.keys(row)){if(normalizeHeader(k)===n)return k;}return null; }
+
 async function fetchSheetImages(gid, includeCaption) {
 includeCaption = includeCaption || false;
 const url='https://docs.google.com/spreadsheets/d/'+CFG.SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+gid;
@@ -1659,11 +1891,13 @@ images.push(entry);
 if(!images.length)throw new Error('No valid images found');
 return images;
 }
+
 async function fetchAlbumSheet(albumId,gid){
 const images=await fetchSheetImages(gid,false);
 const meta=ALBUMS_META[albumId]||{title:'Album '+albumId,subtitle:'Photo Collection',type:'image'};
 return{id:albumId,title:meta.title,subtitle:meta.subtitle,count:images.length,type:meta.type,images:images};
 }
+
 async function loadHighlightSheet(){
 const gid=CFG.HIGHLIGHT_GID;
 if(!gid)return;
@@ -1672,11 +1906,21 @@ const images=await fetchSheetImages(gid,true);
 S.hlItems=images.map(function(img,i){return Object.assign({},img,{cap:img.cap||cleanAltText(img.fileName)||'Photo '+(i+1)});});
 }catch(err){console.warn('[Highlight sheet] using static fallback:',err.message);}
 }
+
+/* =====================================================
+COMMENTS SHEET LOADER
+FIX: All COMMENTS_DATA references changed to COMMENTS_FALLBACK_DATA
+FIX: Robust error handling, never returns undefined
+===================================================== */
 async function fetchCommentsFromSheet() {
 const gid = CFG.COMMENTS_GID;
-if (!gid) { console.warn('[Comments] No GID configured, using fallback data'); return COMMENTS_FALLBACK_DATA; }
+if (!gid) {
+console.warn('[Comments] No GID configured, using fallback data');
+return COMMENTS_FALLBACK_DATA;
+}
 try {
 const url = 'https://docs.google.com/spreadsheets/d/' + CFG.SHEET_ID + '/gviz/tq?tqx=out:csv&gid=' + gid;
+console.log('[Comments] Fetching from:', url);
 const resp = await fetch(url, { cache: 'no-cache' });
 if (!resp.ok) throw new Error('HTTP ' + resp.status);
 const csvText = await resp.text();
@@ -1696,17 +1940,34 @@ const linkedin = (row['LinkedIn'] || '').trim();
 const website = (row['Website'] || '').trim();
 const specialRaw = (row['Special'] || '').toString().toLowerCase().trim();
 const special = specialRaw === 'true' || specialRaw === 'yes' || specialRaw === '1';
-if (!name || !message) return;
+const specialImageUrl = (row['Special Image'] || row['SpecialImage'] || '').trim();
+if (!name || !message) return; /* Skip incomplete rows */
 const social = {};
 if (facebook) social.facebook = facebook;
 if (instagram) social.instagram = instagram;
 if (linkedin) social.linkedin = linkedin;
 if (website) social.website = website;
-comments.push({ name, group, avatar: avatar || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + encodeURIComponent(name), message, rating, social, special });
+comments.push({
+name: name,
+group: group,
+avatar: avatar || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + encodeURIComponent(name),
+message: message,
+rating: rating,
+social: social,
+special: special,
+specialImageUrl: specialImageUrl
 });
+});
+console.log('[Comments] Successfully loaded', comments.length, 'comments from sheet');
+/* FIX: Return fallback if sheet returned 0 valid comments */
 return comments.length > 0 ? comments : COMMENTS_FALLBACK_DATA;
-} catch (err) { console.error('[Comments Sheet] Error, using fallback:', err.message); return COMMENTS_FALLBACK_DATA; }
+} catch (err) {
+console.error('[Comments Sheet] Error, using fallback:', err.message);
+/* FIX: Always return COMMENTS_FALLBACK_DATA (not undefined) on error */
+return COMMENTS_FALLBACK_DATA;
 }
+}
+
 async function loadAllAlbums() {
 load.show();
 const albumIds = Object.keys(CFG.ALBUM_GIDS).map(Number).sort(function(a,b){return a-b;});
@@ -1726,15 +1987,33 @@ S.albumsData = results[1].filter(Boolean);
 load.hide();
 renderAlbums();
 initHighlights();
+/* Load comments after albums */
 initComments();
 }
+
+/* =====================================================
+NAVBAR
+===================================================== */
 function initNavbar(){
 const ham=$('navHam'),mob=$('navMob');
-ham.addEventListener('click',function(){ const open=ham.classList.toggle('open'); mob.classList.toggle('open',open); ham.setAttribute('aria-expanded',open); });
-mob.querySelectorAll('a,button').forEach(function(el){ el.addEventListener('click',function(){ ham.classList.remove('open');mob.classList.remove('open'); ham.setAttribute('aria-expanded','false'); }); });
+ham.addEventListener('click',function(){
+const open=ham.classList.toggle('open');
+mob.classList.toggle('open',open);
+ham.setAttribute('aria-expanded',open);
+});
+mob.querySelectorAll('a,button').forEach(function(el){
+el.addEventListener('click',function(){
+ham.classList.remove('open');mob.classList.remove('open');
+ham.setAttribute('aria-expanded','false');
+});
+});
 $('navFormBtn').onclick=openForm;
 $('navMobFormBtn').onclick=openForm;
 }
+
+/* =====================================================
+HERO SLIDESHOW
+===================================================== */
 const HERO_IMGS=[
 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&h=1080&fit=crop',
 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1920&h=1080&fit=crop',
@@ -1759,7 +2038,11 @@ document.querySelectorAll('.hero-dot').forEach(function(d,i){d.classList.toggle(
 S.heroIdx=idx;heroStart();
 }
 function heroStart(){clearInterval(S.heroTimer);S.heroTimer=setInterval(function(){heroGo((S.heroIdx+1)%HERO_IMGS.length);},4500);}
-const TW_TEXT='An Unforgettable Journey of Friendship & Excellence';
+
+/* =====================================================
+TYPEWRITER
+===================================================== */
+const TW_TEXT='বিদায় নয়, হৃদয়ে চিরকাল...';
 let _twTimer=null,_twObs=null;
 function startTypewriter(){
 const el=$('heroTag');if(!el)return;
@@ -1767,17 +2050,32 @@ clearTimeout(_twTimer);el.innerHTML='';
 let i=0;
 const cursor=document.createElement('span');cursor.className='tw-cursor';
 function type(){
-if(i<TW_TEXT.length){ el.insertBefore(document.createTextNode(TW_TEXT[i]),cursor); i++;_twTimer=setTimeout(type,42); }
-else{ setTimeout(function(){cursor.style.transition='opacity 0.5s ease';cursor.style.opacity='0';},2200); }
+if(i<TW_TEXT.length){
+el.insertBefore(document.createTextNode(TW_TEXT[i]),cursor);
+i++;_twTimer=setTimeout(type,42);
+}else{
+setTimeout(function(){cursor.style.transition='opacity 0.5s ease';cursor.style.opacity='0';},2200);
 }
-el.appendChild(cursor); setTimeout(type,500);
+}
+el.appendChild(cursor);
+setTimeout(type,1000);
 }
 function resetTypewriter(){clearTimeout(_twTimer);const el=$('heroTag');if(el)el.innerHTML='';}
 function initTypewriter(){
 if(_twObs)_twObs.disconnect();
-_twObs=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(entry.isIntersecting)startTypewriter(); else resetTypewriter(); }); },{threshold:0.4});
-const hero=document.querySelector('.hero'); if(hero)_twObs.observe(hero);
+_twObs=new IntersectionObserver(function(entries){
+entries.forEach(function(entry){
+if(entry.isIntersecting)startTypewriter();
+else resetTypewriter();
+});
+},{threshold:0.4});
+const hero=document.querySelector('.hero');
+if(hero)_twObs.observe(hero);
 }
+
+/* =====================================================
+HIGHLIGHTS
+===================================================== */
 function initHighlights(){
 const grid=$('hlGrid');grid.innerHTML='';
 S.hlItems.forEach(function(item,i){
@@ -1791,15 +2089,23 @@ const cb=document.createElement('div');
 cb.className='alb-check';cb.setAttribute('role','checkbox');cb.setAttribute('aria-label','Select image');
 cb.innerHTML='<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 cb.addEventListener('click',function(e){e.stopPropagation();toggleSelect('hl',el,cb);});
-const img=document.createElement('img'); img.src=item.preview;img.alt=item.alt||item.cap||'SSC 2026 highlight photo '+(i+1);img.loading='lazy';
+const img=document.createElement('img');
+img.src=item.preview;img.alt=item.alt||item.cap||'SSC 2026 highlight photo '+(i+1);img.loading='lazy';
 const cap=document.createElement('div');cap.className='hl-cap';cap.textContent=item.cap||'';
-el.addEventListener('click',function(){ if(S.selectMode){toggleSelect('hl',el,cb);return;} S.curAlbumId='hl';openLightbox(S.hlItems,i,'image'); });
+el.addEventListener('click',function(){
+if(S.selectMode){toggleSelect('hl',el,cb);return;}
+S.curAlbumId='hl';openLightbox(S.hlItems,i,'image');
+});
 setupLongPress(el,'hl',cb);
 el.appendChild(cb);el.appendChild(img);el.appendChild(cap);
 grid.appendChild(el);
 });
 initReveal();
 }
+
+/* =====================================================
+ALBUMS
+===================================================== */
 function renderAlbums(){
 const wrap=$('albumsWrap');wrap.innerHTML='';
 S.albumsData.forEach(function(album){
@@ -1846,7 +2152,11 @@ wrap.appendChild(tile);
 });
 initReveal();
 }
-function hintHTML(){ return '<span class="hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11.24V7.5a2.5 2.5 0 015 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>Long-press to select multiple</span>'; }
+
+function hintHTML(){
+return '<span class="hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11.24V7.5a2.5 2.5 0 015 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>Long-press to select multiple</span>';
+}
+
 function toggleAlbum(tile,album){
 const expanded=tile.getAttribute('aria-expanded')==='true';
 document.querySelectorAll('.album-tile[aria-expanded="true"]').forEach(function(t){if(t!==tile)closeAlbum(t);});
@@ -1900,10 +2210,20 @@ cb.className='alb-check';cb.setAttribute('role','checkbox');cb.setAttribute('ari
 cb.innerHTML='<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 cb.addEventListener('click',function(e){e.stopPropagation();toggleSelect(albumId,el,cb);});
 let media;
-if(isVid){ media=document.createElement('video');media.src=item.url;media.muted=true;media.playsInline=true;media.preload='metadata'; if(poster)media.poster=poster;setTimeout(function(){el.classList.add('loaded');},200); }
-else{ media=document.createElement('img');media.alt=altTxt;media.loading='lazy';media.src=previewU; media.addEventListener('load',function(){el.classList.add('loaded');},{once:true}); media.addEventListener('error',function(){el.classList.add('loaded');},{once:true}); }
+if(isVid){
+media=document.createElement('video');media.src=item.url;media.muted=true;media.playsInline=true;media.preload='metadata';
+if(poster)media.poster=poster;setTimeout(function(){el.classList.add('loaded');},200);
+}else{
+media=document.createElement('img');media.alt=altTxt;media.loading='lazy';media.src=previewU;
+media.addEventListener('load',function(){el.classList.add('loaded');},{once:true});
+media.addEventListener('error',function(){el.classList.add('loaded');},{once:true});
+}
 el.style.transitionDelay=(i*.04)+'s';
-el.addEventListener('click',function(){ if(S.selectMode){toggleSelect(albumId,el,cb);return;} if(isVid){openVidModal(item.url,poster,fileName,dlU);} else{S.curAlbumId=albumId;openLightbox(items,i,albumType);} });
+el.addEventListener('click',function(){
+if(S.selectMode){toggleSelect(albumId,el,cb);return;}
+if(isVid){openVidModal(item.url,poster,fileName,dlU);}
+else{S.curAlbumId=albumId;openLightbox(items,i,albumType);}
+});
 el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click();}});
 setupLongPress(el,albumId,cb);
 el.appendChild(cb);el.appendChild(media);grid.appendChild(el);
@@ -1918,21 +2238,51 @@ el.addEventListener('pointerleave',cancel);el.addEventListener('pointercancel',c
 }
 function enterSelectMode(albumId,firstEl,firstCb){
 S.selectMode=true;
-if(albumId==='hl'){ $('hlGrid')&&$('hlGrid').querySelectorAll('.hl-item').forEach(function(el){el.classList.add('selectable');}); }
-else{ const grid=$('agrid-'+albumId); if(grid)grid.querySelectorAll('.alb-img').forEach(function(el){el.classList.add('selectable');}); const footer=$('afooter-'+albumId); if(footer)_buildAlbumFooterControls(footer,albumId); }
+if(albumId==='hl'){
+$('hlGrid')&&$('hlGrid').querySelectorAll('.hl-item').forEach(function(el){el.classList.add('selectable');});
+}else{
+const grid=$('agrid-'+albumId);
+if(grid)grid.querySelectorAll('.alb-img').forEach(function(el){el.classList.add('selectable');});
+const footer=$('afooter-'+albumId);
+if(footer)_buildAlbumFooterControls(footer,albumId);
+}
 toggleSelect(albumId,firstEl,firstCb);
 }
 function exitSelectMode(){
-S.selectMode=false; S.selected.clear();S.selectedDlMap={};S.selectedFnMap={};
-document.querySelectorAll('.alb-img,.hl-item').forEach(function(el){ el.classList.remove('selectable','selected'); el.querySelector('.alb-check')&&el.querySelector('.alb-check').classList.remove('on'); });
-S.albumsData.forEach(function(album){ const tile=document.querySelector('.album-tile[data-id="'+album.id+'"]'); if(tile&&tile.getAttribute('aria-expanded')==='true'){ const f=$('afooter-'+album.id);if(f)f.innerHTML=hintHTML(); } });
+S.selectMode=false;
+S.selected.clear();S.selectedDlMap={};S.selectedFnMap={};
+document.querySelectorAll('.alb-img,.hl-item').forEach(function(el){
+el.classList.remove('selectable','selected');
+el.querySelector('.alb-check')&&el.querySelector('.alb-check').classList.remove('on');
+});
+S.albumsData.forEach(function(album){
+const tile=document.querySelector('.album-tile[data-id="'+album.id+'"]');
+if(tile&&tile.getAttribute('aria-expanded')==='true'){
+const f=$('afooter-'+album.id);if(f)f.innerHTML=hintHTML();
+}
+});
 updateBadge();
 }
 function toggleSelect(albumId,el,cb){
 const url=el.dataset.preview,dlU=el.dataset.download,fn=el.dataset.filename;
-if(S.selected.has(url)){ S.selected.delete(url);delete S.selectedDlMap[url];delete S.selectedFnMap[url]; el.classList.remove('selected');cb.classList.remove('on'); }
-else{ S.selected.add(url);S.selectedDlMap[url]=dlU||url;S.selectedFnMap[url]=fn||extractFileName(dlU||url); el.classList.add('selected','selectable');cb.classList.add('on'); }
-if(albumId!=='hl'){ const saEl=$('sa-'+albumId); if(saEl){ const grid=$('agrid-'+albumId); if(grid){ const all=[...grid.querySelectorAll('.alb-img')]; saEl.checked=all.every(function(e){return S.selected.has(e.dataset.preview);}); saEl.indeterminate=!saEl.checked&&all.some(function(e){return S.selected.has(e.dataset.preview);}); } } }
+if(S.selected.has(url)){
+S.selected.delete(url);delete S.selectedDlMap[url];delete S.selectedFnMap[url];
+el.classList.remove('selected');cb.classList.remove('on');
+}else{
+S.selected.add(url);S.selectedDlMap[url]=dlU||url;S.selectedFnMap[url]=fn||extractFileName(dlU||url);
+el.classList.add('selected','selectable');cb.classList.add('on');
+}
+if(albumId!=='hl'){
+const saEl=$('sa-'+albumId);
+if(saEl){
+const grid=$('agrid-'+albumId);
+if(grid){
+const all=[...grid.querySelectorAll('.alb-img')];
+saEl.checked=all.every(function(e){return S.selected.has(e.dataset.preview);});
+saEl.indeterminate=!saEl.checked&&all.some(function(e){return S.selected.has(e.dataset.preview);});
+}
+}
+}
 updateBadge();updateLbSelBtn();
 }
 function selectAllInAlbum(albumId,checked){
@@ -1947,44 +2297,45 @@ updateBadge();
 function updateBadge(){const n=S.selected.size;$('selN').textContent=n;$('selBadge').classList.toggle('show',n>0);}
 $('selClrBtn').onclick=exitSelectMode;
 $('selDlBtn').onclick=openSelectionDlModal;
-/* ✅ FIXED DOWNLOAD MODAL HANDLERS */
+
+/* =====================================================
+ALBUM DOWNLOAD MODAL
+===================================================== */
 function openAlbumDlModal(album){
-const urls=album.images.map(i => i.download || i.url || i.preview);
-const names=album.images.map(i => i.fileName || extractFileName(i.download || i.url || i.preview));
+const urls=album.images.map(function(i){return i.download||i.url||i.preview;});
+const names=album.images.map(function(i){return i.fileName||extractFileName(i.download||i.url||i.preview);});
 $('dlTitle').textContent=album.title;
 $('dlBody').textContent=album.count+' item'+(album.count!==1?'s':'')+' ready to download:';
-$('dlProgWrap').style.display='none';
+$('dlProgWrap').style.display='none';$('dlZipBtn').style.display='flex';
 const dlAllBtn=$('dlAllBtn');
-dlAllBtn.querySelector('.dl-opt-label').textContent='Download All';
-dlAllBtn.disabled=false;
+dlAllBtn.querySelector('.dl-opt-label').textContent='Download All';dlAllBtn.disabled=false;
 $('dlModal').classList.add('active');
+$('dlZipBtn').onclick=function(){
+const zip=CFG.ALBUM_ZIPS[album.id];
+if(zip){downloadFile(zip,album.title.replace(/\s+/g,'-')+'.zip');$('dlModal').classList.remove('active');}
+else{showMsg('Not Available','ZIP download is not configured for this album.');}
+};
 dlAllBtn.onclick=function(){
 dlAllBtn.disabled=true;
-$('dlProgWrap').style.display='flex';
-$('dlProg').style.width='0%';$('dlProgPct').textContent='';
-downloadQueue(urls,names,
-function(cur,tot){const pct=Math.round(cur/tot*100);$('dlProg').style.width=pct+'%';$('dlProgPct').textContent=pct+'%';},
-function(){dlAllBtn.disabled=false;$('dlModal').classList.remove('active');$('dlProgWrap').style.display='none';showMsg('Done!','Downloaded '+urls.length+' files. Check your device downloads folder.');}
-);
+downloadQueue(urls,names,null,function(){dlAllBtn.disabled=false;$('dlModal').classList.remove('active');showMsg('Done!','All '+urls.length+' items downloaded.');});
 };
 }
 function openSelectionDlModal(){
-const urls=[...S.selected].map(u => S.selectedDlMap[u] || u);
-const names=[...S.selected].map(u => S.selectedFnMap[u] || extractFileName(S.selectedDlMap[u] || u));
+const urls=[...S.selected].map(function(u){return S.selectedDlMap[u]||u;});
+const names=[...S.selected].map(function(u){return S.selectedFnMap[u]||extractFileName(S.selectedDlMap[u]||u);});
 if(!urls.length){showMsg('Nothing selected','Long-press an image to start selecting.');return;}
 $('dlTitle').textContent=urls.length+' item'+(urls.length>1?'s':'')+' selected';
 $('dlBody').textContent='Download your selected photos:';
-$('dlProgWrap').style.display='flex';
+$('dlZipBtn').style.display='none';$('dlProgWrap').style.display='flex';
 $('dlProg').style.width='0%';$('dlProgPct').textContent='';
 const dlAllBtn=$('dlAllBtn');
-dlAllBtn.querySelector('.dl-opt-label').textContent='Download Selected';
-dlAllBtn.disabled=false;
+dlAllBtn.querySelector('.dl-opt-label').textContent='Download Selected';dlAllBtn.disabled=false;
 $('dlModal').classList.add('active');
 dlAllBtn.onclick=function(){
 dlAllBtn.disabled=true;
 downloadQueue(urls,names,
 function(cur,tot){const pct=Math.round(cur/tot*100);$('dlProg').style.width=pct+'%';$('dlProgPct').textContent=pct+'%';},
-function(){dlAllBtn.disabled=false;$('dlModal').classList.remove('active');$('dlProgWrap').style.display='none';showMsg('Done!',urls.length+' items downloaded successfully.');exitSelectMode();}
+function(){dlAllBtn.disabled=false;$('dlModal').classList.remove('active');showMsg('Done!',urls.length+' items downloaded.');exitSelectMode();}
 );
 };
 }
@@ -1993,6 +2344,11 @@ $('dlCancel').onclick=function(){$('dlModal').classList.remove('active');};
 $('openDlAllBtn').onclick=function(){$('dlAllModal').classList.add('active');};
 $('dlAllX').onclick=function(){$('dlAllModal').classList.remove('active');};
 $('dlAllCancel').onclick=function(){$('dlAllModal').classList.remove('active');};
+$('dlAllZipBtn').onclick=function(){
+const zipUrl=CFG.ALL_ALBUMS_ZIP_URL;
+if(zipUrl){downloadFile(zipUrl,'SSC26-All-Albums.zip');$('dlAllModal').classList.remove('active');}
+else{showMsg('Not Available','ZIP download for all albums is not configured yet.');}
+};
 $('dlAllOneByOneBtn').onclick=async function(){
 $('dlAllOneByOneBtn').disabled=true;$('dlAllProgWrap').style.display='flex';
 $('dlAllProg').style.width='0%';$('dlAllProgPct').textContent='';
@@ -2004,6 +2360,10 @@ function(cur,tot){const pct=Math.round(cur/tot*100);$('dlAllProg').style.width=p
 function(){$('dlAllOneByOneBtn').disabled=false;$('dlAllModal').classList.remove('active');$('dlAllProgWrap').style.display='none';showMsg('All Done!','Downloaded all '+allUrls.length+' images.');}
 );
 };
+
+/* =====================================================
+VIDEO MODAL
+===================================================== */
 let _vidDlUrl='',_vidFn='';
 function openVidModal(url,poster,fileName,dlUrl){
 const vid=$('vidEl');vid.src=url;if(poster)vid.poster=poster;
@@ -2017,6 +2377,10 @@ $('vidClose').onclick=closeVidModal;$('vidCloseBtn').onclick=closeVidModal;
 $('vidModal').addEventListener('click',function(e){if(e.target.id==='vidModal')closeVidModal();});
 $('vidDlBtn').onclick=function(){downloadFile(_vidDlUrl,_vidFn);};
 }
+
+/* =====================================================
+LIGHTBOX
+===================================================== */
 function resetLbTransform(animate){
 animate = animate !== false;
 S.lbPanX=0;S.lbPanY=0;S.lbScale=1;
@@ -2034,7 +2398,10 @@ wrap.style.transform='translate('+S.lbPanX+'px,'+S.lbPanY+'px) scale('+S.lbScale
 }
 function toggleLbZoom(){
 if(S.lbZoomed){resetLbTransform(true);}
-else{ S.lbScale=2.5;S.lbPanX=0;S.lbPanY=0;S.lbZoomed=true; applyLbTransform(true);$('lbWrap').classList.add('zoomed');$('lbZoomLbl').textContent='Unzoom'; }
+else{
+S.lbScale=2.5;S.lbPanX=0;S.lbPanY=0;S.lbZoomed=true;
+applyLbTransform(true);$('lbWrap').classList.add('zoomed');$('lbZoomLbl').textContent='Unzoom';
+}
 updateLbSelBtn();
 }
 function clampPan(){
@@ -2050,7 +2417,7 @@ function openLightbox(items,startIdx,type){
 S.lbItems=items;S.lbIdx=startIdx;S.lbType=type;
 resetLbTransform(false);buildLbStrip();renderLb();
 $('lb').classList.add('active');document.body.style.overflow='hidden';
-if(type!=='video'){const h=$('lbZoomHint');h.classList.add('show');setTimeout(function(){h.classList.remove('show');},2200);}
+
 }
 function renderLb(){
 const item=S.lbItems[S.lbIdx];
@@ -2065,7 +2432,7 @@ if(isVid){
 img.style.display='none';img.src='';vid.style.display='block';ctrls.style.display='flex';
 vid.src=item.url||dlUrl;if(item.poster)vid.poster=item.poster;
 vid.muted=S.vidMuted;vid.pause();S.vidPlaying=false;updatePlayBtn();
-$('lbZoomHint').classList.remove('show');
+
 }else{
 vid.pause();vid.src='';vid.style.display='none';ctrls.style.display='none';
 img.style.display='block';img.src=previewUrl;img.alt=altTxt;
@@ -2157,7 +2524,9 @@ wrap.classList.toggle('zoomed',S.lbZoomed);$('lbZoomLbl').textContent=S.lbZoomed
 }
 },{passive:false});
 view.addEventListener('touchend',function(e){
-if(e.touches.length===0){ touchPanStart=null;if(S.lbZoomed&&S.lbScale<1.1)resetLbTransform(true); }
+if(e.touches.length===0){
+touchPanStart=null;if(S.lbZoomed&&S.lbScale<1.1)resetLbTransform(true);
+}
 if(!S.lbZoomed&&e.changedTouches.length>0&&e.touches.length===0){
 const dx=e.changedTouches[0].clientX-((touches[0]&&touches[0].clientX)||e.changedTouches[0].clientX);
 if(Math.abs(dx)>45)lbNav(dx>0?-1:1);
@@ -2196,15 +2565,37 @@ if(e.key==='z'||e.key==='Z')$('lbZoomBtn').click();
 });
 initLightboxZoom();
 }
+
+/* =====================================================
+COMMENTS — FULLY FIXED
+1. COMMENTS_FALLBACK_DATA used correctly
+2. Auto-collapse on swipe/scroll to different card
+3. Cards don't break on mobile
+===================================================== */
 async function initComments() {
 const track = $('comTrack');
+
+/* FIX: Fetch with guaranteed fallback — fetchCommentsFromSheet always returns COMMENTS_FALLBACK_DATA on any failure */
 const finalComments = await fetchCommentsFromSheet();
 console.log('[Comments] Rendering', finalComments.length, 'comments');
-finalComments.forEach(function(c) { track.appendChild(buildComCard(c)); });
+
+/* Render all cards */
+finalComments.forEach(function(c) {
+track.appendChild(buildComCard(c));
+});
+
+/* Start observer immediately after rendering */
 startCardObserver();
-function doSetup() { setupSeeMoreToggles(); equalizeComCards(); }
+
+/* Setup see-more toggles after fonts/images are ready */
+function doSetup() {
+setupSeeMoreToggles();
+equalizeComCards();
+}
 (document.fonts ? document.fonts.ready : Promise.resolve())
 .then(function(){ requestAnimationFrame(function(){ requestAnimationFrame(doSetup); }); });
+
+/* Also wait for avatars */
 const avatarImgs = [...track.querySelectorAll('.cc-av')];
 Promise.all(avatarImgs.map(function(img){
 return new Promise(function(res){
@@ -2213,20 +2604,40 @@ img.addEventListener('load', res, { once: true });
 img.addEventListener('error', res, { once: true });
 });
 })).then(function(){ requestAnimationFrame(doSetup); });
+
+/* Safety net timeout */
 setTimeout(doSetup, 1600);
+
+/* Navigation buttons */
 $('comPrev').onclick = function(){ comStop(); comScrollTo(S.comIdx - 1); comStart(); };
 $('comNext').onclick = function(){ comStop(); comScrollTo(S.comIdx + 1); comStart(); };
 $('comFirst').onclick = function(){ comStop(); comScrollTo(0); comStart(); };
-$('comLast').onclick = function(){ const cards = [...$('comTrack').querySelectorAll('.com-card')]; comStop(); comScrollTo(cards.length - 1); comStart(); };
+$('comLast').onclick = function(){
+const cards = [...$('comTrack').querySelectorAll('.com-card')];
+comStop(); comScrollTo(cards.length - 1); comStart();
+};
+
+/* Desktop navigation buttons */
+$('comPrev').onclick = function(){ comStop(); comScrollTo(S.comIdx - 1); comStart(); };
+$('comNext').onclick = function(){ comStop(); comScrollTo(S.comIdx + 1); comStart(); };
+$('comFirst').onclick = function(){ comStop(); comScrollTo(0); comStart(); };
+$('comLast').onclick = function(){
+const cards = [...$('comTrack').querySelectorAll('.com-card')];
+comStop(); comScrollTo(cards.length - 1); comStart();
+};
+/* Mobile navigation buttons (same collapse logic as desktop) */
 var _mobPrev = $('comMobPrev'), _mobNext = $('comMobNext');
 if(_mobPrev) _mobPrev.onclick = function(){ comStop(); comScrollTo(S.comIdx - 1); comStart(); };
 if(_mobNext) _mobNext.onclick = function(){ comStop(); comScrollTo(S.comIdx + 1); comStart(); };
+/* FIX: Scroll listener — auto-collapse expanded card when user swipes to a different card */
+/* Debounced scroll — correct center-based card detection for mobile */
 var _comScrollTimer = null;
 track.addEventListener('scroll', function(){
 clearTimeout(_comScrollTimer);
 _comScrollTimer = setTimeout(function(){
 const cards = [...track.querySelectorAll('.com-card')];
 if(!cards.length) return;
+/* Use viewport center to find the most visible card */
 const viewCenter = track.scrollLeft + track.clientWidth / 2;
 let nearest = 0, minDist = Infinity;
 cards.forEach(function(c, i){
@@ -2234,39 +2645,48 @@ const cardCenter = c.offsetLeft + c.offsetWidth / 2;
 const d = Math.abs(cardCenter - viewCenter);
 if(d < minDist){ minDist = d; nearest = i; }
 });
-if(nearest !== S.comIdx && S.comExpandedCard){ collapseComCard(S.comExpandedCard); }
+if(nearest !== S.comIdx && S.comExpandedCard){
+collapseComCard(S.comExpandedCard);
+}
 S.comIdx = nearest;
 }, 90);
 }, { passive: true });
+
+/* Auto-start when section is in view */
 new IntersectionObserver(function(entries){
-entries.forEach(function(e){ if(e.isIntersecting && !S.comExpandedCard) comStart(); else comStop(); });
+entries.forEach(function(e){
+if(e.isIntersecting && !S.comExpandedCard) comStart();
+else comStop();
+});
 }, { threshold: .2 }).observe($('comments'));
 }
+
 function setupSeeMoreToggles(){
 document.querySelectorAll('.com-card').forEach(function(card){
 const msgEl = card.querySelector('.cc-msg');
 const toggleEl = card.querySelector('.cc-toggle');
 if(!msgEl || !toggleEl) return;
 toggleEl.style.display = 'none';
+/* Temporarily remove height constraint to measure real scrollHeight */
 const prevMaxH = msgEl.style.maxHeight;
 msgEl.style.maxHeight = 'none';
 const sh = msgEl.scrollHeight;
 msgEl.style.maxHeight = prevMaxH || '';
-if(sh > 152){ toggleEl.style.display = 'inline'; }
+/* Show toggle only if text is actually truncated */
+if(sh > 152){  /* 5em ≈ ~80px minimum */
+toggleEl.style.display = 'inline';
+}
 });
 }
+
 function buildComCard(c){
 const card = document.createElement('div');
 card.className = 'com-card' + (c.special ? ' special' : '');
 card.setAttribute('role', 'listitem');
-/* ✅ INJECT BACKGROUND DIV FOR SPECIAL CARDS */
-if (c.special) {
-const bgDiv = document.createElement('div');
-bgDiv.className = 'com-card-special-bg';
-bgDiv.setAttribute('aria-hidden', 'true');
-card.appendChild(bgDiv);
-}
 const hasSocial = c.social && Object.keys(c.social).length > 0;
+const specialImgHtml = (c.special && c.specialImageUrl)
+  ? '<div class="cc-special-img" aria-hidden="true" style="background-image:url('+JSON.stringify(c.specialImageUrl)+')" ondragstart="return false" oncontextmenu="return false"></div>'
+  : '';
 const icons = {
 facebook: '<svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>',
 instagram: '<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.981 1.28.058 1.688.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
@@ -2277,6 +2697,7 @@ const socialLinks = hasSocial ? Object.entries(c.social).map(function(entry){
 const k = entry[0], v = entry[1];
 return '<a href="'+v+'" target="_blank" rel="noopener" class="cc-sl" aria-label="'+k+'">'+(icons[k]||icons.website)+'</a>';
 }).join('') : '';
+
 card.innerHTML =
 '<div class="cc-head">'+
 '<div class="cc-av-wrap">'+
@@ -2293,19 +2714,29 @@ card.innerHTML =
 '<p class="cc-msg">'+c.message+'</p>'+
 '<button class="cc-toggle" aria-label="Show more">see more</button>'+
 '</div>'+
-'<div class="cc-social">'+socialLinks+'</div>';
+'<div class="cc-social">'+socialLinks+'</div>'+
+specialImgHtml;
+
 const msgEl = card.querySelector('.cc-msg');
 const toggleEl = card.querySelector('.cc-toggle');
+
 toggleEl.addEventListener('click', function(e){
 e.stopPropagation();
 const isExpanded = msgEl.classList.contains('expanded');
 if(!isExpanded){
-if(S.comExpandedCard && S.comExpandedCard !== card){ collapseComCard(S.comExpandedCard); }
+/* Collapse any previously expanded card before expanding this one */
+if(S.comExpandedCard && S.comExpandedCard !== card){
+collapseComCard(S.comExpandedCard);
+}
 expandComCard(card, msgEl, toggleEl);
-}else{ collapseComCard(card); }
+}else{
+collapseComCard(card);
+}
 });
+
 return card;
 }
+
 function expandComCard(card, msgEl, toggleEl){
 msgEl = msgEl || card.querySelector('.cc-msg');
 toggleEl = toggleEl || card.querySelector('.cc-toggle');
@@ -2315,6 +2746,7 @@ toggleEl.textContent = 'see less';
 comStop();
 S.comExpandedCard = card;
 }
+
 function collapseComCard(card){
 if(!card) return;
 const msgEl = card.querySelector('.cc-msg');
@@ -2322,31 +2754,51 @@ const toggleEl = card.querySelector('.cc-toggle');
 if(msgEl) msgEl.classList.remove('expanded');
 if(toggleEl) toggleEl.textContent = 'see more';
 card.classList.remove('is-expanded');
-if(_equalizedCardHeight > 0){ card.style.height = _equalizedCardHeight + 'px'; }
-else { card.style.height = 'auto'; }
+/* Restore equalized height only if we have a valid measurement */
+if(_equalizedCardHeight > 0){
+card.style.height = _equalizedCardHeight + 'px';
+} else {
+card.style.height = 'auto';
+}
 if(S.comExpandedCard === card) S.comExpandedCard = null;
 comStart();
 }
+
 function equalizeComCards(){
 const all = [...document.querySelectorAll('.com-card')];
 if(!all.length) return;
+/* Only measure non-expanded cards */
 const collapsed = all.filter(function(c){ return !c.classList.contains('is-expanded'); });
 if(!collapsed.length) return;
+/* Reset to natural height for measurement */
 collapsed.forEach(function(c){ c.style.height = 'auto'; });
+/* Force reflow */
 void (collapsed[0] && collapsed[0].offsetHeight);
 const maxH = Math.max.apply(null, collapsed.map(function(c){ return c.scrollHeight; }));
-if(maxH > 80){ _equalizedCardHeight = maxH; collapsed.forEach(function(c){ c.style.height = maxH + 'px'; }); }
+if(maxH > 80){
+_equalizedCardHeight = maxH;
+collapsed.forEach(function(c){ c.style.height = maxH + 'px'; });
 }
+}
+
 function startCardObserver(){
 if(S.comObs) S.comObs.disconnect();
 const track = $('comTrack');
 S.comObs = new IntersectionObserver(function(entries){
-entries.forEach(function(e){ if(e.isIntersecting && !e.target.classList.contains('visible')) e.target.classList.add('visible'); });
+entries.forEach(function(e){
+if(e.isIntersecting && !e.target.classList.contains('visible'))
+e.target.classList.add('visible');
+});
 }, { root: track, threshold: .35 });
 track.querySelectorAll('.com-card').forEach(function(c){ S.comObs.observe(c); });
 }
+
+/* FIX: comScrollTo — always auto-collapses expanded card before scrolling */
 function comScrollTo(idx){
-if(S.comExpandedCard){ collapseComCard(S.comExpandedCard); }
+/* Always collapse any expanded card when navigating */
+if(S.comExpandedCard){
+collapseComCard(S.comExpandedCard);
+}
 const track = $('comTrack');
 const cards = [...track.querySelectorAll('.com-card')];
 if(!cards.length) return;
@@ -2354,16 +2806,20 @@ const total = cards.length;
 idx = ((idx % total) + total) % total;
 S.comIdx = idx;
 const card = cards[idx];
+const targetLeft = card.offsetLeft - track.offsetLeft + track.scrollLeft;
+/* Use getBoundingClientRect-based approach for accuracy */
 const cardRect = card.getBoundingClientRect();
 const trackRect = track.getBoundingClientRect();
 const scrollTarget = track.scrollLeft + (cardRect.left - trackRect.left);
 track.scrollTo({ left: scrollTarget, behavior: 'smooth' });
 }
+
 const CFG_COM_DWELL = 5000;
 function comBarStart(){
 const b = $('comBar');
-b.style.transition = 'none'; b.style.width = '0%';
-b.offsetHeight;
+b.style.transition = 'none';
+b.style.width = '0%';
+b.offsetHeight; /* force reflow */
 b.style.transition = 'width ' + CFG_COM_DWELL + 'ms linear';
 b.style.width = '100%';
 }
@@ -2371,30 +2827,61 @@ function comBarStop(){
 const b = $('comBar');
 const computed = parseFloat(getComputedStyle(b).width);
 const parentW = (b.parentElement && b.parentElement.clientWidth) || 1;
-b.style.transition = 'none'; b.style.width = (computed / parentW * 100) + '%';
+b.style.transition = 'none';
+b.style.width = (computed / parentW * 100) + '%';
 }
 function comStart(){
-if(S.comExpandedCard) return;
-comStop(); comBarStart();
-S.comTimer = setTimeout(function(){ comScrollTo(S.comIdx + 1); comStart(); }, CFG_COM_DWELL);
+if(S.comExpandedCard) return; /* Don't auto-advance when a card is expanded */
+comStop();
+comBarStart();
+S.comTimer = setTimeout(function(){
+comScrollTo(S.comIdx + 1);
+comStart();
+}, CFG_COM_DWELL);
 }
-function comStop(){ clearTimeout(S.comTimer); S.comTimer = null; comBarStop(); }
+function comStop(){
+clearTimeout(S.comTimer);
+S.comTimer = null;
+comBarStop();
+}
+
+/* =====================================================
+SUCCESS MODAL
+===================================================== */
 function showSuccessModal(name, isResubmit){
 isResubmit = isResubmit || false;
 $('succName').textContent = name || 'Friend';
-if(isResubmit){ $('succBody').innerHTML = 'Your updated info has been added to our <b>Resubmits</b> sheet. Your original entry is still safe. ✅'; }
-else{ $('succBody').innerHTML = 'Your memory is now part of SSC 26\'s legacy. 🎓<br><small style="color:var(--muted);font-size:.82em;">It will appear on the Wall after review.</small>'; }
+if(isResubmit){
+$('succBody').innerHTML = 'Your updated info has been added to our <b>Resubmits</b> sheet. Your original entry is still safe. ✅';
+}else{
+$('succBody').innerHTML = 'Your memory is now part of SSC 26\'s legacy. 🎓<br><small style="color:var(--muted);font-size:.82em;">It will appear on the Wall after review.</small>';
+}
 $('successOverlay').classList.add('active');
 }
 function closeSuccessModal(){ $('successOverlay').classList.remove('active'); }
 $('succClose').onclick = closeSuccessModal;
 $('successOverlay').addEventListener('click', function(e){ if(e.target === $('successOverlay')) closeSuccessModal(); });
 function closeSpecialModal(modalId){ const el = $(modalId); if(el) el.classList.remove('active'); }
+
+/* =====================================================
+FORM
+===================================================== */
 let _pendingPayload = null;
 function openForm(){ $('fmOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; loadFormCache(); }
 function closeForm(){ $('fmOverlay').classList.remove('active'); document.body.style.overflow = ''; }
-function showFormStatus(type, text){ const el = $('formStatus'); el.className = 'form-status ' + type; el.textContent = text; }
+function showFormStatus(type, text){
+  const el = $('formStatus');
+  el.className = 'form-status ' + type;
+  el.textContent = text;
+  if(type === 'err'){
+    el.classList.remove('shake');
+    void el.offsetHeight; /* force reflow so re-triggering works */
+    el.classList.add('shake');
+    setTimeout(function(){ el.classList.remove('shake'); }, 600);
+  }
+}
 function hideFormStatus(){ $('formStatus').className = 'form-status'; $('formStatus').textContent = ''; }
+
 $('dupX').onclick = function(){ $('dupModal').classList.remove('active'); _pendingPayload = null; formLoadAbort(); };
 $('dupCancel').onclick = function(){ $('dupModal').classList.remove('active'); _pendingPayload = null; formLoadAbort(); };
 $('dupUpdate').onclick = async function(){
@@ -2402,41 +2889,64 @@ $('dupModal').classList.remove('active');
 if(!_pendingPayload) return;
 const payload = Object.assign({}, _pendingPayload, { action: 'resubmit' });
 _pendingPayload = null;
+/* Show loading overlay immediately, advance to 85% while request is in-flight */
 formLoadShow();
 setTimeout(function(){ progressTo(85, 1.2); }, 350);
 const result = await gasPost(payload);
-if(result.ok){ formLoadHide(function(){ closeForm(); showSuccessModal(payload.name, true); }); }
-else{ formLoadAbort(); showFormStatus('err', result.message || 'Resubmit failed.'); }
+if(result.ok){
+formLoadHide(function(){
+closeForm();
+showSuccessModal(payload.name, true);
+});
+}else{
+formLoadAbort();
+showFormStatus('err', result.message || 'Resubmit failed.');
+}
 };
+
 async function gasPost(payload){
 try{
 const resp = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
 let data = {};
 try{ data = await resp.json(); }catch{}
 return { ok: resp.ok && data.success !== false, ...data };
-}catch(corsErr){ console.warn('[GAS] CORS:', corsErr.message); }
+}catch(corsErr){
+console.warn('[GAS] CORS:', corsErr.message);
+}
 try{
 await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
 return { ok: true, unconfirmed: true };
-}catch(netErr){ return { ok: false, message: 'Network error. Please check your connection.' }; }
+}catch(netErr){
+return { ok: false, message: 'Network error. Please check your connection.' };
 }
+}
+
 function getSpecialModalId(roll, gender){
 const match = SPECIAL_IDENTITIES.find(function(s){ return String(s.roll)===String(roll) && s.gender===gender; });
 if(!match) return null;
 const modalId = 'specialModal_' + match.roll + '_' + match.gender;
 return $(modalId) ? modalId : null;
 }
+
 function initForm(){
 $('openFormBtn').onclick = openForm;
+
 $('fmClose').onclick = closeForm;
 $('fmOverlay').addEventListener('click', function(e){ if(e.target.id === 'fmOverlay') closeForm(); });
-document.querySelectorAll('input[name="rating"]').forEach(function(r){ r.addEventListener('change', function(){ $('starVal').textContent = r.value + ' / 5'; }); });
+
+document.querySelectorAll('input[name="rating"]').forEach(function(r){
+r.addEventListener('change', function(){ $('starVal').textContent = r.value + ' / 5'; });
+});
+
 const imgUp = $('imgUp'), fPhoto = $('fPhoto'), imgPr = $('imgPrev');
-['dragenter','dragover','dragleave','drop'].forEach(function(ev){ imgUp.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); }); });
+['dragenter','dragover','dragleave','drop'].forEach(function(ev){
+imgUp.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); });
+});
 imgUp.addEventListener('dragenter', function(){ imgUp.classList.add('over'); });
 imgUp.addEventListener('dragleave', function(){ imgUp.classList.remove('over'); });
 imgUp.addEventListener('drop', function(e){ imgUp.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) handlePhoto(f); });
 fPhoto.addEventListener('change', function(e){ if(e.target.files[0]) handlePhoto(e.target.files[0]); });
+
 function handlePhoto(file){
 const reader = new FileReader();
 reader.onload = function(ev){
@@ -2452,76 +2962,182 @@ img.src = ev.target.result;
 };
 reader.readAsDataURL(file);
 }
+
 const setErr = function(id, msg, visible){ const el = $(id); el.textContent = msg; el.classList.toggle('show', visible); };
-$('fareForm').addEventListener('submit', async function(e){
-e.preventDefault(); hideFormStatus(); let ok = true;
-const rating = document.querySelector('input[name="rating"]:checked');
-if(!rating){ setErr('ratingErr','Please select a rating.',true); ok=false; } else { setErr('ratingErr','',false); }
-const name = $('fName').value.trim(); if(!name){ setErr('nameErr','Name is required.',true); ok=false; } else { setErr('nameErr','',false); }
-const roll = $('fRoll').value.trim(); if(!/^\d{1,3}$/.test(roll)){ setErr('rollErr','Enter a valid roll (digits only).',true); ok=false; } else { setErr('rollErr','',false); }
-const group = $('fGroup').value; if(!group){ setErr('groupErr','Select your group.',true); ok=false; } else { setErr('groupErr','',false); }
-const gender = $('fGender').value; if(!gender){ setErr('genderErr','Select your gender.',true); ok=false; } else { setErr('genderErr','',false); }
-const email = $('fEmail').value.trim(); if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setErr('emailErr','Please enter a valid email address.',true); ok=false; } else { setErr('emailErr','',false); }
-const msg = $('fMsg').value.trim(); if(!msg){ setErr('msgErr','Message is required.',true); ok=false; } else { setErr('msgErr','',false); }
-if(!$('fPriv').checked){ setErr('privErr','You must agree to continue.',true); ok=false; } else { setErr('privErr','',false); }
-if(!ok){ showFormStatus('err','Please fix the errors above.'); return; }
-const payload = { name, roll, group, gender, rating: parseInt(rating.value), message: msg, rollKey: (gender==='boy'?'B-':'G-') + roll, social: { email, facebook: $('fFb').value.trim(), instagram: $('fIg').value.trim(), other: $('fOther').value.trim() }, profileImageUrl: S.photoDataUrl, timestamp: new Date().toISOString() };
-$('fSubmit').disabled = true; formLoadShow(); showFormStatus('warn', 'Checking…'); progressTo(40, 2);
-const checkResult = await gasPost({ action:'check', roll, group, gender });
-if(checkResult.found){
-formLoadAbort(); _pendingPayload={...payload};$('fSubmit').disabled=false;
+
+/* === PASTE THIS BLOCK to REPLACE the last incomplete line in your index.html === */
+/* It starts right after:  const setErr = function(id, msg, visible){ ...  }; */
+
+    $('fareForm').addEventListener('submit', async function(e){
+      e.preventDefault(); hideFormStatus(); let ok = true;
+      const rating = document.querySelector('input[name="rating"]:checked');
+      if(!rating){ setErr('ratingErr','Please select a rating.',true); ok=false; } else { setErr('ratingErr','',false); }
+      const name = $('fName').value.trim();
+      if(!name){ setErr('nameErr','Name is required.',true); ok=false; } else { setErr('nameErr','',false); }
+      const roll = $('fRoll').value.trim();
+      if(!/^\d{1,3}$/.test(roll)){ setErr('rollErr','Enter a valid roll (digits only).',true); ok=false; } else { setErr('rollErr','',false); }
+      const group = $('fGroup').value;
+      if(!group){ setErr('groupErr','Select your group.',true); ok=false; } else { setErr('groupErr','',false); }
+      const gender = $('fGender').value;
+      if(!gender){ setErr('genderErr','Select your gender.',true); ok=false; } else { setErr('genderErr','',false); }
+      const email = $('fEmail').value.trim();
+      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setErr('emailErr','Please enter a valid email address.',true); ok=false; } else { setErr('emailErr','',false); }
+      const msg = $('fMsg').value.trim();
+      if(!msg){ setErr('msgErr','Message is required.',true); ok=false; } else { setErr('msgErr','',false); }
+      if(!$('fPriv').checked){ setErr('privErr','You must agree to continue.',true); ok=false; } else { setErr('privErr','',false); }
+      if(!ok){ showFormStatus('err','Please fix the errors above.'); return; }
+
+      const payload = {
+        name, roll, group, gender,
+        rating: parseInt(rating.value),
+        message: msg,
+        rollKey: (gender==='boy'?'B-':'G-') + roll,
+        social: {
+          email,
+          facebook: $('fFb').value.trim(),
+          instagram: $('fIg').value.trim(),
+          other: $('fOther').value.trim()
+        },
+        profileImageUrl: S.photoDataUrl,
+        timestamp: new Date().toISOString()
+      };
+
+      $('fSubmit').disabled = true;
+      formLoadShow();
+      showFormStatus('warn', 'Checking…');
+      progressTo(40, 2);
+
+      /* Duplicate check */
+      const checkResult = await gasPost({ action:'check', roll, group, gender });
+
+      if(checkResult.found){
+/* FIX: Abort loading BEFORE showing duplicate modal */
+formLoadAbort();
+_pendingPayload={...payload};$('fSubmit').disabled=false;
 const ed=checkResult.existingData||{};
 const rawDate=ed.submittedAt||ed.timestamp||'';
 const dateStr=rawDate?(()=>{try{return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'});}catch{return rawDate;}})():'Unknown';
 $('dupMeta').innerHTML=`<span><span class="k">Name</span><span class="v">${ed.name||'—'}</span></span><span><span class="k">Roll</span><span class="v">${ed.roll||roll}</span></span><span><span class="k">Group</span><span class="v">${ed.group||group}</span></span><span><span class="k">Submitted</span><span class="v">${dateStr}</span></span>`;
 $('dupModal').classList.add('active');hideFormStatus();return;
 }
-if(checkResult.found){
-formLoadAbort(); $('fSubmit').disabled = false;
-_pendingPayload = Object.assign({}, payload);
-const ed = checkResult.existingData || {};
-const rawDate = ed.submittedAt || ed.timestamp || '';
-const dateStr = rawDate ? (function(){ try{ return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'}); } catch{ return rawDate; } })() : 'Unknown';
-$('dupMeta').innerHTML = '<span><span class="k">Name</span><span class="v">'+(ed.name||'—')+'</span></span><span><span class="k">Roll</span><span class="v">'+(ed.roll||roll)+'</span></span><span><span class="k">Group</span><span class="v">'+(ed.group||group)+'</span></span><span><span class="k">Submitted</span><span class="v">'+dateStr+'</span></span>';
-$('dupModal').classList.add('active'); hideFormStatus(); return;
-}
-progressTo(90, 1.5); showFormStatus('warn', 'Submitting…');
-const submitResult = await gasPost(Object.assign({}, payload, { action:'submit' }));
-$('fSubmit').disabled = false;
-if(submitResult.ok){
-cacheForm(payload);
-formLoadHide(function(){ $('fareForm').reset(); $('imgUp').classList.remove('has-img'); $('starVal').textContent = '0 / 5'; S.photoDataUrl = null; hideFormStatus(); closeForm(); const specialId = getSpecialModalId(roll, gender); if(specialId) $(specialId).classList.add('active'); else showSuccessModal(name, false); });
-} else { formLoadAbort(); showFormStatus('err', submitResult.message || 'Submission error. Please try again.'); }
-});
-}
-function cacheForm(d){ try{ localStorage.setItem('ssc26-form', JSON.stringify(d)); } catch{} }
-function loadFormCache(){
-try{
-const d = JSON.parse(localStorage.getItem('ssc26-form') || 'null');
-if(!d) return;
-const map = { name:'fName', roll:'fRoll', group:'fGroup', gender:'fGender', message:'fMsg' };
-Object.entries(map).forEach(function(kv){ if(d[kv[0]] && $(kv[1])) $(kv[1]).value = d[kv[0]]; });
-if(d.social){ const sm = { email:'fEmail', facebook:'fFb', instagram:'fIg', other:'fOther' }; Object.entries(sm).forEach(function(kv){ if(d.social[kv[0]] && $(kv[1])) $(kv[1]).value = d.social[kv[0]]; }); }
-if(d.profileImageUrl){ $('imgPrev').src=d.profileImageUrl; $('imgUp').classList.add('has-img'); S.photoDataUrl=d.profileImageUrl; }
-if(d.rating){ const r = document.querySelector('input[name="rating"][value="'+d.rating+'"]'); if(r){ r.checked=true; $('starVal').textContent=d.rating+' / 5'; } }
-} catch{}
-}
-function initReveal(){
-const obs = new IntersectionObserver(function(entries){ entries.forEach(function(e){ e.target.classList.toggle('in', e.isIntersecting); }); }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-document.querySelectorAll('.reveal,.hl-item').forEach(function(el){ obs.observe(el); });
-}
-document.addEventListener('DOMContentLoaded', function(){
-if('scrollRestoration' in history){ history.scrollRestoration = 'manual'; }
-setTimeout(function(){ $('introOverlay').classList.add('done'); setTimeout(function(){ $('introOverlay').style.display='none'; }, 700); }, 1400);
-initNavbar(); initHero(); initTypewriter(); initHighlights(); initLightbox(); initVidModal(); initForm(); initReveal(); loadAllAlbums();
-document.addEventListener('keydown', function(e){
-if($('lb').classList.contains('active')) return; if($('vidModal').classList.contains('active')) return; if($('fmOverlay').classList.contains('active')) return;
-if(e.key==='ArrowLeft') heroGo((S.heroIdx-1+HERO_IMGS.length)%HERO_IMGS.length);
-if(e.key==='ArrowRight') heroGo((S.heroIdx+1)%HERO_IMGS.length);
-});
-let resizeT;
-window.addEventListener('resize', function(){ clearTimeout(resizeT); resizeT = setTimeout(equalizeComCards, 250); });
-});
+
+      if(checkResult.found){
+        /* FIX: abort loader cleanly BEFORE showing duplicate modal — this was the freeze root cause */
+        formLoadAbort();
+        $('fSubmit').disabled = false;
+        _pendingPayload = Object.assign({}, payload);
+        const ed = checkResult.existingData || {};
+        const rawDate = ed.submittedAt || ed.timestamp || '';
+        const dateStr = rawDate ? (function(){
+          try{ return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'}); }
+          catch{ return rawDate; }
+        })() : 'Unknown';
+        $('dupMeta').innerHTML =
+          '<span><span class="k">Name</span><span class="v">'+(ed.name||'—')+'</span></span>'+
+          '<span><span class="k">Roll</span><span class="v">'+(ed.roll||roll)+'</span></span>'+
+          '<span><span class="k">Group</span><span class="v">'+(ed.group||group)+'</span></span>'+
+          '<span><span class="k">Submitted</span><span class="v">'+dateStr+'</span></span>';
+        $('dupModal').classList.add('active');
+        hideFormStatus();
+        return;
+      }
+
+      progressTo(90, 1.5);
+      showFormStatus('warn', 'Submitting…');
+
+      const submitResult = await gasPost(Object.assign({}, payload, { action:'submit' }));
+      $('fSubmit').disabled = false;
+
+      if(submitResult.ok){
+        cacheForm(payload);
+        formLoadHide(function(){
+          $('fareForm').reset();
+          $('imgUp').classList.remove('has-img');
+          $('starVal').textContent = '0 / 5';
+          S.photoDataUrl = null;
+          hideFormStatus();
+          closeForm();
+          const specialId = getSpecialModalId(roll, gender);
+          if(specialId) $(specialId).classList.add('active');
+          else showSuccessModal(name, false);
+        });
+      } else {
+        formLoadAbort();
+        showFormStatus('err', submitResult.message || 'Submission error. Please try again.');
+      }
+    });
+  } /* end initForm */
+
+  function cacheForm(d){
+    try{ localStorage.setItem('ssc26-form', JSON.stringify(d)); } catch{}
+  }
+  function loadFormCache(){
+    try{
+      const d = JSON.parse(localStorage.getItem('ssc26-form') || 'null');
+      if(!d) return;
+      const map = { name:'fName', roll:'fRoll', group:'fGroup', gender:'fGender', message:'fMsg' };
+      Object.entries(map).forEach(function(kv){ if(d[kv[0]] && $(kv[1])) $(kv[1]).value = d[kv[0]]; });
+      if(d.social){
+        const sm = { email:'fEmail', facebook:'fFb', instagram:'fIg', other:'fOther' };
+        Object.entries(sm).forEach(function(kv){ if(d.social[kv[0]] && $(kv[1])) $(kv[1]).value = d.social[kv[0]]; });
+      }
+      if(d.profileImageUrl){ $('imgPrev').src=d.profileImageUrl; $('imgUp').classList.add('has-img'); S.photoDataUrl=d.profileImageUrl; }
+      if(d.rating){
+        const r = document.querySelector('input[name="rating"][value="'+d.rating+'"]');
+        if(r){ r.checked=true; $('starVal').textContent=d.rating+' / 5'; }
+      }
+    } catch{}
+  }
+
+  /* =====================================================
+     SCROLL REVEAL
+     ===================================================== */
+  function initReveal(){
+    const obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ e.target.classList.toggle('in', e.isIntersecting); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal,.hl-item').forEach(function(el){ obs.observe(el); });
+  }
+
+  /* =====================================================
+     INIT
+     ===================================================== */
+  document.addEventListener('DOMContentLoaded', function(){
+    if('scrollRestoration' in history){
+      history.scrollRestoration = 'manual';
+    }
+
+    setTimeout(function(){
+      $('introOverlay').classList.add('done');
+      setTimeout(function(){ $('introOverlay').style.display='none'; }, 700);
+    }, 1400);
+
+    initNavbar();
+    initHero();
+    initTypewriter();
+    initHighlights();
+    initLightbox();
+    initVidModal();
+    initForm();
+    initReveal();
+    loadAllAlbums();
+
+    document.addEventListener('keydown', function(e){
+      if($('lb').classList.contains('active')) return;
+      if($('vidModal').classList.contains('active')) return;
+      if($('fmOverlay').classList.contains('active')) return;
+      if(e.key==='ArrowLeft')  heroGo((S.heroIdx-1+HERO_IMGS.length)%HERO_IMGS.length);
+      if(e.key==='ArrowRight') heroGo((S.heroIdx+1)%HERO_IMGS.length);
+    });
+
+    let resizeT;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeT);
+      resizeT = setTimeout(equalizeComCards, 250);
+    });
+
+    
+  });
 </script>
 </body>
 </html>
