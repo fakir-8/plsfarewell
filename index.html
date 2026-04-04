@@ -237,7 +237,7 @@ padding:24px; width:100%; max-width:600px;
 padding-top:80px;
 }
 .hero-logo { height:180px; width:auto; object-fit:contain; margin-bottom:24px; filter:drop-shadow(0 4px 20px rgba(0,0,0,.7)); animation:fadeUp .8s ease 1.5s both; }
-.hero-title { font-family:'Playfair Display',Georgia,serif; font-size:clamp(2rem,6vw,4rem); font-weight:600; letter-spacing:-.01em; margin-bottom:10px; text-shadow:0 4px 24px rgba(0,0,0,.6); animation:fadeUp .8s ease 1.7s both; }
+.hero-title { font-family:'Playfair Display',Georgia,serif; font-size:clamp(2rem,6vw,4rem); font-weight:700; letter-spacing:-.01em; margin-bottom:10px; text-shadow:0 4px 24px rgba(0,0,0,.6); animation:fadeUp .8s ease 1.7s both; }
 .hero-tag {
 font-family: 'HeroTagFont', var(--f-bn), sans-serif;
 font-size: clamp(1rem,2.8vw,1.45rem);
@@ -725,6 +725,8 @@ flex-shrink:0; text-align:left;
 display:flex; gap:10px;
 margin-top:auto; padding-top:14px;
 flex-shrink:0; min-height:42px; align-items:center;
+order: 10; /* always before the special image (order:99) */
+position: relative; z-index: 1; /* above the image in stacking context */
 }
 /* Special card */
 .com-card.special {
@@ -786,25 +788,47 @@ font-style:italic; font-size:1.05rem; color:var(--text-2); line-height:1.65;
 /* Special card — bottom stacked image */
 .cc-special-img {
   display: block;
-  width: 100%;
+  width: calc(100% + 56px);   /* bleed to card edges (card padding is 28px each side) */
+  margin-left: -28px;
   height: 0;
+  max-height: 0;              /* belt-and-suspenders: fully hidden when collapsed */
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
+  background-color: transparent; /* no black flash if image is slow to load */
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
   flex-shrink: 0;
-  transition: height .45s ease, margin-top .45s ease;
+  order: 99;                  /* always last in the flex column regardless of DOM position */
+  transition: height .45s ease, max-height .45s ease, margin-top .45s ease;
   margin-top: 0;
+  opacity: 0;
+  transition: height .45s ease, max-height .45s ease, margin-top .45s ease, opacity .45s ease;
 }
 .com-card.is-expanded .cc-special-img {
-  height: 150px;
+  height: 160px;
+  max-height: 160px;
   margin-top: 14px;
+  opacity: 1;
+}
+
+/* Mobile: narrower card padding — adjust bleed */
+@media (max-width:580px) {
+  .cc-special-img {
+    width: calc(100% + 36px);
+    margin-left: -18px;
+  }
+}
+@media (max-width:380px) {
+  .cc-special-img {
+    width: calc(100% + 28px);
+    margin-left: -14px;
+  }
 }
 
 
@@ -1817,21 +1841,38 @@ async function downloadFile(url,filename){
 if(!url)return;
 const fn=filename||extractFileName(url,'download');
 const driveId=extractDriveId(url);
-/* Build ordered fetch-candidates. Thumbnail API is CORS-accessible for public Drive files. */
+/* 
+  NEVER use drive.google.com/uc?export=download on mobile — it triggers
+  the Google account picker page. Use only CORS-transparent CDN endpoints.
+*/
 const candidates=[];
 if(driveId){
+  /* Thumbnail endpoint: CORS-open, no account picker, works on all devices */
   candidates.push('https://drive.google.com/thumbnail?id='+driveId+'&sz=w4096');
-  candidates.push('https://drive.google.com/uc?export=view&id='+driveId);
+  /* lh3 CDN: direct Google CDN, no redirect chain */
+  candidates.push('https://lh3.googleusercontent.com/d/'+driveId);
 }
-candidates.push(url);
-/* 1) Direct blob fetch */
-for(const c of candidates){try{await blobDownload(c,fn);return;}catch(e){}}
-/* 2) CORS proxy fallback */
-for(const c of candidates.slice(0,2)){
-  try{await blobDownload('https://corsproxy.io/?'+encodeURIComponent(c),fn);return;}catch(e){}
+/* Only add the raw URL if it is NOT a Drive redirect URL */
+if(!driveId){candidates.push(url);}
+
+/* Pass 1 — direct blob fetch (works on desktop + most mobile) */
+for(const c of candidates){
+  try{await blobDownload(c,fn);return;}catch(e){console.warn('[DL] direct fail:',c,e.message);}
 }
-/* 3) Last resort — may behave as navigation on some browsers */
-triggerAnchor(url,fn);
+/* Pass 2 — CORS proxy (handles strict mobile CORS) */
+for(const c of candidates){
+  try{await blobDownload('https://corsproxy.io/?'+encodeURIComponent(c),fn);return;}catch(e){console.warn('[DL] proxy fail:',c,e.message);}
+}
+/* Pass 3 — absolute last resort: open CDN url in new tab rather than Drive page */
+if(driveId){
+  const a=document.createElement('a');
+  a.href='https://drive.google.com/thumbnail?id='+driveId+'&sz=w4096';
+  a.download=fn; a.target='_blank'; a.rel='noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  requestAnimationFrame(function(){try{document.body.removeChild(a);}catch{}});
+}else{
+  triggerAnchor(url,fn);
+}
 }
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 async function downloadQueue(urls,filenames,onProgress,onDone){
@@ -2685,7 +2726,7 @@ card.className = 'com-card' + (c.special ? ' special' : '');
 card.setAttribute('role', 'listitem');
 const hasSocial = c.social && Object.keys(c.social).length > 0;
 const specialImgHtml = (c.special && c.specialImageUrl)
-  ? '<div class="cc-special-img" aria-hidden="true" style="background-image:url('+JSON.stringify(c.specialImageUrl)+')" ondragstart="return false" oncontextmenu="return false"></div>'
+  ? '<div class="cc-special-img" aria-hidden="true" style="background-image:url(\''+c.specialImageUrl.replace(/'/g,'%27')+'\')" ondragstart="return false" oncontextmenu="return false"></div>'
   : '';
 const icons = {
 facebook: '<svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>',
