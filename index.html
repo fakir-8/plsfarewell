@@ -1976,66 +1976,76 @@ COMMENTS SHEET LOADER
 FIX: All COMMENTS_DATA references changed to COMMENTS_FALLBACK_DATA
 FIX: Robust error handling, never returns undefined
 ===================================================== */
+/* =====================================================
+COMMENTS SHEET LOADER — FIXED VARIABLE ORDER
+===================================================== */
 async function fetchCommentsFromSheet() {
-const gid = CFG.COMMENTS_GID;
-if (!gid) {
-console.warn('[Comments] No GID configured, using fallback data');
-return COMMENTS_FALLBACK_DATA;
-}
-try {
-const url = 'https://docs.google.com/spreadsheets/d/' + CFG.SHEET_ID + '/gviz/tq?tqx=out:csv&gid=' + gid;
-console.log('[Comments] Fetching from:', url);
-const resp = await fetch(url, { cache: 'no-cache' });
-if (!resp.ok) throw new Error('HTTP ' + resp.status);
-const csvText = await resp.text();
-if (!csvText || csvText.trim().length < 10) throw new Error('Empty sheet');
-const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true, dynamicTyping: false });
-if (!parsed.data || !parsed.data.length) throw new Error('No rows in sheet');
-const comments = [];
-parsed.data.forEach(function(row, idx) {
-const name = (row['Name'] || '').trim();
-const group = (row['Group'] || '').trim();
-const avatar = (row['Avatar'] || '').trim();
-const message = (row['Message'] || '').trim();
-const rating = parseInt(row['Rating'] || '5', 10) || 5;
-const facebook = (row['Facebook'] || '').trim();
-const instagram = (row['Instagram'] || '').trim();
-const linkedin = (row['LinkedIn'] || '').trim();
-const website = (row['Website'] || '').trim();
-const email = (row['Email'] || '').trim();
-const others = (row['Others'] || '').trim();
+  const gid = CFG.COMMENTS_GID;
+  if (!gid) {
+    console.warn('[Comments] No GID configured, using fallback data');
+    return COMMENTS_FALLBACK_DATA;
+  }
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + CFG.SHEET_ID + '/gviz/tq?tqx=out:csv&gid=' + gid;
+    console.log('[Comments] Fetching from:', url);
+    const resp = await fetch(url, { cache: 'no-cache' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const csvText = await resp.text();
+    if (!csvText || csvText.trim().length < 10) throw new Error('Empty sheet');
+    const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true, dynamicTyping: false });
+    if (!parsed.data || !parsed.data.length) throw new Error('No rows in sheet');
+    const comments = [];
+    
+    parsed.data.forEach(function(row, idx) {
+      // 1. Extract ALL raw values first
+      const name = (row['Name'] || '').trim();
+      const group = (row['Group'] || '').trim();
+      const avatar = (row['Avatar'] || '').trim();
+      const message = (row['Message'] || '').trim();
+      const rating = parseInt(row['Rating'] || '5', 10) || 5;
+      const facebook = (row['Facebook'] || '').trim();
+      const instagram = (row['Instagram'] || '').trim();
+      const linkedin = (row['LinkedIn'] || '').trim();
+      const website = (row['Website'] || '').trim();
+      const email = (row['Email'] || '').trim();   // New Column
+      const others = (row['Others'] || '').trim(); // New Column
+      const specialRaw = (row['Special'] || '').toString().toLowerCase().trim();
+      const special = specialRaw === 'true' || specialRaw === 'yes' || specialRaw === '1';
+      const specialImageUrl = (row['Special Image'] || row['SpecialImage'] || '').trim();
+      
+      // 2. Skip incomplete rows
+      if (!name || !message) return; 
 
-// ... inside the social object building:
-if (email) social.email = email;
-if (others) social.others = others;
-const specialRaw = (row['Special'] || '').toString().toLowerCase().trim();
-const special = specialRaw === 'true' || specialRaw === 'yes' || specialRaw === '1';
-const specialImageUrl = (row['Special Image'] || row['SpecialImage'] || '').trim();
-if (!name || !message) return; /* Skip incomplete rows */
-const social = {};
-if (facebook) social.facebook = facebook;
-if (instagram) social.instagram = instagram;
-if (linkedin) social.linkedin = linkedin;
-if (website) social.website = website;
-comments.push({
-name: name,
-group: group,
-avatar: avatar || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + encodeURIComponent(name),
-message: message,
-rating: rating,
-social: social,
-special: special,
-specialImageUrl: specialImageUrl
-});
-});
-console.log('[Comments] Successfully loaded', comments.length, 'comments from sheet');
-/* FIX: Return fallback if sheet returned 0 valid comments */
-return comments.length > 0 ? comments : COMMENTS_FALLBACK_DATA;
-} catch (err) {
-console.error('[Comments Sheet] Error, using fallback:', err.message);
-/* FIX: Always return COMMENTS_FALLBACK_DATA (not undefined) on error */
-return COMMENTS_FALLBACK_DATA;
-}
+      // 3. Initialize social object HERE (BEFORE assigning properties)
+      const social = {}; 
+      
+      // 4. Assign properties safely
+      if (facebook) social.facebook = facebook;
+      if (instagram) social.instagram = instagram;
+      if (linkedin) social.linkedin = linkedin;
+      if (website) social.website = website;
+      if (email) social.email = email;       // Fixed: social is now defined
+      if (others) social.others = others;    // Fixed: social is now defined
+
+      // 5. Push to array
+      comments.push({
+        name: name,
+        group: group,
+        avatar: avatar || 'https://api.dicebear.com/7.x/thumbs/svg?seed=' + encodeURIComponent(name),
+        message: message,
+        rating: rating,
+        social: social,
+        special: special,
+        specialImageUrl: specialImageUrl
+      });
+    });
+    
+    console.log('[Comments] Successfully loaded', comments.length, 'comments from sheet');
+    return comments.length > 0 ? comments : COMMENTS_FALLBACK_DATA;
+  } catch (err) {
+    console.error('[Comments Sheet] Error, using fallback:', err.message);
+    return COMMENTS_FALLBACK_DATA;
+  }
 }
 
 async function loadAllAlbums() {
