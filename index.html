@@ -794,36 +794,32 @@ background:black; border:1px solid var(--gb); border-radius:8px; transition:all 
 /* REPLACE the existing .cc-special-img & .com-card.is-expanded .cc-special-img rules */
 .com-card { position: relative; } /* ensures absolute positioning works */
 
-/* REPLACE the existing .cc-special-img rules with this */
 .cc-special-img {
   position: absolute;
-  bottom: 0; 
-  left: 0;
-  
-  /* 1. Width controls the scale. We match the card's bleed width exactly. */
-  width: calc(100% + 56px); 
-  
-  /* 2. Height is now AUTO. It calculates based on the image's aspect ratio. */
-  height: auto; 
-  
-  /* 3. Ensure it doesn't grow infinitely large if the image is huge */
-  max-height: 40vh; /* Optional: Caps height at 40% of screen so it doesn't cover text */
-  
-  margin-left: -28px; /* Pulls it out to match card padding */
-  
-  background-size: contain; /* CHANGED from 'cover' to 'contain' to prevent cropping */
+  bottom: 0; left: 0;
+  width: calc(100% + 56px); /* matches card padding bleed */
+  height: 300px; /* fixed height, always visible */
+  margin-left: -28px;
+  background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
   border-radius: 0 0 var(--r-lg) var(--r-lg);
-  
-  z-index: 0;
+  z-index: 0; /* sits BEHIND all content */
   pointer-events: none;
   user-select: none;
-  opacity: 0.9;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  opacity: 0.9; /* subtle blend, adjust 0-1 as needed */
   transition: opacity 0.3s ease;
 }
 
-/* Mobile Adjustments for the new width calculation */
+/* Keep ALL card content above the background image */
+.cc-head, .cc-div, .cc-msg, .cc-toggle, .cc-social {
+  position: relative;
+  z-index: 2;
+
+
+/* Mobile: narrower card padding — adjust bleed */
 @media (max-width:580px) {
   .cc-special-img {
     width: calc(100% + 36px);
@@ -836,14 +832,6 @@ background:black; border:1px solid var(--gb); border-radius:8px; transition:all 
     margin-left: -14px;
   }
 }
-
-/* Keep ALL card content above the background image */
-.cc-head, .cc-div, .cc-msg, .cc-toggle, .cc-social {
-  position: relative;
-  z-index: 2; }
-
-
-
 
 
 .cc-sl { width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:var(--glass); border:1px solid var(--gb); border-radius:8px; transition:all .2s ease; }
