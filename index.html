@@ -726,7 +726,7 @@ display:flex; gap:10px;
 margin-top:auto; padding-top:14px;
 flex-shrink:0; min-height:42px; align-items:center;
 order: 10; /* always before the special image (order:99) */
-position: relative; z-index: 1; /* above the image in stacking context */
+position: relative; z-index: 11; /* above the image in stacking context */
 }
 /* Special card */
 .com-card.special {
@@ -779,12 +779,13 @@ font-style:italic; font-size:1.05rem; color:var(--text-2); line-height:1.65;
 background:black; border:1px solid var(--gb); border-radius:8px; transition:all .2s ease; }
 .cc-sl svg { width:16px; height:16px; fill:#50C878; }
 
+/* REPLACE THIS BLOCK */
 .com-card.special .cc-sl:hover {
-  background: rgba(80,200,120,.12) !important;
-  border-color: rgba(80,200,120,.35) !important;
+  background: rgba(96, 165, 250, 0.12) !important; /* Light Blue Background */
+  border-color: rgba(96, 165, 250, 0.35) !important; /* Light Blue Border */
 }
 .com-card.special .cc-sl:hover svg {
-  fill: #50C878 !important;
+  fill: #60A5FA !important; /* Light Blue Icon Color */
 }
 
 @keyframes rotateAura { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -798,7 +799,7 @@ background:black; border:1px solid var(--gb); border-radius:8px; transition:all 
   position: absolute;
   bottom: 0; left: 0;
   width: calc(100% + 56px); /* matches card padding bleed */
-  height: 200px; /* fixed height, always visible */
+  height: 225px; /* fixed height, always visible */
   margin-left: -28px;
   background-size: cover;
   background-position: center bottom;
