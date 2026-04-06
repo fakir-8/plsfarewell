@@ -169,7 +169,7 @@ border-bottom:1px solid var(--gb);
 transform:translateY(0); opacity:1;
 }
 .nav-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
-.nav-logo { width:auto; height:57px; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+.nav-logo { width:auto; height:70px; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
 .nav-links { display:flex; align-items:center; gap:6px; }
 .nav-link { padding:7px 14px; border-radius:8px; color:var(--text-2); text-decoration:none; font-size:.875rem; font-weight:500; transition:color var(--ease),background var(--ease); background:none; border:none; }
 .nav-link:hover { color:var(--accent); background:var(--accent-dim); }
@@ -237,10 +237,10 @@ padding:24px; width:100%; max-width:600px;
 padding-top:80px;
 }
 .hero-logo { height:180px; width:auto; object-fit:contain; margin-bottom:24px; filter:drop-shadow(0 4px 20px rgba(0,0,0,.7)); animation:fadeUp .8s ease 1.5s both; }
-.hero-title { font-family:'Playfair Display',Georgia,serif; font-size:clamp(2rem,6vw,4rem); font-weight:700; letter-spacing:-.01em; margin-bottom:10px; text-shadow:0 4px 24px rgba(0,0,0,.6); animation:fadeUp .8s ease 1.7s both; }
+.hero-title { font-family:'Dancing Script',Georgia,serif; font-size:clamp(2.6rem,6vw,4rem); font-weight:700; letter-spacing:-.01em; margin-bottom:10px; text-shadow:0 4px 24px rgba(0,0,0,.6); animation:fadeUp .8s ease 1.7s both; }
 .hero-tag {
 font-family: 'HeroTagFont', var(--f-bn), sans-serif;
-font-size: clamp(1rem,2.8vw,1.45rem);
+font-size: clamp(1.45rem,2.8vw,2rem);
 font-weight: 500;
 color: var(--text-2);
 text-shadow: 0 2px 8px rgba(0,0,0,.5);
@@ -980,7 +980,7 @@ text-align:center; position:relative; z-index:1; overflow:hidden;
 .fg-tri { position:absolute; width:0; height:0; border-left:60px solid transparent; border-right:60px solid transparent; border-bottom:90px solid rgba(26,54,93,.07); top:20px; right:18%; transform:rotate(8deg); }
 .footer > *:not(.footer-geo) { position:relative; z-index:1; }
 .footer-logo {
-width:68px; height:68px; object-fit:contain; margin:0 auto 20px; opacity:.75;
+width:auto; height:80px; object-fit:contain; margin:0 auto 20px; opacity:.75;
 transition:transform .3s ease,opacity .3s ease;
 }
 .footer-logo:hover { transform:scale(1.12); opacity:1; }
@@ -992,7 +992,7 @@ color:var(--muted); margin-bottom:10px; font-size:.92rem;
 .footer-school {
 font-family:var(--f-head);
 /* FIX: responsive font size using clamp */
-font-size:clamp(1.1rem, 3.8vw, 1.66rem);
+font-size:clamp(1.5rem, 3.8vw, 1.8rem);
 line-height:1.25;
 margin-bottom:28px;
 transition:color .2s ease;
@@ -1131,14 +1131,14 @@ transition:transform .5s cubic-bezier(.17,.84,.44,1);
 .succ-orb { width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,rgba(31,182,255,.08),transparent 65%); top:-55px; left:-55px; }
 .succ-tri { width:0; height:0; border-left:80px solid transparent; border-right:80px solid transparent; border-bottom:110px solid rgba(26,54,93,.12); bottom:-30px; right:-30px; transform:rotate(12deg); }
 .succ-inner { position:relative; z-index:1; }
-.succ-x { position:absolute; top:10px; right:10px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:8px; color:var(--muted); font-size:18px; line-height:1; cursor:pointer; transition:all .2s ease; z-index:10; font-family:inherit; }
+.succ-x { position:absolute; top:7px; right:7px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:8px; color:var(--muted); font-size:18px; line-height:1; cursor:pointer; transition:all .2s ease; z-index:10; font-family:inherit; }
 .succ-x:hover { background:var(--error); border-color:var(--error); color:#fff; }
 .succ-tick-outer { width:68px; height:68px; background:rgba(31,182,255,.1); border-radius:50%; margin:0 auto 22px; display:flex; align-items:center; justify-content:center; }
 .succ-tick-inner { width:48px; height:48px; background:linear-gradient(135deg,var(--school-blue),var(--accent)); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 18px rgba(31,182,255,.35); }
 .succ-title { font-family:var(--f-head); font-size:1.55rem; font-weight:600; color:#fff; margin:0 0 12px; line-height:1.3; }
 .succ-body { color:var(--text-2); line-height:1.6; font-size:.93rem; margin:0; }
-#specialModal_12_boy .succ-card { border-color:rgba(245,158,11,.35); box-shadow:0 0 40px rgba(245,158,11,.12),0 20px 60px rgba(0,0,0,.6); }
-#specialModal_12_boy .succ-title { background:linear-gradient(90deg,#f59e0b,#fbbf24,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#specialModal_14_boy .succ-card { border-color:rgba(245,158,11,.35); box-shadow:0 0 40px rgba(245,158,11,.12),0 20px 60px rgba(0,0,0,.6); }
+#specialModal_14_boy .succ-title { background:linear-gradient(90deg,#f59e0b,#fbbf24,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 #specialModal_12_girl .succ-card { border-color:rgba(236,72,153,.35); box-shadow:0 0 40px rgba(236,72,153,.12),0 20px 60px rgba(0,0,0,.6); }
 #specialModal_12_girl .succ-title { background:linear-gradient(90deg,#ec4899,#f472b6,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 #specialModal_12_girl .succ-tick-inner { background:linear-gradient(135deg,#9d174d,#ec4899); box-shadow:0 4px 18px rgba(236,72,153,.35); }
@@ -1206,7 +1206,7 @@ section { padding:56px 16px; }
 <!-- Navbar -->
 <nav id="navbar" role="navigation" aria-label="Main navigation">
 <a href="#" class="nav-brand" aria-label="Police Line Secondary School, Jashore — SSC 2026">
-<img src="https://drive.google.com/thumbnail?id=1rc0DnazAH3_9fW27cLx1ozUtS0MDZ6vB&sz=w1000" alt="PLSJ School Logo" class="nav-logo">
+<img src="https://drive.google.com/thumbnail?id=1xMX0bOSifWAqJZB51udontbrlr3Gqzzw&sz=w1000" alt="Songshoptok 26 Logo" class="nav-logo">
 </a>
 <ul class="nav-links" role="list" style="list-style:none;margin:0;padding:0;">
 <li><a href="#highlights" class="nav-link">Highlights</a></li>
@@ -1282,10 +1282,10 @@ section { padding:56px 16px; }
 <div class="com-controls reveal">
 <button class="com-jump-btn" id="comFirst" aria-label="Go to first comment">
 <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-First
+
 </button>
 <button class="com-jump-btn" id="comLast" aria-label="Go to last comment">
-Last
+
 <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2.5-6 5.5 4V8l-5.5 4zm7-6v12h2V6h-2z"/></svg>
 </button>
 </div>
@@ -1315,7 +1315,7 @@ Last
 <div class="form-trig">
 <button class="form-trig-btn" id="openFormBtn" aria-label="Leave your memory and message">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-Leave Your Message &amp; Memory
+Leave Your Message &amp; Memory as a Batchmate
 </button>
 </div>
 </main>
@@ -1327,7 +1327,7 @@ Leave Your Message &amp; Memory
 <div class="fg-diamond"></div><div class="fg-ring-1"></div>
 <div class="fg-ring-2"></div><div class="fg-tri"></div>
 </div>
-<img src="https://image.qwenlm.ai/public_source/81734978-1c69-4d1d-b77f-e902a3c47564/1bd13492a-d829-4845-9c26-21b4f4364013.png" alt="Police Line Secondary School Jashore crest" class="footer-logo reveal">
+<img src="https://drive.google.com/thumbnail?id=1SL-ZyAnvn3b4CuL3ecz3ltNUD-k88sQG&sz=w1000" alt="Songshoptok 26 logo" class="footer-logo reveal">
 <!-- FIX: Batch line BEFORE school name -->
 <p class="footer-batch reveal">An Unforgettable Journey — SSC Batch 2026</p>
 <a href="https://plsj.edu.bd" target="_blank" rel="noopener noreferrer" class="footer-school-link reveal" aria-label="Visit Police Line Secondary School, Jashore official website">
@@ -1504,7 +1504,7 @@ LIGHTBOX
 <div class="fg">
 <div class="priv">
 <input type="checkbox" id="fPriv" required>
-<label for="fPriv">Your name, photo, and group will be publicly visible. All other data is kept private.</label>
+<label for="fPriv">Your name, profile photo (if uploaded), group name, and social links will be publicly visible. All other data is kept private</label>
 </div>
 <div class="ferr" id="privErr">You must agree to continue.</div>
 </div>
@@ -1563,10 +1563,10 @@ LIGHTBOX
 <div class="m-head"><h3 class="m-title" id="dupTitle">⚠ Already Submitted</h3><button class="m-x" id="dupX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>
 <p class="m-body">We found an existing entry matching this Roll, Group &amp; Gender.</p>
 <div class="dup-meta" id="dupMeta"></div>
-<p class="m-body" style="margin-bottom:0;">Do you want to <strong>resubmit</strong> your info? Your new entry will be saved separately — your original submission <em>will not be removed</em>.</p>
+<p class="m-body" style="margin-bottom:0;">Want to<strong>update</strong> your info? We’ll use the details from your new entry for your comments.</p>
 <div class="m-acts" style="margin-top:20px;">
 <button class="btn btn-s" id="dupCancel">Keep Original</button>
-<button class="btn btn-p" id="dupUpdate">Yes, Resubmit</button>
+<button class="btn btn-p" id="dupUpdate">Yes, Update</button>
 </div>
 </div>
 </div>
@@ -1584,19 +1584,19 @@ LIGHTBOX
 </div>
 </div>
 <!-- Special Modal: Roll 12 Boy -->
-<div id="specialModal_12_boy" class="succ-overlay" role="dialog" aria-modal="true">
+<div id="specialModal_14_boy" class="succ-overlay" role="dialog" aria-modal="true">
 <div class="succ-card">
 <div class="succ-geo succ-orb" style="background:radial-gradient(circle,rgba(255,160,0,.1),transparent 65%)"></div>
 <div class="succ-geo succ-tri" style="border-bottom-color:rgba(245,158,11,.1)"></div>
 <div class="succ-inner">
-<button class="succ-x" onclick="closeSpecialModal('specialModal_12_boy')" aria-label="Close">&#x2715;</button>
+<button class="succ-x" onclick="closeSpecialModal('specialModal_14_boy')" aria-label="Close">&#x2715;</button>
 <div class="succ-tick-outer" style="background:rgba(245,158,11,.14)">
 <div class="succ-tick-inner" style="background:linear-gradient(135deg,#b45309,#f59e0b);box-shadow:0 4px 18px rgba(245,158,11,.4)">
 <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
 </div>
 </div>
-<h2 class="succ-title">Welcome, Champion! 🏆</h2>
-<p class="succ-body">Roll 12 — you're one of our finest! Your memory is sealed in SSC 26's golden chapter. Stay legendary, brother! 🎓✨</p>
+<h2 class="succ-title">Welcome, Champion! MAF! 🏆</h2>
+<p class="succ-body">MD. Mokhdum Amin Fahim — you're one of our finest! Your memory is sealed in SSC 26's golden chapter. Stay legendary, physicist! 🎓✨</p>
 </div>
 </div>
 </div>
@@ -1706,7 +1706,7 @@ const ALBUMS_META = {
 };
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOMCZHzQvlIwANLZFTrZHeG_COi0rYvkbCF546ymMuJ2zcJKlQ7kqxKMHaHgZsnuMI/exec';
 const SPECIAL_IDENTITIES = [
-{ roll: '12', gender: 'boy'  },
+{ roll: '14', gender: 'boy'  },
 { roll: '12', gender: 'girl' }
 ];
 
