@@ -3771,6 +3771,10 @@ if($('guestSuccessModal')) {
   /* =====================================================
      INIT
      ===================================================== */
+	 // Add this to the top of your DOMContentLoaded to force cache bust
+if('caches' in window){
+  caches.keys().then(names => names.forEach(name => caches.delete(name)));
+}
   document.addEventListener('DOMContentLoaded', function(){
     if('scrollRestoration' in history){
       history.scrollRestoration = 'manual';
