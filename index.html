@@ -3434,7 +3434,12 @@ function closeSpecialModal(modalId){ const el = $(modalId); if(el) el.classList.
 FORM
 ===================================================== */
 let _pendingPayload = null;
-function openForm(){ $('fmOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; loadFormCache(); }
+function openForm(){ $('fmOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; 
+loadFormCache();
+ 
+ function cacheForm(d){
+  try{ localStorage.setItem('ssc26-form', JSON.stringify(d)); } catch(e){ console.warn('[Cache] Failed:', e.message); }
+}}
 function closeForm(){ $('fmOverlay').classList.remove('active'); document.body.style.overflow = ''; }
 function showFormStatus(type, text){
   const el = $('formStatus');
@@ -3574,64 +3579,61 @@ const setErr = function(id, msg, visible){ const el = $(id); el.textContent = ms
       showFormStatus('warn', 'Checking…');
       progressTo(40, 2);
 
-      /* Duplicate check */
-      const checkResult = await gasPost({ action:'check', roll, group, gender });
+     /* Duplicate check */
+const checkResult = await gasPost({ action:'check', roll, group, gender });
 
-      if(checkResult.found){
-/* FIX: Abort loading BEFORE showing duplicate modal */
-formLoadAbort();
-_pendingPayload={...payload};$('fSubmit').disabled=false;
-const ed=checkResult.existingData||{};
-const rawDate=ed.submittedAt||ed.timestamp||'';
-const dateStr=rawDate?(()=>{try{return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'});}catch{return rawDate;}})():'Unknown';
-$('dupMeta').innerHTML=`<span><span class="k">Name</span><span class="v">${ed.name||'—'}</span></span><span><span class="k">Roll</span><span class="v">${ed.roll||roll}</span></span><span><span class="k">Group</span><span class="v">${ed.group||group}</span></span><span><span class="k">Submitted</span><span class="v">${dateStr}</span></span>`;
-$('dupModal').classList.add('active');hideFormStatus();return;
+if(checkResult.found){
+  /* Abort loading BEFORE showing duplicate modal */
+  formLoadAbort();
+  _pendingPayload = {...payload};
+  $('fSubmit').disabled = false;
+  
+  const ed = checkResult.existingData || {};
+  const rawDate = ed.submittedAt || ed.timestamp || '';
+  const dateStr = rawDate ? (function(){
+    try{ return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'}); }
+    catch{ return rawDate; }
+  })() : 'Unknown';
+  
+  $('dupMeta').innerHTML =
+    '<span><span class="k">Name</span><span class="v">'+(ed.name||'—')+'</span></span>'+
+    '<span><span class="k">Roll</span><span class="v">'+(ed.roll||roll)+'</span></span>'+
+    '<span><span class="k">Group</span><span class="v">'+(ed.group||group)+'</span></span>'+
+    '<span><span class="k">Submitted</span><span class="v">'+dateStr+'</span></span>';
+  
+  $('dupModal').classList.add('active');
+  hideFormStatus();
+  return; /* Exit early — user must choose in modal */
 }
 
-      if(checkResult.found){
-        /* FIX: abort loader cleanly BEFORE showing duplicate modal — this was the freeze root cause */
-        formLoadAbort();
-        $('fSubmit').disabled = false;
-        _pendingPayload = Object.assign({}, payload);
-        const ed = checkResult.existingData || {};
-        const rawDate = ed.submittedAt || ed.timestamp || '';
-        const dateStr = rawDate ? (function(){
-          try{ return new Date(rawDate).toLocaleDateString('en-BD',{year:'numeric',month:'long',day:'numeric'}); }
-          catch{ return rawDate; }
-        })() : 'Unknown';
-        $('dupMeta').innerHTML =
-          '<span><span class="k">Name</span><span class="v">'+(ed.name||'—')+'</span></span>'+
-          '<span><span class="k">Roll</span><span class="v">'+(ed.roll||roll)+'</span></span>'+
-          '<span><span class="k">Group</span><span class="v">'+(ed.group||group)+'</span></span>'+
-          '<span><span class="k">Submitted</span><span class="v">'+dateStr+'</span></span>';
-        $('dupModal').classList.add('active');
-        hideFormStatus();
-        return;
-      }
+     progressTo(90, 1.5);
+showFormStatus('warn', 'Submitting…');
 
-      progressTo(90, 1.5);
-      showFormStatus('warn', 'Submitting…');
+const submitResult = await gasPost(Object.assign({}, payload, { action:'submit' }));
+$('fSubmit').disabled = false;
 
-      const submitResult = await gasPost(Object.assign({}, payload, { action:'submit' }));
-      $('fSubmit').disabled = false;
-
-      if(submitResult.ok){
-        cacheForm(payload);
-        formLoadHide(function(){
-          $('fareForm').reset();
-          $('imgUp').classList.remove('has-img');
-          $('starVal').textContent = '0 / 5';
-          S.photoDataUrl = null;
-          hideFormStatus();
-          closeForm();
-          const specialId = getSpecialModalId(roll, gender);
-          if(specialId) $(specialId).classList.add('active');
-          else showSuccessModal(name, false);
-        });
-      } else {
-        formLoadAbort();
-        showFormStatus('err', submitResult.message || 'Submission error. Please try again.');
-      }
+if(submitResult.ok){
+  /* Only cache if confirmed by server */
+  if(!submitResult.unconfirmed){
+    cacheForm(payload);
+  }
+  
+  formLoadHide(function(){
+    $('fareForm').reset();
+    $('imgUp').classList.remove('has-img');
+    $('starVal').textContent = '0 / 5';
+    S.photoDataUrl = null;
+    hideFormStatus();
+    closeForm();
+    
+    const specialId = getSpecialModalId(roll, gender);
+    if(specialId) $(specialId).classList.add('active');
+    else showSuccessModal(name, false);
+  });
+} else {
+  formLoadAbort();
+  showFormStatus('err', submitResult.message || 'Submission error. Please try again.');
+}
     });
   } /* end initForm */
   
