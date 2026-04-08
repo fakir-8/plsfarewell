@@ -769,8 +769,14 @@ color:rgba(255,255,255,.5); padding:2px 0; font-weight:700;
 letter-spacing:.08em; font-size:.72rem; text-transform:uppercase; margin-top:-4px !important;
 }
 .com-card.special .cc-msg {
-font-family:'CardFont','Cormorant Garamond','Hind Siliguri',Georgia,serif;
-font-style:italic; font-size:1.05rem; color:white; line-height:1.65;
+  font-family: 'CardFont','Cormorant Garamond','Hind Siliguri',Georgia,serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: white;
+  line-height: 1.65;
+  text-shadow:
+    0 1px 4px rgba(0,0,0,0.7),
+    0 3px 14px rgba(0,0,0,0.5);
 }
 
 /* Emerald green on special card social icon hover */
@@ -781,7 +787,7 @@ background:black; border:1px solid var(--gb); border-radius:8px; transition:all 
 
 /* REPLACE THIS BLOCK */
 .com-card.special .cc-sl:hover {
-  background: rgba(96, 165, 250, 0.12) !important; /* Light Blue Background */
+  background: rgba(96, 165, 250,) !important; /* Light Blue Background */
   border-color: rgba(96, 165, 250, 0.35) !important; /* Light Blue Border */
 }
 .com-card.special .cc-sl:hover svg {
@@ -841,7 +847,7 @@ background:black; border:1px solid var(--gb); border-radius:8px; transition:all 
 .cc-sl:hover svg { fill:var(--bg); }
 @media (max-width:580px) {
 .com-card { flex:0 0 85vw; padding:22px 18px; }
-.cc-msg { font-size:1.22rem; line-height:1.74; }
+.cc-msg { font-size:1.35rem; line-height:1.7; }
 .rating-section-box { padding:26px 20px 20px; }
 .rating-section-box .rating-label { font-size:1.16rem; }
 .rating-section-box .star-grp label { font-size:2.6rem; }
@@ -850,7 +856,7 @@ background:black; border:1px solid var(--gb); border-radius:8px; transition:all 
 }
 @media (max-width:380px) {
 .com-card { flex:0 0 92vw; padding:18px 14px; }
-.cc-msg { font-size:1.08rem; }
+.cc-msg { font-size:1.18rem; }
 .rating-section-box .star-grp label { font-size:2.25rem; }
 }
 
@@ -1740,7 +1746,7 @@ FORM TRIGGER — REDESIGNED
         <span class="btn-arrow">→</span>
       </button>
       
-      <p class="ft-note">Secure submission • Visible on Student Wall</p>
+      <p class="ft-note">• Visible on Student Wall After Review</p>
     </div>
   </div>
 </div>
@@ -1826,11 +1832,11 @@ GUEST MESSAGE SECTION
 
 <div class="footer-fb-wrap reveal">
   <!-- Facebook -->
-  <a href="https://facebook.com/yourgroup" class="footer-fb-group" aria-label="Join our SSC 2026 Facebook Group">
+  <a href="https://www.facebook.com/pulisa.la.ina.skula.yasora" class="footer-fb-group" aria-label="Join our SSC 2026 Facebook Group">
     <div class="footer-fb-circle">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="white" d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
     </div>
-    <span>Join Our Facebook Group</span>
+    <span> Facebook Page</span>
   </a>
   
   <!-- Email -->
@@ -2052,7 +2058,7 @@ LIGHTBOX
 <div class="m-head"><h3 class="m-title" id="dupTitle">⚠ Already Submitted</h3><button class="m-x" id="dupX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>
 <p class="m-body">We found an existing entry matching this Roll, Group &amp; Gender.</p>
 <div class="dup-meta" id="dupMeta"></div>
-<p class="m-body" style="margin-bottom:0;">Want to<strong>update</strong> your info? We’ll use the details from your new entry for your comments.</p>
+<p class="m-body" style="margin-bottom:0;">Want to <strong>update</strong> your info? We’ll use the details from your new entry for your comments.</p>
 <div class="m-acts" style="margin-top:20px;">
 <button class="btn btn-s" id="dupCancel">Keep Original</button>
 <button class="btn btn-p" id="dupUpdate">Yes, Update</button>
@@ -2196,7 +2202,7 @@ const ALBUMS_META = {
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxTNF7Nn5pg8Ea6OdD0DEL4wPHCStmj9uOQbRARtCXmC6oDSyyZgiDc6cdWkr1wG-N/exec';
 const SPECIAL_IDENTITIES = [
 { roll: '14', gender: 'boy'  },
-{ roll: '12', gender: 'girl' }
+{ roll: '120', gender: 'girl' }
 ];
 
 /* =====================================================
@@ -2349,34 +2355,17 @@ async function downloadFile(url, filename) {
   const fn = filename || extractFileName(url, 'download');
   const driveId = extractDriveId(url);
 
-  // Build ordered candidates — usercontent bypasses account picker & supports CORS blob fetch
-  const candidates = [];
-  if (driveId) {
-    candidates.push('https://drive.usercontent.google.com/download?id=' + driveId + '&export=download&authuser=0&confirm=t');
-    candidates.push('https://lh3.googleusercontent.com/d/' + driveId);
-  } else {
-    candidates.push(url);
-  }
+  // Always use usercontent — delivers original file, no picker, no flash tab
+  const dlUrl = driveId
+    ? 'https://drive.usercontent.google.com/download?id=' + driveId + '&export=download&authuser=0&confirm=t'
+    : url;
 
-  // Pass 1 — direct blob fetch (no tab opens, no account picker)
-  for (const c of candidates) {
-    try { await blobDownload(c, fn); return; }
-    catch (e) { console.warn('[DL] direct fail:', c, e.message); }
-  }
+  // Pass 1 — blob fetch (completely invisible, no tab opens)
+  try { await blobDownload(dlUrl, fn); return; }
+  catch (e) { console.warn('[DL] blob fail:', e.message); }
 
-  // Pass 2 — CORS proxy fallback
-  for (const c of candidates) {
-    try { await blobDownload('https://corsproxy.io/?' + encodeURIComponent(c), fn); return; }
-    catch (e) { console.warn('[DL] proxy fail:', c, e.message); }
-  }
-
-  // Pass 3 — anchor trigger (last resort, still no Google picker page)
-  triggerAnchor(
-    driveId
-      ? 'https://drive.usercontent.google.com/download?id=' + driveId + '&export=download&authuser=0&confirm=t'
-      : url,
-    fn
-  );
+  // Pass 2 — anchor fallback (still no picker; browser handles file directly)
+  triggerAnchor(dlUrl, fn);
 }
 /* =====================================================
 GOOGLE SHEETS LOADER
@@ -3655,13 +3644,20 @@ function initGuestForm(){
   }
 
   /* Only show errors for a field after user has left it (blur) */
-  ['gName','gContact','gMsg','gPriv'].forEach(function(id){
-    const el = $(id);
-    if(!el) return;
-    el.addEventListener('blur', function(){ _touched.add(id); validateForm(false); });
-    el.addEventListener('input', function(){ if(_touched.has(id)) validateForm(false); });
-    el.addEventListener('change', function(){ _touched.add(id); validateForm(false); });
-  });
+ // Text fields — validate on blur (first touch) and on input thereafter
+['gName','gContact','gMsg'].forEach(function(id){
+  const el = $(id);
+  if(!el) return;
+  el.addEventListener('blur',  function(){ _touched.add(id); validateForm(false); });
+  el.addEventListener('input', function(){ if(_touched.has(id)) validateForm(false); });
+});
+
+// Checkbox — change/click both fire reliably across all devices
+const privCb = $('gPriv');
+if(privCb){
+  privCb.addEventListener('change', function(){ _touched.add('gPriv'); validateForm(false); });
+  privCb.addEventListener('click',  function(){ _touched.add('gPriv'); validateForm(false); });
+}
 
   /* No setTimeout(validateForm) on load — button starts disabled, that's enough */
 
