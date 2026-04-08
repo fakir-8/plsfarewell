@@ -1790,7 +1790,8 @@ GUEST MESSAGE SECTION
       </div>
       
       <!-- Button with SVG Icon -->
-      <button type="submit" class="g-submit" id="gSubmit" disabled>
+      <!-- REPLACE WITH: -->
+<button type="submit" class="g-submit" id="gSubmit">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
         </svg>
@@ -2349,6 +2350,18 @@ function cleanUrlStr(url){ return url?url.trim().replace(/\s+$/,''):''; }
 function cleanAltText(s){ return (s||'').replace(/\.[a-z0-9]{2,5}$/i,'').trim(); }
 function triggerAnchor(href,filename){ const a=document.createElement('a');a.href=href;a.download=filename||'';a.rel='noopener noreferrer';a.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';document.body.appendChild(a);a.click();requestAnimationFrame(()=>{try{document.body.removeChild(a);}catch{}}); }
 async function blobDownload(fetchUrl,filename){ const resp=await fetch(fetchUrl,{cache:'no-cache'});if(!resp.ok)throw new Error('HTTP '+resp.status);const blob=await resp.blob();const ext=blob.type.split('/')[1]&&blob.type.split('/')[1].split(';')[0]||'';const safe=filename&&filename.includes('.')?filename:(ext?((filename||'file')+'.'+ext):(filename||'file'));const burl=URL.createObjectURL(blob);triggerAnchor(burl,safe);setTimeout(()=>URL.revokeObjectURL(burl),30000); }
+
+async function downloadQueue(urls, names, onProgress, onDone) {
+  const total = urls.length;
+  for (let i = 0; i < total; i++) {
+    try { await downloadFile(urls[i], names[i]); }
+    catch(e) { console.warn('[Queue] skip:', urls[i], e.message); }
+    if (onProgress) onProgress(i + 1, total);
+    if (i < total - 1) await new Promise(function(r){ setTimeout(r, 700); });
+  }
+  if (onDone) onDone();
+}
+
 // REPLACE WITH:
 async function downloadFile(url, filename) {
   if (!url) return;
@@ -3616,58 +3629,56 @@ function initGuestForm(){
   const submitBtn = $('gSubmit');
   if(!form || !submitBtn) return;
 
-  /* Track which fields the user has actually interacted with */
-  const _touched = new Set();
+  /* Define setGuestErr HERE — it was missing, causing silent ReferenceError */
+  function setGuestErr(id, msg, visible){
+    const el = $(id);
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.toggle('show', !!visible);
+  }
 
-  function validateForm(showAll) {
-    /* showAll = true only on submit attempt */
+  function validateForm(showAll){
     let isValid = true;
 
     const name = $('gName').value.trim();
-    if(!name){ isValid = false; setGuestErr('gNameErr','Name is required.', showAll || _touched.has('gName')); }
-    else { setGuestErr('gNameErr','',false); }
+    if(!name){ isValid = false; setGuestErr('gNameErr','Name is required.', showAll); }
+    else { setGuestErr('gNameErr','', false); }
 
     const contact = $('gContact').value.trim();
     const badContact = contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) && !contact.startsWith('@');
-    if(badContact){ isValid = false; setGuestErr('gContactErr','Enter a valid email or @username.', showAll || _touched.has('gContact')); }
-    else { setGuestErr('gContactErr','',false); }
+    if(badContact){ isValid = false; setGuestErr('gContactErr','Enter a valid email or @username.', showAll); }
+    else { setGuestErr('gContactErr','', false); }
 
     const msg = $('gMsg').value.trim();
-    if(!msg){ isValid = false; setGuestErr('gMsgErr','Message is required.', showAll || _touched.has('gMsg')); }
-    else { setGuestErr('gMsgErr','',false); }
+    if(!msg){ isValid = false; setGuestErr('gMsgErr','Message is required.', showAll); }
+    else { setGuestErr('gMsgErr','', false); }
 
-    if(!$('gPriv').checked){ isValid = false; setGuestErr('gPrivErr','You must agree.', showAll || _touched.has('gPriv')); }
-    else { setGuestErr('gPrivErr','',false); }
+    if(!$('gPriv').checked){ isValid = false; setGuestErr('gPrivErr','You must agree.', showAll); }
+    else { setGuestErr('gPrivErr','', false); }
 
-    submitBtn.disabled = !isValid;
     return isValid;
   }
 
-  /* Only show errors for a field after user has left it (blur) */
- // Text fields — validate on blur (first touch) and on input thereafter
-['gName','gContact','gMsg'].forEach(function(id){
-  const el = $(id);
-  if(!el) return;
-  el.addEventListener('blur',  function(){ _touched.add(id); validateForm(false); });
-  el.addEventListener('input', function(){ if(_touched.has(id)) validateForm(false); });
-});
+  /* Show errors only after user touches each field */
+  ['gName','gContact','gMsg'].forEach(function(id){
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener('blur',  function(){ validateForm(false); setGuestErr(id+'Err', el.value.trim() ? '' : (id==='gMsg'?'Message is required.':'Name is required.'), !el.value.trim()); });
+    el.addEventListener('input', function(){ validateForm(false); });
+  });
 
-// Checkbox — change/click both fire reliably across all devices
-const privCb = $('gPriv');
-if(privCb){
-  privCb.addEventListener('change', function(){ _touched.add('gPriv'); validateForm(false); });
-  privCb.addEventListener('click',  function(){ _touched.add('gPriv'); validateForm(false); });
-}
-
-  /* No setTimeout(validateForm) on load — button starts disabled, that's enough */
+  var privCb = $('gPriv');
+  if(privCb){
+    privCb.addEventListener('change', function(){ validateForm(false); });
+  }
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();
-    if(!validateForm(true)) return; /* Show ALL errors on submit attempt */
+    /* Validate everything and show all errors on submit */
+    if(!validateForm(true)) return;
 
-    /* Spinner state */
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<svg viewBox="0 0 24 24" class="g-spin" aria-hidden="true" style="animation:guestSpin .8s linear infinite;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg><span>Sending…</span>';
+    submitBtn.innerHTML = '<svg viewBox="0 0 24 24" style="animation:guestSpin .8s linear infinite;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg><span>Sending…</span>';
 
     const payload = {
       action: 'guestMessage',
@@ -3689,8 +3700,7 @@ if(privCb){
       if(resp.ok && data.success !== false){
         openGuestSuccessModal();
         form.reset();
-        _touched.clear();
-        validateForm(false); /* reset button */
+        validateForm(false);
       } else {
         alert(data.message || 'Failed to send. Please try again.');
       }
@@ -3699,10 +3709,8 @@ if(privCb){
       console.error('[GuestForm]', err);
     }
 
-    /* Restore button */
     submitBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg><span>Send Message</span>';
     submitBtn.disabled = false;
-    validateForm(false);
   });
 }
   /* =====================================================
