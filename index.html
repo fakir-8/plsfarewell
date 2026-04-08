@@ -1596,6 +1596,7 @@ section { padding:56px 16px; }
 .lb-btn span { display:none; }
 .lb-acts { gap:4px; }
 }
+@keyframes guestSpin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -2192,7 +2193,7 @@ const ALBUMS_META = {
 3: { title:'Farewell Ceremony',   subtitle:'Official documentary',          type:'video' },
 4: { title:'Cultural Events',     subtitle:'Performances & celebrations',   type:'image' },
 };
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW9Xy7OR6sz4B4LHjAZK_UkQyHfydiG3WlwhSfmCBSp-efieja1bXJAkqSvomu9rAm/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxTNF7Nn5pg8Ea6OdD0DEL4wPHCStmj9uOQbRARtCXmC6oDSyyZgiDc6cdWkr1wG-N/exec';
 const SPECIAL_IDENTITIES = [
 { roll: '14', gender: 'boy'  },
 { roll: '12', gender: 'girl' }
@@ -2343,54 +2344,40 @@ function cleanAltText(s){ return (s||'').replace(/\.[a-z0-9]{2,5}$/i,'').trim();
 function triggerAnchor(href,filename){ const a=document.createElement('a');a.href=href;a.download=filename||'';a.rel='noopener noreferrer';a.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';document.body.appendChild(a);a.click();requestAnimationFrame(()=>{try{document.body.removeChild(a);}catch{}}); }
 async function blobDownload(fetchUrl,filename){ const resp=await fetch(fetchUrl,{cache:'no-cache'});if(!resp.ok)throw new Error('HTTP '+resp.status);const blob=await resp.blob();const ext=blob.type.split('/')[1]&&blob.type.split('/')[1].split(';')[0]||'';const safe=filename&&filename.includes('.')?filename:(ext?((filename||'file')+'.'+ext):(filename||'file'));const burl=URL.createObjectURL(blob);triggerAnchor(burl,safe);setTimeout(()=>URL.revokeObjectURL(burl),30000); }
 // REPLACE WITH:
-async function downloadFile(url,filename){
-if(!url)return;
-const fn=filename||extractFileName(url,'download');
-const driveId=extractDriveId(url);
-/* 
-  NEVER use drive.google.com/uc?export=download on mobile — it triggers
-  the Google account picker page. Use only CORS-transparent CDN endpoints.
-*/
-const candidates=[];
-if(driveId){
-  /* Thumbnail endpoint: CORS-open, no account picker, works on all devices */
-  candidates.push('https://drive.google.com/thumbnail?id='+driveId+'&sz=w4096');
-  /* lh3 CDN: direct Google CDN, no redirect chain */
-  candidates.push('https://lh3.googleusercontent.com/d/'+driveId);
-}
-/* Only add the raw URL if it is NOT a Drive redirect URL */
-if(!driveId){candidates.push(url);}
+async function downloadFile(url, filename) {
+  if (!url) return;
+  const fn = filename || extractFileName(url, 'download');
+  const driveId = extractDriveId(url);
 
-/* Pass 1 — direct blob fetch (works on desktop + most mobile) */
-for(const c of candidates){
-  try{await blobDownload(c,fn);return;}catch(e){console.warn('[DL] direct fail:',c,e.message);}
-}
-/* Pass 2 — CORS proxy (handles strict mobile CORS) */
-for(const c of candidates){
-  try{await blobDownload('https://corsproxy.io/?'+encodeURIComponent(c),fn);return;}catch(e){console.warn('[DL] proxy fail:',c,e.message);}
-}
-/* Pass 3 — absolute last resort: open CDN url in new tab rather than Drive page */
-if(driveId){
-  const a=document.createElement('a');
-  a.href='https://drive.google.com/thumbnail?id='+driveId+'&sz=w4096';
-  a.download=fn; a.target='_blank'; a.rel='noopener noreferrer';
-  document.body.appendChild(a); a.click();
-  requestAnimationFrame(function(){try{document.body.removeChild(a);}catch{}});
-}else{
-  triggerAnchor(url,fn);
-}
-}
-const delay=ms=>new Promise(r=>setTimeout(r,ms));
-async function downloadQueue(urls,filenames,onProgress,onDone){
-for(let i=0;i<urls.length;i++){
-if(!urls[i]){onProgress&&onProgress(i+1,urls.length);continue;}
-await downloadFile(urls[i],filenames&&filenames[i]);
-onProgress&&onProgress(i+1,urls.length);
-if(i<urls.length-1)await delay(1400);
-}
-onDone&&onDone();
-}
+  // Build ordered candidates — usercontent bypasses account picker & supports CORS blob fetch
+  const candidates = [];
+  if (driveId) {
+    candidates.push('https://drive.usercontent.google.com/download?id=' + driveId + '&export=download&authuser=0&confirm=t');
+    candidates.push('https://lh3.googleusercontent.com/d/' + driveId);
+  } else {
+    candidates.push(url);
+  }
 
+  // Pass 1 — direct blob fetch (no tab opens, no account picker)
+  for (const c of candidates) {
+    try { await blobDownload(c, fn); return; }
+    catch (e) { console.warn('[DL] direct fail:', c, e.message); }
+  }
+
+  // Pass 2 — CORS proxy fallback
+  for (const c of candidates) {
+    try { await blobDownload('https://corsproxy.io/?' + encodeURIComponent(c), fn); return; }
+    catch (e) { console.warn('[DL] proxy fail:', c, e.message); }
+  }
+
+  // Pass 3 — anchor trigger (last resort, still no Google picker page)
+  triggerAnchor(
+    driveId
+      ? 'https://drive.usercontent.google.com/download?id=' + driveId + '&export=download&authuser=0&confirm=t'
+      : url,
+    fn
+  );
+}
 /* =====================================================
 GOOGLE SHEETS LOADER
 ===================================================== */
@@ -3434,12 +3421,9 @@ function closeSpecialModal(modalId){ const el = $(modalId); if(el) el.classList.
 FORM
 ===================================================== */
 let _pendingPayload = null;
-function openForm(){ $('fmOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; 
-loadFormCache();
+function openForm(){ $('fmOverlay').classList.add('active'); document.body.style.overflow = 'hidden';
+ }
  
- function cacheForm(d){
-  try{ localStorage.setItem('ssc26-form', JSON.stringify(d)); } catch(e){ console.warn('[Cache] Failed:', e.message); }
-}}
 function closeForm(){ $('fmOverlay').classList.remove('active'); document.body.style.overflow = ''; }
 function showFormStatus(type, text){
   const el = $('formStatus');
@@ -3614,9 +3598,7 @@ $('fSubmit').disabled = false;
 
 if(submitResult.ok){
   /* Only cache if confirmed by server */
-  if(!submitResult.unconfirmed){
-    cacheForm(payload);
-  }
+  
   
   formLoadHide(function(){
     $('fareForm').reset();
@@ -3643,60 +3625,54 @@ GUEST MESSAGE FORM HANDLER — UPDATED
 function initGuestForm(){
   const form = $('guestForm');
   const submitBtn = $('gSubmit');
-  const inputs = ['gName', 'gContact', 'gMsg', 'gPriv'].map(id => $(id));
-  
   if(!form || !submitBtn) return;
 
-  // Function to validate all fields
-  function validateForm() {
+  /* Track which fields the user has actually interacted with */
+  const _touched = new Set();
+
+  function validateForm(showAll) {
+    /* showAll = true only on submit attempt */
     let isValid = true;
-    
-    // Name
+
     const name = $('gName').value.trim();
-    if(!name) { setGuestErr('gNameErr','Name is required.',true); isValid=false; }
+    if(!name){ isValid = false; setGuestErr('gNameErr','Name is required.', showAll || _touched.has('gName')); }
     else { setGuestErr('gNameErr','',false); }
-    
-    // Contact (Optional but must be valid if present)
+
     const contact = $('gContact').value.trim();
-    if(contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) && !contact.startsWith('@')){
-      setGuestErr('gContactErr','Enter valid email or @username.',true); isValid=false;
-    } else { setGuestErr('gContactErr','',false); }
-    
-    // Message
+    const badContact = contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) && !contact.startsWith('@');
+    if(badContact){ isValid = false; setGuestErr('gContactErr','Enter a valid email or @username.', showAll || _touched.has('gContact')); }
+    else { setGuestErr('gContactErr','',false); }
+
     const msg = $('gMsg').value.trim();
-    if(!msg){ setGuestErr('gMsgErr','Message is required.',true); isValid=false; }
+    if(!msg){ isValid = false; setGuestErr('gMsgErr','Message is required.', showAll || _touched.has('gMsg')); }
     else { setGuestErr('gMsgErr','',false); }
-    
-    // Privacy
-    if(!$('gPriv').checked){ setGuestErr('gPrivErr','You must agree.',true); isValid=false; }
+
+    if(!$('gPriv').checked){ isValid = false; setGuestErr('gPrivErr','You must agree.', showAll || _touched.has('gPriv')); }
     else { setGuestErr('gPrivErr','',false); }
-    
-    // Toggle Button State
-    if(isValid) {
-      submitBtn.removeAttribute('disabled');
-    } else {
-      submitBtn.setAttribute('disabled', 'true');
-    }
+
+    submitBtn.disabled = !isValid;
     return isValid;
   }
 
-  // Add listeners to inputs to re-validate on change
-  inputs.forEach(input => {
-    if(input) {
-      input.addEventListener('input', validateForm);
-      input.addEventListener('change', validateForm);
-    }
+  /* Only show errors for a field after user has left it (blur) */
+  ['gName','gContact','gMsg','gPriv'].forEach(function(id){
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener('blur', function(){ _touched.add(id); validateForm(false); });
+    el.addEventListener('input', function(){ if(_touched.has(id)) validateForm(false); });
+    el.addEventListener('change', function(){ _touched.add(id); validateForm(false); });
   });
 
-  // Initial check (in case browser autofills)
-  setTimeout(validateForm, 100);
+  /* No setTimeout(validateForm) on load — button starts disabled, that's enough */
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();
-    if(!validateForm()) return; // Double check
-    
-    submitBtn.setAttribute('disabled', 'true'); // Lock button during send
-    
+    if(!validateForm(true)) return; /* Show ALL errors on submit attempt */
+
+    /* Spinner state */
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<svg viewBox="0 0 24 24" class="g-spin" aria-hidden="true" style="animation:guestSpin .8s linear infinite;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg><span>Sending…</span>';
+
     const payload = {
       action: 'guestMessage',
       name: $('gName').value.trim(),
@@ -3705,59 +3681,34 @@ function initGuestForm(){
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent.slice(0,200)
     };
-    
+
     try{
       const resp = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {'Content-Type':'text/plain'},
+        method:'POST', headers:{'Content-Type':'text/plain'},
         body: JSON.stringify(payload)
       });
       let data = {};
       try{ data = await resp.json(); }catch{}
-      
+
       if(resp.ok && data.success !== false){
-        // Show Success Modal
         openGuestSuccessModal();
         form.reset();
-        validateForm(); // Reset button state
+        _touched.clear();
+        validateForm(false); /* reset button */
       } else {
         alert(data.message || 'Failed to send. Please try again.');
-        submitBtn.removeAttribute('disabled');
       }
     } catch(err){
       alert('Network error. Please check your connection.');
       console.error('[GuestForm]', err);
-      submitBtn.removeAttribute('disabled');
     }
+
+    /* Restore button */
+    submitBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg><span>Send Message</span>';
+    submitBtn.disabled = false;
+    validateForm(false);
   });
 }
-
-function setGuestErr(id, msg, visible){
-  const el = $(id);
-  if(el){ el.textContent = msg; el.classList.toggle('show', visible); }
-}
-
-// Modal Functions
-function openGuestSuccessModal(){
-  const modal = $('guestSuccessModal');
-  if(modal) modal.classList.add('active');
-}
-
-function closeGuestSuccessModal(){
-  const modal = $('guestSuccessModal');
-  if(modal) modal.classList.remove('active');
-}
-
-// Close modal events
-if($('gSuccClose')) {
-  $('gSuccClose').addEventListener('click', closeGuestSuccessModal);
-}
-if($('guestSuccessModal')) {
-  $('guestSuccessModal').addEventListener('click', function(e){
-    if(e.target === $('guestSuccessModal')) closeGuestSuccessModal();
-  });
-}
-
   /* =====================================================
      SCROLL REVEAL
      ===================================================== */
