@@ -2338,83 +2338,247 @@ setLoadProgress(0);
 /* =====================================================
 DOWNLOAD ENGINE — FIXED
 ===================================================== */
-function isMobileDevice(){ return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||(typeof navigator.maxTouchPoints==='number'&&navigator.maxTouchPoints>2&&/MacIntel/.test(navigator.platform)); }
+/* =====================================================
+   DOWNLOAD ENGINE v3 — IFRAME-FIRST, ZERO FLASH
+   
+   How it works:
+   - fetch+blob: silent (needs CORS — rare for Drive, works if ever added)
+   - iframe: silent — Drive sends Content-Disposition:attachment,
+     browser downloads inside hidden iframe, main page untouched.
+     On first multi-download: browser shows ONE "allow multiple downloads"
+     prompt. After Allow, all future downloads are fully silent.
+   - anchor _blank: last-resort fallback only.
+   ===================================================== */
+
+/* ── Utilities ─────────────────────────────────────── */
+function isMobileDevice(){
+  return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    ||(typeof navigator.maxTouchPoints==='number'&&navigator.maxTouchPoints>2
+       &&/MacIntel/.test(navigator.platform));
+}
 function extractFileName(url,fallback){
-  fallback = fallback || 'file';
-  try{const parts=new URL(url).pathname.split('/').filter(Boolean);const last=decodeURIComponent(parts[parts.length-1]||'');return last.includes('.')?last:fallback;}catch{return fallback;}
-}
-function extractDriveId(url){ if(!url)return null;const m=url.match(/(?:\/d\/|[?&]id=|open\?id=)([a-zA-Z0-9_-]{20,})/);return m?m[1]:null; }
-function buildDriveDownloadUrl(url){ const id=extractDriveId(url);if(!id)return url;return `https://drive.usercontent.google.com/download?id=${id}&export=download&authuser=0&confirm=t`; }
-function toDrivePreview(rawUrl,fileId){ const id=fileId||extractDriveId(rawUrl);if(id)return `https://drive.google.com/uc?export=view&id=${id}`;if(rawUrl&&rawUrl.startsWith('http'))return rawUrl;return ''; }
-function toDriveDownload(rawUrl,fileId){ const id=fileId||extractDriveId(rawUrl);if(id)return buildDriveDownloadUrl(rawUrl);if(rawUrl&&rawUrl.startsWith('http'))return rawUrl;return ''; }
-function isUrlValid(s){ if(!s)return false;try{const u=new URL(s);return u.protocol==='http:'||u.protocol==='https:';}catch{return false;} }
-function cleanUrlStr(url){ return url?url.trim().replace(/\s+$/,''):''; }
-function cleanAltText(s){ return (s||'').replace(/\.[a-z0-9]{2,5}$/i,'').trim(); }
-
-/* Core anchor trigger — target _blank prevents page navigation on cross-origin */
-function triggerAnchor(href, filename){
-  const a = document.createElement('a');
-  a.href = href;
-  a.download = filename || '';
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
-  document.body.appendChild(a);
-  a.click();
-  /* Keep in DOM long enough for browser to register the download */
-  setTimeout(function(){ try{ document.body.removeChild(a); }catch{} }, 5000);
-}
-
-/* Blob download — fetches file into memory, creates object URL, downloads invisibly */
-async function blobDownload(fetchUrl, filename){
-  const resp = await fetch(fetchUrl, { cache: 'no-cache' });
-  if(!resp.ok) throw new Error('HTTP ' + resp.status);
-  const blob = await resp.blob();
-  const ext = (blob.type || '').split('/')[1]?.split(';')[0] || '';
-  const safeFn = filename && filename.includes('.') ? filename : (ext ? ((filename||'file')+'.'+ext) : (filename||'file'));
-  const burl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = burl;
-  a.download = safeFn;
-  a.style.cssText = 'position:fixed;top:-9999px;opacity:0;pointer-events:none;';
-  document.body.appendChild(a);
-  a.click();
-  /* Revoke after delay so browser can read the blob */
-  setTimeout(function(){ URL.revokeObjectURL(burl); try{ a.remove(); }catch{} }, 60000);
-}
-
-/* Single file download — blob first (silent), anchor fallback (_blank tab closes immediately) */
-async function downloadFile(url, filename){
-  if(!url) return;
-  const driveId = extractDriveId(url);
-  const fn = filename || extractFileName(url, 'photo') || 'photo.jpg';
-  /* Always use usercontent for Drive IDs — bypasses picker, no confirm page */
-  const dlUrl = driveId
-    ? `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
-    : url;
-
-  /* Pass 1: Fetch → Blob → ObjectURL (completely invisible, user stays on page, full quality) */
+  fallback=fallback||'file';
   try{
-    await blobDownload(dlUrl, fn);
+    const parts=new URL(url).pathname.split('/').filter(Boolean);
+    const last=decodeURIComponent(parts[parts.length-1]||'');
+    return last.includes('.')?last:fallback;
+  }catch{return fallback;}
+}
+function extractDriveId(url){
+  if(!url)return null;
+  const m=url.match(/(?:\/d\/|[?&]id=|open\?id=|\/file\/d\/)([a-zA-Z0-9_-]{20,})/);
+  return m?m[1]:null;
+}
+/* Always use usercontent + confirm=t — bypasses virus-scan picker */
+function buildDriveDownloadUrl(idOrUrl){
+  const id=typeof idOrUrl==='string'&&idOrUrl.length<40?idOrUrl:extractDriveId(idOrUrl);
+  if(id) return `https://drive.usercontent.google.com/download?id=${id}&export=download&authuser=0&confirm=t`;
+  return idOrUrl;
+}
+function toDrivePreview(rawUrl,fileId){
+  const id=fileId||extractDriveId(rawUrl);
+  if(id)return `https://drive.google.com/uc?export=view&id=${id}`;
+  if(rawUrl&&rawUrl.startsWith('http'))return rawUrl;
+  return '';
+}
+function toDriveDownload(rawUrl,fileId){
+  const id=fileId||extractDriveId(rawUrl);
+  if(id)return buildDriveDownloadUrl(id);
+  if(rawUrl&&rawUrl.startsWith('http'))return rawUrl;
+  return '';
+}
+function isUrlValid(s){
+  if(!s)return false;
+  try{const u=new URL(s);return u.protocol==='http:'||u.protocol==='https:';}catch{return false;}
+}
+function cleanUrlStr(url){return url?url.trim().replace(/\s+$/,''):'';}
+function cleanAltText(s){return(s||'').replace(/\.[a-z0-9]{2,5}$/i,'').trim();}
+
+/* ── Core download methods ──────────────────────────── */
+
+/**
+ * METHOD 1 — Blob fetch (CORS required).
+ * Works only if Drive ever enables CORS for the origin.
+ * 100% silent, full quality, no tab, no iframe.
+ */
+async function _blobDownload(dlUrl, filename){
+  const resp=await fetch(dlUrl,{cache:'no-cache',mode:'cors'});
+  if(!resp.ok)throw new Error('HTTP '+resp.status);
+  const blob=await resp.blob();
+  const ext=(blob.type||'').split('/')[1]?.split(';')[0]||'';
+  const fn=filename&&filename.includes('.')?filename:(ext?`${filename||'photo'}.${ext}`:(filename||'photo'));
+  const burl=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=burl; a.download=fn;
+  a.style.cssText='position:fixed;top:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  /* Revoke after 60s — browser needs time to stream large files */
+  setTimeout(()=>{URL.revokeObjectURL(burl);try{a.remove();}catch{}},60000);
+}
+
+/**
+ * METHOD 2 — Hidden iframe (PRIMARY, no CORS needed).
+ * Sets src of an invisible iframe to the download URL.
+ * Drive responds with Content-Disposition:attachment → browser downloads
+ * inside the iframe, parent page stays intact, zero visible flash.
+ *
+ * Multiple files: Chrome shows ONE "allow multiple downloads" prompt
+ * the first time, then all subsequent downloads are silent forever.
+ * That single prompt is unavoidable without a server proxy but is
+ * far better than a flashing tab per file.
+ */
+function _iframeDownload(dlUrl){
+  return new Promise(function(resolve){
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText=
+      'position:fixed;top:-9999px;left:-9999px;'+
+      'width:1px;height:1px;opacity:0;pointer-events:none;border:none;';
+    /* No sandbox attribute — sandboxed iframes cannot trigger downloads */
+    document.body.appendChild(iframe);
+    iframe.src=dlUrl;
+    /*
+     * 8 seconds gives the browser time to:
+     *  1. Navigate the iframe to the URL
+     *  2. Receive the Content-Disposition header
+     *  3. Initiate the file download
+     * After that we clean up the iframe (download already in progress).
+     */
+    setTimeout(function(){
+      try{iframe.remove();}catch{}
+      resolve();
+    },8000);
+  });
+}
+
+/**
+ * METHOD 3 — Anchor _blank (last-resort fallback only).
+ * Opens a tiny new tab that closes ~1s after download starts.
+ * Used only if both blob and iframe fail.
+ */
+function _anchorDownload(dlUrl,filename){
+  const a=document.createElement('a');
+  a.href=dlUrl;
+  a.download=filename||'';
+  a.target='_blank';
+  a.rel='noopener noreferrer';
+  a.style.cssText='position:fixed;top:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){try{a.remove();}catch{}},5000);
+}
+
+/* ── Public API ─────────────────────────────────────── */
+
+/**
+ * downloadFile(url, filename)
+ * Downloads a single file. Tries methods in order:
+ * blob fetch → iframe → anchor _blank
+ */
+async function downloadFile(url,filename){
+  if(!url)return;
+  const driveId=extractDriveId(url);
+  const dlUrl=driveId?buildDriveDownloadUrl(driveId):url;
+  const fn=filename||extractFileName(url,'photo.jpg');
+
+  /* Pass 1: blob (silent, no tab, no iframe) — works if CORS ever available */
+  try{
+    await _blobDownload(dlUrl,fn);
     return;
   }catch(e){
-    console.warn('[DL] Blob failed, using anchor fallback:', e.message);
+    /* CORS blocked (expected for Drive) — fall through */
   }
 
-  /* Pass 2: Anchor with _blank — tab opens briefly then closes when download starts */
-  triggerAnchor(dlUrl, fn);
+  /* Pass 2: iframe (silent, no tab, no navigation, works for Drive) */
+  await _iframeDownload(dlUrl);
+
+  /*
+   * Pass 3 would be _anchorDownload() but we don't reach it because
+   * _iframeDownload always resolves (never throws).
+   * Uncomment if you ever need it:
+   *   _anchorDownload(dlUrl, fn);
+   */
 }
 
-/* Sequential queue with 1.4s gap — browser won't throttle at this rate */
-async function downloadQueue(urls, names, onProgress, onDone){
-  const total = urls.length;
-  for(let i = 0; i < total; i++){
-    try{ await downloadFile(urls[i], names[i]); }
-    catch(e){ console.warn('[Queue] skip:', urls[i], e.message); }
-    if(onProgress) onProgress(i + 1, total);
-    if(i < total - 1) await new Promise(function(r){ setTimeout(r, 1400); });
+/**
+ * downloadQueue(urls, names, onProgress, onDone)
+ * Downloads files one by one with a 2-second gap.
+ * 2s is the sweet spot: fast enough for UX, slow enough that
+ * Chrome doesn't aggressively block the stream.
+ */
+async function downloadQueue(urls,names,onProgress,onDone){
+  const total=urls.length;
+  for(let i=0;i<total;i++){
+    try{await downloadFile(urls[i],names[i]);}
+    catch(e){console.warn('[Queue] skip:',urls[i],e.message);}
+    if(onProgress)onProgress(i+1,total);
+    if(i<total-1)await new Promise(r=>setTimeout(r,2000));
   }
-  if(onDone) onDone();
+  if(onDone)onDone();
+}
+
+/**
+ * downloadAsZip(urls, names, zipName, onProgress)
+ * Attempts to bundle all files into a single ZIP using JSZip.
+ * Requires CORS — if Drive blocks fetch, falls back to sequential iframe.
+ * compression:'STORE' = zero compression, 100% original file quality.
+ */
+async function downloadAsZip(urls,names,zipName,onProgress){
+  /* Load JSZip lazily */
+  if(!window.JSZip){
+    await new Promise(function(resolve,reject){
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=resolve; s.onerror=reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  const zip=new window.JSZip();
+  const total=urls.length;
+  let fetched=0;
+  let corsBlocked=false;
+
+  for(let i=0;i<total;i++){
+    try{
+      const driveId=extractDriveId(urls[i]);
+      const dlUrl=driveId?buildDriveDownloadUrl(driveId):urls[i];
+      const resp=await fetch(dlUrl,{cache:'no-cache',mode:'cors'});
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      const blob=await resp.blob();
+      zip.file(names[i]||`photo-${i+1}.jpg`,blob);
+      fetched++;
+    }catch(e){
+      if(e.message&&e.message.includes('CORS'))corsBlocked=true;
+      console.warn('[ZIP] skip:',urls[i],e.message);
+    }
+    if(onProgress)onProgress(i+1,total);
+  }
+
+  if(fetched===0){
+    /*
+     * All fetches failed (CORS blocked by Drive).
+     * Fall back: download sequentially via iframe instead.
+     */
+    showMsg(
+      'ZIP not available',
+      'Google Drive blocks direct file access from this site. '+
+      'Files will download one by one instead — same quality, no tabs.'
+    );
+    await downloadQueue(urls,names,onProgress,null);
+    return;
+  }
+
+  /* Generate ZIP — STORE = no compression, images keep 100% original bytes */
+  if(onProgress)onProgress(total,total); /* show 100% while zipping */
+  const content=await zip.generateAsync({type:'blob',compression:'STORE'});
+  const burl=URL.createObjectURL(content);
+  const a=document.createElement('a');
+  a.href=burl; a.download=(zipName||'SSC26-Photos')+'.zip';
+  a.style.cssText='position:fixed;top:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(burl);try{a.remove();}catch{}},60000);
 }
 
 /* JSZip in-browser ZIP — fetches all files as blobs, zips them, downloads one file.
@@ -2945,20 +3109,17 @@ const dlAllBtn=$('dlAllBtn');
 dlAllBtn.querySelector('.dl-opt-label').textContent='Download All';dlAllBtn.disabled=false;
 $('dlModal').classList.add('active');
 $('dlZipBtn').onclick = async function(){
-  const urls = album.images.map(function(i){ return i.download||i.url||i.preview; });
-  const names = album.images.map(function(i){ return i.fileName||extractFileName(i.download||i.url||i.preview); });
-  const zipBtn = $('dlZipBtn');
-  zipBtn.disabled = true;
+  const urls = album.images.map(i => i.download||i.url||i.preview);
+  const names = album.images.map(i => i.fileName||extractFileName(i.download||i.url||i.preview));
+  $('dlZipBtn').disabled = true;
   $('dlProgWrap').style.display = 'flex';
-  $('dlZipBtn').querySelector('.dl-opt-label').textContent = 'Zipping…';
-  await downloadAsZip(
-    urls, names,
-    album.title.replace(/\s+/g,'-'),
-    function(cur, tot){ const p = Math.round(cur/tot*100); $('dlProg').style.width = p+'%'; $('dlProgPct').textContent = p+'%'; }
+  $('dlZipBtn').querySelector('.dl-opt-label').textContent = 'Working…';
+  await downloadAsZip(urls, names, album.title.replace(/\s+/g,'-'),
+    function(cur,tot){ const p=Math.round(cur/tot*100); $('dlProg').style.width=p+'%'; $('dlProgPct').textContent=p+'%'; }
   );
-  zipBtn.disabled = false;
-  $('dlZipBtn').querySelector('.dl-opt-label').textContent = 'ZIP Archive';
+  $('dlZipBtn').disabled = false;
   $('dlProgWrap').style.display = 'none';
+  $('dlZipBtn').querySelector('.dl-opt-label').textContent = 'ZIP Archive';
   $('dlModal').classList.remove('active');
 };
 dlAllBtn.onclick=function(){
@@ -2994,22 +3155,20 @@ $('dlAllZipBtn').onclick = async function(){
   const allUrls=[], allNames=[];
   S.albumsData.forEach(function(album){
     album.images.forEach(function(img){
-      const u = img.download||img.url||img.preview;
-      if(u){ allUrls.push(u); allNames.push(img.fileName||extractFileName(u)); }
+      const u=img.download||img.url||img.preview;
+      if(u){allUrls.push(u); allNames.push(img.fileName||extractFileName(u));}
     });
   });
-  if(!allUrls.length){ showMsg('No images','No album images found.'); return; }
-  $('dlAllZipBtn').disabled = true;
-  $('dlAllProgWrap').style.display = 'flex';
-  $('dlAllProg').style.width = '0%';
-  $('dlAllZipBtn').querySelector('.dl-opt-label').textContent = 'Zipping…';
-  await downloadAsZip(
-    allUrls, allNames, 'SSC26-All-Albums',
-    function(cur, tot){ const p = Math.round(cur/tot*100); $('dlAllProg').style.width=p+'%'; $('dlAllProgPct').textContent=p+'%'; }
+  if(!allUrls.length){showMsg('No images','No album images loaded yet.');return;}
+  $('dlAllZipBtn').disabled=true;
+  $('dlAllProgWrap').style.display='flex';
+  $('dlAllZipBtn').querySelector('.dl-opt-label').textContent='Working…';
+  await downloadAsZip(allUrls, allNames, 'SSC26-All-Albums',
+    function(cur,tot){ const p=Math.round(cur/tot*100); $('dlAllProg').style.width=p+'%'; $('dlAllProgPct').textContent=p+'%'; }
   );
-  $('dlAllZipBtn').disabled = false;
-  $('dlAllProgWrap').style.display = 'none';
-  $('dlAllZipBtn').querySelector('.dl-opt-label').textContent = 'Download as ZIP';
+  $('dlAllZipBtn').disabled=false;
+  $('dlAllProgWrap').style.display='none';
+  $('dlAllZipBtn').querySelector('.dl-opt-label').textContent='Download as ZIP';
   $('dlAllModal').classList.remove('active');
 };
 $('dlAllOneByOneBtn').onclick=async function(){
