@@ -2187,7 +2187,8 @@ ALBUM_GIDS:  {
 1: '979443307',
 2: null,
 3: null,
-4: null
+4: null,
+5: null
 },
 ALBUM_ZIPS:  { 1:null, 2:null, 3:null, 4:null },
 HIGHLIGHT_GID: '979443307',
@@ -2195,10 +2196,11 @@ ALL_ALBUMS_GDRIVE_URL: 'https://drive.google.com',
 ALL_ALBUMS_ZIP_URL:    null
 };
 const ALBUMS_META = {
-1: { title:'Campus Life',         subtitle:'Daily moments on campus',       type:'image' },
-2: { title:'Sports Day 2025',     subtitle:'Athletic achievements',         type:'image' },
-3: { title:'Farewell Ceremony',   subtitle:'Official documentary',          type:'video' },
-4: { title:'Cultural Events',     subtitle:'Performances & celebrations',   type:'image' },
+1: { title:'Group Photos',         subtitle:'',       type:'image' },
+2: { title:'Candid',     subtitle:'',         type:'image' },
+3: { title:'Indivisual',   subtitle:'',          type:'image' },
+4: { title:'Friends',     subtitle:'',   type:'image' },
+5: { title:'Drone',     subtitle:'',   type:'image' }
 };
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxTNF7Nn5pg8Ea6OdD0DEL4wPHCStmj9uOQbRARtCXmC6oDSyyZgiDc6cdWkr1wG-N/exec';
 const SPECIAL_IDENTITIES = [
@@ -2334,12 +2336,12 @@ setLoadProgress(0);
 }
 
 /* =====================================================
-DOWNLOAD ENGINE
+DOWNLOAD ENGINE — FIXED
 ===================================================== */
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||(typeof navigator.maxTouchPoints==='number'&&navigator.maxTouchPoints>2&&/MacIntel/.test(navigator.platform)); }
 function extractFileName(url,fallback){
-fallback = fallback || 'file';
-try{const parts=new URL(url).pathname.split('/').filter(Boolean);const last=decodeURIComponent(parts[parts.length-1]||'');return last.includes('.')?last:fallback;}catch{return fallback;}
+  fallback = fallback || 'file';
+  try{const parts=new URL(url).pathname.split('/').filter(Boolean);const last=decodeURIComponent(parts[parts.length-1]||'');return last.includes('.')?last:fallback;}catch{return fallback;}
 }
 function extractDriveId(url){ if(!url)return null;const m=url.match(/(?:\/d\/|[?&]id=|open\?id=)([a-zA-Z0-9_-]{20,})/);return m?m[1]:null; }
 function buildDriveDownloadUrl(url){ const id=extractDriveId(url);if(!id)return url;return `https://drive.usercontent.google.com/download?id=${id}&export=download&authuser=0&confirm=t`; }
@@ -2348,37 +2350,117 @@ function toDriveDownload(rawUrl,fileId){ const id=fileId||extractDriveId(rawUrl)
 function isUrlValid(s){ if(!s)return false;try{const u=new URL(s);return u.protocol==='http:'||u.protocol==='https:';}catch{return false;} }
 function cleanUrlStr(url){ return url?url.trim().replace(/\s+$/,''):''; }
 function cleanAltText(s){ return (s||'').replace(/\.[a-z0-9]{2,5}$/i,'').trim(); }
-function triggerAnchor(href,filename){ const a=document.createElement('a');a.href=href;a.download=filename||'';a.rel='noopener noreferrer';a.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';document.body.appendChild(a);a.click();requestAnimationFrame(()=>{try{document.body.removeChild(a);}catch{}}); }
-async function blobDownload(fetchUrl,filename){ const resp=await fetch(fetchUrl,{cache:'no-cache'});if(!resp.ok)throw new Error('HTTP '+resp.status);const blob=await resp.blob();const ext=blob.type.split('/')[1]&&blob.type.split('/')[1].split(';')[0]||'';const safe=filename&&filename.includes('.')?filename:(ext?((filename||'file')+'.'+ext):(filename||'file'));const burl=URL.createObjectURL(blob);triggerAnchor(burl,safe);setTimeout(()=>URL.revokeObjectURL(burl),30000); }
 
-async function downloadQueue(urls, names, onProgress, onDone) {
-  const total = urls.length;
-  for (let i = 0; i < total; i++) {
-    try { await downloadFile(urls[i], names[i]); }
-    catch(e) { console.warn('[Queue] skip:', urls[i], e.message); }
-    if (onProgress) onProgress(i + 1, total);
-    if (i < total - 1) await new Promise(function(r){ setTimeout(r, 700); });
-  }
-  if (onDone) onDone();
+/* Core anchor trigger — target _blank prevents page navigation on cross-origin */
+function triggerAnchor(href, filename){
+  const a = document.createElement('a');
+  a.href = href;
+  a.download = filename || '';
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  /* Keep in DOM long enough for browser to register the download */
+  setTimeout(function(){ try{ document.body.removeChild(a); }catch{} }, 5000);
 }
 
-// REPLACE WITH:
-async function downloadFile(url, filename) {
-  if (!url) return;
-  const fn = filename || extractFileName(url, 'download');
-  const driveId = extractDriveId(url);
+/* Blob download — fetches file into memory, creates object URL, downloads invisibly */
+async function blobDownload(fetchUrl, filename){
+  const resp = await fetch(fetchUrl, { cache: 'no-cache' });
+  if(!resp.ok) throw new Error('HTTP ' + resp.status);
+  const blob = await resp.blob();
+  const ext = (blob.type || '').split('/')[1]?.split(';')[0] || '';
+  const safeFn = filename && filename.includes('.') ? filename : (ext ? ((filename||'file')+'.'+ext) : (filename||'file'));
+  const burl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = burl;
+  a.download = safeFn;
+  a.style.cssText = 'position:fixed;top:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  /* Revoke after delay so browser can read the blob */
+  setTimeout(function(){ URL.revokeObjectURL(burl); try{ a.remove(); }catch{} }, 60000);
+}
 
-  // Always use usercontent — delivers original file, no picker, no flash tab
+/* Single file download — blob first (silent), anchor fallback (_blank tab closes immediately) */
+async function downloadFile(url, filename){
+  if(!url) return;
+  const driveId = extractDriveId(url);
+  const fn = filename || extractFileName(url, 'photo') || 'photo.jpg';
+  /* Always use usercontent for Drive IDs — bypasses picker, no confirm page */
   const dlUrl = driveId
-    ? 'https://drive.usercontent.google.com/download?id=' + driveId + '&export=download&authuser=0&confirm=t'
+    ? `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
     : url;
 
-  // Pass 1 — blob fetch (completely invisible, no tab opens)
-  try { await blobDownload(dlUrl, fn); return; }
-  catch (e) { console.warn('[DL] blob fail:', e.message); }
+  /* Pass 1: Fetch → Blob → ObjectURL (completely invisible, user stays on page, full quality) */
+  try{
+    await blobDownload(dlUrl, fn);
+    return;
+  }catch(e){
+    console.warn('[DL] Blob failed, using anchor fallback:', e.message);
+  }
 
-  // Pass 2 — anchor fallback (still no picker; browser handles file directly)
+  /* Pass 2: Anchor with _blank — tab opens briefly then closes when download starts */
   triggerAnchor(dlUrl, fn);
+}
+
+/* Sequential queue with 1.4s gap — browser won't throttle at this rate */
+async function downloadQueue(urls, names, onProgress, onDone){
+  const total = urls.length;
+  for(let i = 0; i < total; i++){
+    try{ await downloadFile(urls[i], names[i]); }
+    catch(e){ console.warn('[Queue] skip:', urls[i], e.message); }
+    if(onProgress) onProgress(i + 1, total);
+    if(i < total - 1) await new Promise(function(r){ setTimeout(r, 1400); });
+  }
+  if(onDone) onDone();
+}
+
+/* JSZip in-browser ZIP — fetches all files as blobs, zips them, downloads one file.
+   Uses STORE compression so image quality is 100% preserved. */
+async function downloadAsZip(urls, names, zipName, onProgress){
+  /* Lazy-load JSZip from CDN */
+  if(!window.JSZip){
+    await new Promise(function(resolve, reject){
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  const zip = new window.JSZip();
+  const total = urls.length;
+  let failed = 0;
+  for(let i = 0; i < total; i++){
+    try{
+      const driveId = extractDriveId(urls[i]);
+      const dlUrl = driveId
+        ? `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
+        : urls[i];
+      const resp = await fetch(dlUrl, { cache: 'no-cache' });
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      const blob = await resp.blob();
+      const fn = names[i] || `photo-${i+1}.jpg`;
+      zip.file(fn, blob);
+    }catch(e){
+      console.warn('[ZIP] Skip:', urls[i], e.message);
+      failed++;
+    }
+    if(onProgress) onProgress(i + 1, total);
+  }
+  if(total - failed === 0){ showMsg('ZIP Failed','Could not fetch any files. Check that images are publicly shared on Drive.'); return; }
+  /* Generate zip — STORE means zero compression, images keep 100% original quality */
+  const content = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+  const burl = URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = burl;
+  a.download = (zipName || 'SSC26-Photos') + '.zip';
+  a.style.cssText = 'position:fixed;top:-9999px;opacity:0;pointer-events:none;';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(burl); try{ a.remove(); }catch{} }, 60000);
 }
 /* =====================================================
 GOOGLE SHEETS LOADER
@@ -2567,10 +2649,10 @@ $('navMobFormBtn').onclick=openForm;
 HERO SLIDESHOW
 ===================================================== */
 const HERO_IMGS=[
-'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&h=1080&fit=crop',
-'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1920&h=1080&fit=crop',
-'https://images.unsplash.com/photo-1525921429624-479b6a26d84d?w=1920&h=1080&fit=crop',
-'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1920&h=1080&fit=crop'
+'https://drive.google.com/thumbnail?id=1uwRX7ue1jOP6ppGOOxvzGl4AmSKol_Qb&sz=w1000',
+'https://drive.google.com/thumbnail?id=1PBS_832OMJd2vM9assjwdMhvzOugNYZS&sz=w1000',
+'https://drive.google.com/thumbnail?id=10Um8MdrxPZvxAvDDQhf4uY87AMnHnXOn&sz=w1000',
+'https://drive.google.com/thumbnail?id=1RYcPyadU-NV51HvJZQBkzx8Jkmcx0JGI&sz=w1000'
 ];
 function initHero(){
 const ss=$('heroSS'),dots=$('heroDots');
@@ -2862,10 +2944,22 @@ $('dlProgWrap').style.display='none';$('dlZipBtn').style.display='flex';
 const dlAllBtn=$('dlAllBtn');
 dlAllBtn.querySelector('.dl-opt-label').textContent='Download All';dlAllBtn.disabled=false;
 $('dlModal').classList.add('active');
-$('dlZipBtn').onclick=function(){
-const zip=CFG.ALBUM_ZIPS[album.id];
-if(zip){downloadFile(zip,album.title.replace(/\s+/g,'-')+'.zip');$('dlModal').classList.remove('active');}
-else{showMsg('Not Available','ZIP download is not configured for this album.');}
+$('dlZipBtn').onclick = async function(){
+  const urls = album.images.map(function(i){ return i.download||i.url||i.preview; });
+  const names = album.images.map(function(i){ return i.fileName||extractFileName(i.download||i.url||i.preview); });
+  const zipBtn = $('dlZipBtn');
+  zipBtn.disabled = true;
+  $('dlProgWrap').style.display = 'flex';
+  $('dlZipBtn').querySelector('.dl-opt-label').textContent = 'Zipping…';
+  await downloadAsZip(
+    urls, names,
+    album.title.replace(/\s+/g,'-'),
+    function(cur, tot){ const p = Math.round(cur/tot*100); $('dlProg').style.width = p+'%'; $('dlProgPct').textContent = p+'%'; }
+  );
+  zipBtn.disabled = false;
+  $('dlZipBtn').querySelector('.dl-opt-label').textContent = 'ZIP Archive';
+  $('dlProgWrap').style.display = 'none';
+  $('dlModal').classList.remove('active');
 };
 dlAllBtn.onclick=function(){
 dlAllBtn.disabled=true;
@@ -2896,10 +2990,27 @@ $('dlCancel').onclick=function(){$('dlModal').classList.remove('active');};
 $('openDlAllBtn').onclick=function(){$('dlAllModal').classList.add('active');};
 $('dlAllX').onclick=function(){$('dlAllModal').classList.remove('active');};
 $('dlAllCancel').onclick=function(){$('dlAllModal').classList.remove('active');};
-$('dlAllZipBtn').onclick=function(){
-const zipUrl=CFG.ALL_ALBUMS_ZIP_URL;
-if(zipUrl){downloadFile(zipUrl,'SSC26-All-Albums.zip');$('dlAllModal').classList.remove('active');}
-else{showMsg('Not Available','ZIP download for all albums is not configured yet.');}
+$('dlAllZipBtn').onclick = async function(){
+  const allUrls=[], allNames=[];
+  S.albumsData.forEach(function(album){
+    album.images.forEach(function(img){
+      const u = img.download||img.url||img.preview;
+      if(u){ allUrls.push(u); allNames.push(img.fileName||extractFileName(u)); }
+    });
+  });
+  if(!allUrls.length){ showMsg('No images','No album images found.'); return; }
+  $('dlAllZipBtn').disabled = true;
+  $('dlAllProgWrap').style.display = 'flex';
+  $('dlAllProg').style.width = '0%';
+  $('dlAllZipBtn').querySelector('.dl-opt-label').textContent = 'Zipping…';
+  await downloadAsZip(
+    allUrls, allNames, 'SSC26-All-Albums',
+    function(cur, tot){ const p = Math.round(cur/tot*100); $('dlAllProg').style.width=p+'%'; $('dlAllProgPct').textContent=p+'%'; }
+  );
+  $('dlAllZipBtn').disabled = false;
+  $('dlAllProgWrap').style.display = 'none';
+  $('dlAllZipBtn').querySelector('.dl-opt-label').textContent = 'Download as ZIP';
+  $('dlAllModal').classList.remove('active');
 };
 $('dlAllOneByOneBtn').onclick=async function(){
 $('dlAllOneByOneBtn').disabled=true;$('dlAllProgWrap').style.display='flex';
