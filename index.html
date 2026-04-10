@@ -130,7 +130,7 @@ unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+
 RESET
 ===================================================== */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { scroll-behavior:smooth; font-size:16px; }
+html { scroll-behavior:smooth; font-size:16px;  scrollbar-gutter: stable; /* ← ADD THIS LINE */ }
 body { font-family:var(--f-body); background:var(--bg); color:var(--text-1); line-height:1.6; min-height:100vh; overflow-x:hidden; }
 img,video { display:block; max-width:100%; }
 button { font-family:inherit; cursor:pointer; }
@@ -1598,9 +1598,12 @@ section { padding:56px 16px; }
 .fm-modal { padding:24px 18px; }
 .succ-card { padding:38px 24px 32px; }
 }
-@media (max-width:380px) {
-.lb-btn span { display:none; }
-.lb-acts { gap:4px; }
+@media (max-width: 600px) {
+  .lb-bar { flex-wrap: nowrap; padding: 10px 12px; gap: 6px; }
+  .lb-acts { flex-wrap: nowrap; gap: 4px; }
+  .lb-btn { padding: 7px 8px; }
+  .lb-btn span { display: none; } /* icons only — saves width */
+  .lb-close-btn { flex-shrink: 0; }
 }
 @keyframes guestSpin { to { transform: rotate(360deg); } }
 
@@ -1609,33 +1612,40 @@ section { padding:56px 16px; }
    TEMPORARY SPECIAL ALBUM VIEW
    ========================================= */
 .special-album-container {
-  background: var(--panel);
-  border: 1px solid var(--gb);
-  border-radius: var(--r-lg);
-  padding: 24px 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.05) 100%);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  padding: 32px 0 20px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  margin: 0 -24px; /* bleeds past section padding */
+  box-shadow: 0 4px 40px rgba(0,0,0,0.25);
 }
-.special-album-header { text-align: center; margin-bottom: 16px; }
+@media (max-width: 600px) {
+  .special-album-container { margin: 0 -16px; padding: 24px 0 16px; }
+}
+.special-album-header { text-align: center; margin-bottom: 20px; padding: 0 24px; }
 .special-album-header h3 {
   font-family: var(--f-head);
   font-size: clamp(1.3rem, 3vw, 1.6rem);
   font-weight: 600; color: var(--text-1); margin: 0; letter-spacing: -0.01em;
 }
 .special-viewport {
-  overflow: hidden; border-radius: 12px; position: relative; margin-bottom: 12px;
+  overflow: hidden; position: relative; margin-bottom: 0;
 }
 .special-track {
   display: flex; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 .special-page {
-  flex: 0 0 100%; display: grid; gap: 10px; padding: 2px;
+  flex: 0 0 100%; display: grid; gap: 6px; padding: 2px 16px;
 }
 /* Mobile: 2 cols | Desktop: 4 cols */
-@media (max-width: 600px) { .special-page { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 601px) { .special-page { grid-template-columns: repeat(4, 1fr); } }
+/* Always 4 columns — compact, fast-browsing gallery */
+.special-page { grid-template-columns: repeat(4, 1fr); }
 
 .special-page .alb-img {
   border-radius: 14px; margin: 0; background: rgba(255,255,255,0.03);
@@ -1644,7 +1654,7 @@ section { padding:56px 16px; }
 .special-page .alb-img:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(31,182,255,0.15); }
 .special-page .alb-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.special-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; }
+.special-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; padding: 0 24px; }
 .spec-btn {
   width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
   background: var(--glass); border: 1px solid var(--gb); border-radius: 50%;
@@ -1734,8 +1744,8 @@ section { padding:56px 16px; }
 <!-- Albums -->
 <section id="albums" aria-labelledby="alb-title">
 <div class="eyebrow reveal"><div class="eyebrow-line"></div><span class="eyebrow-txt">Categories</span><div class="eyebrow-line"></div></div>
-<h2 class="sec-title reveal" id="alb-title">Photo Albums</h2>
-<p class="sec-sub reveal">Browse our memories by category</p>
+<h2 class="sec-title reveal" id="alb-title">Photo Album</h2>
+<p class="sec-sub reveal"></p>
 <div class="albums-wrap" id="albumsWrap" role="list" aria-label="Photo album collection"></div>
 </section>
 <!-- Bulk actions -->
@@ -2340,6 +2350,8 @@ photoDataUrl:null, comIdx:0, comTimer:null, comObs:null,
 lbPanX:0, lbPanY:0, lbScale:1,
 lbDragging:false, lbDragStartX:0, lbDragStartY:0, lbPanStartX:0, lbPanStartY:0,
 lbLastTap:0,
+lbSlideshow:false,
+lbSlideshowTimer:null,
 comExpandedCard:null
 };
 
@@ -2980,15 +2992,13 @@ ALBUMS
    TEMPORARY SPECIAL ALBUM VIEW (Paginated Grid)
    ===================================================== */
 const USE_SPECIAL_ALBUM_VIEW = true; // 🔑 Set to FALSE to instantly revert to original albums
-const SPECIAL_ROWS_MOBILE = 5;       // 2 cols × 5 rows = 10 per page
+const SPECIAL_ROWS_MOBILE = 4;       // 2 cols × 5 rows = 10 per page
 const SPECIAL_ROWS_DESKTOP = 5;      // 4 cols × 5 rows = 20 per page (change to 10 if preferred)
 let _specialPage = 0;
 
 function getSpecialPageSize() {
-  const isMobile = window.innerWidth <= 600;
-  const cols = isMobile ? 2 : 4;
-  const rows = isMobile ? SPECIAL_ROWS_MOBILE : SPECIAL_ROWS_DESKTOP;
-  return cols * rows;
+  const rows = window.innerWidth <= 600 ? SPECIAL_ROWS_MOBILE : SPECIAL_ROWS_DESKTOP;
+  return 4 * rows; // always 4 columns
 }
 
 function renderSpecialAlbum(albumData) {
@@ -3022,12 +3032,27 @@ function renderSpecialAlbum(albumData) {
       el.dataset.preview = item.preview || item.url || '';
       el.dataset.download = item.download || item.url || el.dataset.preview;
       el.dataset.filename = item.fileName || extractFileName(el.dataset.download);
-      el.innerHTML = `<img src="${item.preview || item.url || ''}" alt="${item.alt || ''}" loading="lazy">`;
-      el.style.opacity = '0'; el.style.transform = 'translateY(12px)';
+      // Checkbox
+      const cb = document.createElement('div');
+      cb.className = 'alb-check';
+      cb.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+      cb.addEventListener('click', (e) => { e.stopPropagation(); toggleSelect('special', el, cb); });
+      // Image
+      const sImg = document.createElement('img');
+      sImg.src = item.preview || item.url || '';
+      sImg.alt = item.alt || 'SSC 2026 photo';
+      sImg.loading = 'lazy';
+      sImg.draggable = false;
+      el.appendChild(cb);
+      el.appendChild(sImg);
+
+      el.style.opacity = '0'; el.style.transform = 'translateY(8px)';
       el.addEventListener('click', () => {
+        if (S.selectMode) { toggleSelect('special', el, cb); return; }
         S.curAlbumId = 'special';
         openLightbox(albumData.images, start + i, albumData.type || 'image');
       });
+      setupLongPress(el, 'special', cb);
       pageDiv.appendChild(el);
       requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
     });
@@ -3044,8 +3069,14 @@ function renderSpecialAlbum(albumData) {
   $('specNext').onclick = () => { if (_specialPage < totalPages - 1) { _specialPage++; updateNav(); } };
   updateNav();
 
-  let resizeTimer;
-  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderSpecialAlbum(albumData), 250); });
+  let resizeTimer, _lastSpecialCols = 4;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const newCols = 4; // always 4 — see Fix 5
+      if (newCols !== _lastSpecialCols) { _lastSpecialCols = newCols; renderSpecialAlbum(albumData); }
+    }, 400);
+  });
 }
 /* =====================================================
    REPLACED `renderAlbums()` — Original logic preserved below
@@ -3190,7 +3221,9 @@ el.addEventListener('pointerleave',cancel);el.addEventListener('pointercancel',c
 function enterSelectMode(albumId,firstEl,firstCb){
 S.selectMode=true;
 if(albumId==='hl'){
-$('hlGrid')&&$('hlGrid').querySelectorAll('.hl-item').forEach(function(el){el.classList.add('selectable');});
+  $('hlGrid')&&$('hlGrid').querySelectorAll('.hl-item').forEach(function(el){el.classList.add('selectable');});
+}else if(albumId==='special'){
+  document.querySelectorAll('.special-page .alb-img').forEach(function(el){el.classList.add('selectable');});
 }else{
 const grid=$('agrid-'+albumId);
 if(grid)grid.querySelectorAll('.alb-img').forEach(function(el){el.classList.add('selectable');});
@@ -3396,8 +3429,9 @@ function openLightbox(items, startIdx, type) {
   if (S.isSpecialAlbumView && !document.getElementById('lbSsBtn')) {
     const ssBtn = document.createElement('button');
     ssBtn.className = 'lb-btn'; ssBtn.id = 'lbSsBtn'; ssBtn.setAttribute('aria-label', 'Slideshow');
-    ssBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span id="lbSsLbl">Play</span>';
+   ssBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span id="lbSsLbl">Play</span>';
     $('lbZoomBtn').after(ssBtn);
+    ssBtn.onclick = toggleLbSlideshow; // ← THIS WAS MISSING — attaches at creation time
   }
   if ($('lbSsBtn')) $('lbSsBtn').style.display = S.isSpecialAlbumView ? 'flex' : 'none';
   stopLbSlideshow(); // Reset state on open
@@ -3425,27 +3459,32 @@ function renderLb() {
     img.style.display = 'block';
     
     // 🎨 Smooth Crossfade Logic
-    if (S.lbSlideshow) {
-      img.style.transition = 'opacity 0.5s ease';
-      img.style.opacity = '0';
-      // Wait for fade out, swap src, then fade in
-      setTimeout(() => { 
-        img.src = previewUrl; 
-        img.alt = altTxt; 
-        // Ensure browser has started loading before fading in
-        requestAnimationFrame(() => { img.style.opacity = '1'; });
-      }, 500);
-    } else {
-      img.style.transition = 'none';
-      img.src = previewUrl; 
-      img.alt = altTxt; 
-      img.style.opacity = '1';
-    }
+// Universal crossfade — applies to manual nav AND slideshow
+    img.style.transition = 'opacity 0.15s ease';
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = previewUrl;
+      img.alt = altTxt;
+      const fadeIn = () => { img.style.transition = 'opacity 0.4s ease'; img.style.opacity = '1'; };
+      // Cached images fire no onload — check immediately
+      if (img.complete && img.naturalWidth > 0) { fadeIn(); }
+      else { img.onload = fadeIn; img.onerror = fadeIn; }
+    }, 150);
   }
   
   const dlBtn = $('lbDlBtn'); dlBtn.dataset.url = dlUrl; dlBtn.dataset.filename = fileName;
   $('lbCount').textContent = (S.lbIdx + 1) + ' / ' + S.lbItems.length;
   updateLbSelBtn();
+  
+
+  // Preload adjacent images so navigation feels instant
+  requestAnimationFrame(() => {
+    [-1, 1, 2].forEach(offset => {
+      const pi = (S.lbIdx + offset + S.lbItems.length) % S.lbItems.length;
+      const pItem = S.lbItems[pi];
+      if (pItem && pItem.preview) { (new Image()).src = pItem.preview; }
+    });
+  });
   
   // Update Thumbnails
   document.querySelectorAll('.lb-thumb').forEach(function (t, i) { t.classList.toggle('active', i === S.lbIdx); });
