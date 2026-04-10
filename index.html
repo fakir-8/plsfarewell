@@ -1603,6 +1603,65 @@ section { padding:56px 16px; }
 .lb-acts { gap:4px; }
 }
 @keyframes guestSpin { to { transform: rotate(360deg); } }
+
+
+/* =========================================
+   TEMPORARY SPECIAL ALBUM VIEW
+   ========================================= */
+.special-album-container {
+  background: var(--panel);
+  border: 1px solid var(--gb);
+  border-radius: var(--r-lg);
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.special-album-header { text-align: center; margin-bottom: 16px; }
+.special-album-header h3 {
+  font-family: var(--f-head);
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 600; color: var(--text-1); margin: 0; letter-spacing: -0.01em;
+}
+.special-viewport {
+  overflow: hidden; border-radius: 12px; position: relative; margin-bottom: 12px;
+}
+.special-track {
+  display: flex; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.special-page {
+  flex: 0 0 100%; display: grid; gap: 10px; padding: 2px;
+}
+/* Mobile: 2 cols | Desktop: 4 cols */
+@media (max-width: 600px) { .special-page { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 601px) { .special-page { grid-template-columns: repeat(4, 1fr); } }
+
+.special-page .alb-img {
+  border-radius: 14px; margin: 0; background: rgba(255,255,255,0.03);
+  overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.4s ease;
+}
+.special-page .alb-img:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(31,182,255,0.15); }
+.special-page .alb-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.special-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; }
+.spec-btn {
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  background: var(--glass); border: 1px solid var(--gb); border-radius: 50%;
+  cursor: pointer; transition: all 0.25s ease; color: var(--text-2);
+}
+.spec-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--bg); transform: scale(1.08); }
+.spec-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+.spec-btn svg { width: 18px; height: 18px; fill: currentColor; }
+.spec-counter { font-size: 0.82rem; color: var(--muted); font-weight: 600; min-width: 55px; text-align: center; letter-spacing: 0.5px; }
+
+/* 🔧 FIX: Show lightbox thumbnail strip on mobile */
+@media (max-width: 600px) {
+  .lb-strip { display: flex !important; height: 70px; padding: 8px 10px; }
+  .lb-thumb { width: 48px; height: 46px; }
+}
+
+
 </style>
 </head>
 <body>
@@ -2188,7 +2247,7 @@ ALBUM_GIDS:  {
 },
 ALBUM_ZIPS:  { 1:null, 2:null, 3:null, 4:null },
 HIGHLIGHT_GID: '1827804160',
-ALL_ALBUMS_GDRIVE_URL: 'https://drive.google.com/drive/folders/1AX_y913_oZN7Mw3vC0lggDhtlIDnSIES',
+ALL_ALBUMS_GDRIVE_URL: 'https://drive.google.com/drive/folders/1AX_y913_oZN7Mw3vC0lggDhtlIDnSIES?usp=sharing',
 ALL_ALBUMS_ZIP_URL:    null
 };
 const ALBUMS_META = {
@@ -2898,51 +2957,129 @@ initReveal();
 /* =====================================================
 ALBUMS
 ===================================================== */
+/* =====================================================
+   TEMPORARY SPECIAL ALBUM VIEW (Paginated Grid)
+   ===================================================== */
+const USE_SPECIAL_ALBUM_VIEW = true; // 🔑 Set to FALSE to instantly revert to original albums
+const SPECIAL_ROWS_MOBILE = 5;       // 2 cols × 5 rows = 10 per page
+const SPECIAL_ROWS_DESKTOP = 5;      // 4 cols × 5 rows = 20 per page (change to 10 if preferred)
+let _specialPage = 0;
+
+function getSpecialPageSize() {
+  const isMobile = window.innerWidth <= 600;
+  const cols = isMobile ? 2 : 4;
+  const rows = isMobile ? SPECIAL_ROWS_MOBILE : SPECIAL_ROWS_DESKTOP;
+  return cols * rows;
+}
+
+function renderSpecialAlbum(albumData) {
+  const wrap = $('albumsWrap');
+  if (!wrap || !albumData || !albumData.images.length) return;
+
+  wrap.innerHTML = '';
+  const container = document.createElement('div');
+  container.className = 'special-album-container reveal in';
+  container.innerHTML = `
+    <div class="special-album-header"><h3>${albumData.title || 'Memory Lane'}</h3></div>
+    <div class="special-viewport"><div class="special-track" id="specialTrack"></div></div>
+    <div class="special-nav">
+      <button class="spec-btn" id="specPrev" aria-label="Previous page"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+      <span class="spec-counter" id="specCounter">1 / 1</span>
+      <button class="spec-btn" id="specNext" aria-label="Next page"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+    </div>`;
+  wrap.appendChild(container);
+
+  const pageSize = getSpecialPageSize();
+  const totalPages = Math.ceil(albumData.images.length / pageSize);
+  _specialPage = 0;
+  const track = $('specialTrack'); track.innerHTML = '';
+
+  for (let p = 0; p < totalPages; p++) {
+    const pageDiv = document.createElement('div'); pageDiv.className = 'special-page';
+    const start = p * pageSize, end = Math.min(start + pageSize, albumData.images.length);
+    albumData.images.slice(start, end).forEach((item, i) => {
+      const el = document.createElement('div'); el.className = 'alb-img';
+      el.dataset.preview = item.preview || item.url || '';
+      el.dataset.download = item.download || item.url || el.dataset.preview;
+      el.dataset.filename = item.fileName || extractFileName(el.dataset.download);
+      el.innerHTML = `<img src="${item.preview || item.url || ''}" alt="${item.alt || ''}" loading="lazy">`;
+      el.style.opacity = '0'; el.style.transform = 'translateY(12px)';
+      el.addEventListener('click', () => openLightbox(albumData.images, start + i, albumData.type || 'image'));
+      pageDiv.appendChild(el);
+      requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
+    });
+    track.appendChild(pageDiv);
+  }
+
+  const updateNav = () => {
+    $('specCounter').textContent = `${_specialPage + 1} / ${totalPages}`;
+    $('specPrev').disabled = _specialPage === 0;
+    $('specNext').disabled = _specialPage >= totalPages - 1;
+    track.style.transform = `translateX(-${_specialPage * 100}%)`;
+  };
+  $('specPrev').onclick = () => { if (_specialPage > 0) { _specialPage--; updateNav(); } };
+  $('specNext').onclick = () => { if (_specialPage < totalPages - 1) { _specialPage++; updateNav(); } };
+  updateNav();
+
+  let resizeTimer;
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderSpecialAlbum(albumData), 200); });
+}
+
+/* =====================================================
+   REPLACED `renderAlbums()` — Original logic preserved below
+   ===================================================== */
 function renderAlbums(){
-const wrap=$('albumsWrap');wrap.innerHTML='';
-S.albumsData.forEach(function(album){
-const tile=document.createElement('div');
-tile.className='album-tile reveal';tile.setAttribute('aria-expanded','false');
-tile.setAttribute('role','listitem');tile.dataset.id=album.id;
-const stacks=album.images.slice(0,3).map(function(img){
-const src=img.poster||img.preview||img.url||'';
-return '<img src="'+src+'" alt="'+(img.alt||album.title)+'" loading="lazy">';
-}).join('');
-tile.innerHTML=
-'<div class="alb-geo alb-geo-orb" aria-hidden="true"></div>'+
-'<div class="alb-geo alb-geo-diamond" aria-hidden="true"></div>'+
-'<div class="alb-geo alb-geo-dots" aria-hidden="true"></div>'+
-'<div class="alb-geo alb-geo-ring" aria-hidden="true"></div>'+
-'<div class="album-bg" aria-hidden="true"></div>'+
-'<div class="album-hdr" role="button" tabindex="0" aria-label="Toggle '+album.title+' album">'+
-'<div class="album-stack" aria-hidden="true">'+stacks+'</div>'+
-'<div class="album-info">'+
-'<h3 class="album-title">'+album.title+'</h3>'+
-'<p class="album-sub">'+album.subtitle+'</p>'+
-'</div>'+
-'<div class="album-meta">'+
-'<span class="album-count">'+album.count+' items</span>'+
-'<div class="album-meta-btns">'+
-'<button class="icon-btn alb-dl-btn" aria-label="Download '+album.title+'">'+
-'<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>'+
-'</button>'+
-'<div class="icon-btn album-toggle" tabindex="0" role="button" aria-label="Expand or collapse">'+
-'<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>'+
-'</div>'+
-'</div>'+
-'</div>'+
-'</div>'+
-'<div class="album-body" id="abody-'+album.id+'" aria-hidden="true">'+
-'<div class="album-grid" id="agrid-'+album.id+'" role="list" aria-label="'+album.title+' photos"></div>'+
-'<div class="album-footer" id="afooter-'+album.id+'">'+hintHTML()+'</div>'+
-'</div>';
-tile.querySelector('.alb-dl-btn').addEventListener('click',function(e){e.stopPropagation();openAlbumDlModal(album);});
-const hdr=tile.querySelector('.album-hdr');
-hdr.addEventListener('click',function(){toggleAlbum(tile,album);});
-hdr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleAlbum(tile,album);}});
-wrap.appendChild(tile);
-});
-initReveal();
+  if (USE_SPECIAL_ALBUM_VIEW) {
+    const specialData = S.albumsData.find(a => a.id === 1) || S.albumsData[0];
+    if (specialData) renderSpecialAlbum(specialData);
+    return; // ⛔ Stops here. Original albums skipped temporarily.
+  }
+
+  // ─────────── ORIGINAL LOGIC (DO NOT EDIT) ───────────
+  const wrap=$('albumsWrap');wrap.innerHTML='';
+  S.albumsData.forEach(function(album){
+    const tile=document.createElement('div');
+    tile.className='album-tile reveal';tile.setAttribute('aria-expanded','false');
+    tile.setAttribute('role','listitem');tile.dataset.id=album.id;
+    const stacks=album.images.slice(0,3).map(function(img){
+      const src=img.poster||img.preview||img.url||'';
+      return '<img src="'+src+'" alt="'+(img.alt||album.title)+'" loading="lazy">';
+    }).join('');
+    tile.innerHTML=
+    '<div class="alb-geo alb-geo-orb" aria-hidden="true"></div>'+
+    '<div class="alb-geo alb-geo-diamond" aria-hidden="true"></div>'+
+    '<div class="alb-geo alb-geo-dots" aria-hidden="true"></div>'+
+    '<div class="alb-geo alb-geo-ring" aria-hidden="true"></div>'+
+    '<div class="album-bg" aria-hidden="true"></div>'+
+    '<div class="album-hdr" role="button" tabindex="0" aria-label="Toggle '+album.title+' album">'+
+    '<div class="album-stack" aria-hidden="true">'+stacks+'</div>'+
+    '<div class="album-info">'+
+    '<h3 class="album-title">'+album.title+'</h3>'+
+    '<p class="album-sub">'+album.subtitle+'</p>'+
+    '</div>'+
+    '<div class="album-meta">'+
+    '<span class="album-count">'+album.count+' items</span>'+
+    '<div class="album-meta-btns">'+
+    '<button class="icon-btn alb-dl-btn" aria-label="Download '+album.title+'">'+
+    '<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>'+
+    '</button>'+
+    '<div class="icon-btn album-toggle" tabindex="0" role="button" aria-label="Expand or collapse">'+
+    '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>'+
+    '</div>'+
+    '</div>'+
+    '</div>'+
+    '</div>'+
+    '<div class="album-body" id="abody-'+album.id+'" aria-hidden="true">'+
+    '<div class="album-grid" id="agrid-'+album.id+'" role="list" aria-label="'+album.title+' photos"></div>'+
+    '<div class="album-footer" id="afooter-'+album.id+'">'+hintHTML()+'</div>'+
+    '</div>';
+    tile.querySelector('.alb-dl-btn').addEventListener('click',function(e){e.stopPropagation();openAlbumDlModal(album);});
+    const hdr=tile.querySelector('.album-hdr');
+    hdr.addEventListener('click',function(){toggleAlbum(tile,album);});
+    hdr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleAlbum(tile,album);}});
+    wrap.appendChild(tile);
+  });
+  initReveal();
 }
 
 function hintHTML(){
