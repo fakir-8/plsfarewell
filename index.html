@@ -576,7 +576,7 @@ backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
   .lb-nav {
     top: auto !important;
     transform: none !important;
-    bottom: 78px;   /* sits just above the thumbnail strip */
+    bottom: 20px;   /* sits just above the thumbnail strip */
     width: 40px;
     height: 40px;
   }
@@ -1648,10 +1648,14 @@ section { padding:56px 16px; }
   font-weight: 600; color: var(--text-1); margin: 0; letter-spacing: -0.01em;
 }
 .special-viewport {
-  overflow: hidden; position: relative; margin-bottom: 0;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 0;
 }
 .special-track {
-  display: flex; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: flex-start; /* ← KEY: don't stretch pages to tallest sibling */
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 /* TRUE MASONRY — no gaps, natural ratios */
@@ -1689,12 +1693,7 @@ section { padding:56px 16px; }
 }
 
 /* Allow viewport to breathe with varying column heights */
-.special-viewport {
-  overflow-x: hidden;
-  overflow-y: visible;
-  position: relative;
-  margin-bottom: 0;
-}
+
 
 .special-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; padding: 0 24px; }
 .spec-btn {
@@ -3195,9 +3194,21 @@ const updateNav = () => {
   $('specPrev').disabled = _specialPage === 0;
   $('specNext').disabled = _specialPage >= totalPages - 1;
   track.style.transform = `translateX(-${_specialPage * 100}%)`;
-  
+
   const inp = $('specPageInput');
   if (inp) { inp.max = totalPages; inp.value = _specialPage + 1; }
+
+  // FIX: Sync viewport height to current page's actual content height
+  // so no gap appears between last image row and nav buttons
+  requestAnimationFrame(() => {
+    const pages = track.querySelectorAll('.special-page');
+    const activePage = pages[_specialPage];
+    if (activePage) {
+      // Measure real height after masonry has laid out
+      const h = activePage.getBoundingClientRect().height;
+      if (h > 0) track.parentElement.style.height = h + 'px';
+    }
+  });
 };
   
 updateNav();
@@ -3239,9 +3250,9 @@ const USE_VIDEO_ALBUM_VIEW = true;
 const SPECIAL_VIDEOS = [
   {
     title: 'Farewell Memories',
-    thumbnail: 'YOUR_THUMBNAIL_1_URL',   // ← paste your thumbnail image URL
-    src:       'YOUR_VIDEO_1_URL',        // ← paste your video URL (Drive direct link or other)
-    download:  'YOUR_VIDEO_1_URL',
+    thumbnail: 'https://drive.google.com/thumbnail?id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z&sz=w1000',   // ← paste your thumbnail image URL
+    src:       'https://drive.google.com/uc?export=download&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',        // ← paste your video URL (Drive direct link or other)
+    download:  'https://drive.google.com/uc?export=download&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',
     fileName:  'SSC 2026 - Farewel-Police-Line-Secondary-School-Jashore.mp4'
   }
 ];
