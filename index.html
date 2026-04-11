@@ -570,6 +570,19 @@ background:rgba(3,4,10,.7); border:1px solid var(--gb); border-radius:50%;
 transition:all .2s ease; z-index:10;
 backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 }
+
+/* Mobile: move nav buttons to bottom corners, below image */
+@media (max-width: 600px) {
+  .lb-nav {
+    top: auto !important;
+    transform: none !important;
+    bottom: 78px;   /* sits just above the thumbnail strip */
+    width: 40px;
+    height: 40px;
+  }
+  .lb-prev { left: 12px; }
+  .lb-next { right: 12px; }
+}
 .lb-nav:hover { background:var(--accent); border-color:var(--accent); }
 .lb-nav svg { width:22px; height:22px; fill:var(--text-2); }
 .lb-nav:hover svg { fill:var(--bg); }
@@ -1641,23 +1654,46 @@ section { padding:56px 16px; }
   display: flex; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
+/* TRUE MASONRY — no gaps, natural ratios */
 .special-page {
-  flex: 0 0 100%; display: grid; gap: 6px; padding: 2px 16px;
-  align-items: start; /* ← KEY: each cell = natural image height */
+  flex: 0 0 100%;
+  column-count: 4;
+  column-gap: 6px;
+  padding: 2px 16px;
 }
-.special-page { grid-template-columns: repeat(4, 1fr); }
-@media (max-width: 600px) { .special-page { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) {
+  .special-page { column-count: 2; }
+}
 
 .special-page .alb-img {
-  border-radius: 10px; margin: 0; background: rgba(255,255,255,0.03);
-  overflow: hidden; transition: box-shadow 0.3s ease, opacity 0.4s ease;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  display: block;
+  width: 100%;
+  margin: 0 0 6px 0;       /* gap between items within a column */
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+  transition: box-shadow 0.3s ease, opacity 0.4s ease;
 }
-.special-page .alb-img:hover { box-shadow: 0 8px 24px rgba(31,182,255,0.2); }
+.special-page .alb-img:hover {
+  box-shadow: 0 8px 24px rgba(31,182,255,0.2);
+}
 .special-page .alb-img img {
   width: 100%;
-  height: auto;        /* ← CRITICAL: own natural ratio */
+  height: auto;
   display: block;
-  object-fit: unset;   /* ← Remove forced crop */
+  border-radius: 10px;
+  object-fit: unset;
+}
+
+/* Allow viewport to breathe with varying column heights */
+.special-viewport {
+  overflow-x: hidden;
+  overflow-y: visible;
+  position: relative;
+  margin-bottom: 0;
 }
 
 .special-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; padding: 0 24px; }
@@ -3159,11 +3195,20 @@ const updateNav = () => {
   $('specPrev').disabled = _specialPage === 0;
   $('specNext').disabled = _specialPage >= totalPages - 1;
   track.style.transform = `translateX(-${_specialPage * 100}%)`;
+  
   const inp = $('specPageInput');
   if (inp) { inp.max = totalPages; inp.value = _specialPage + 1; }
 };
   
 updateNav();
+
+// FIX: Wire up prev/next page buttons
+$('specPrev').addEventListener('click', () => {
+  if (_specialPage > 0) { _specialPage--; updateNav(); }
+});
+$('specNext').addEventListener('click', () => {
+  if (_specialPage < totalPages - 1) { _specialPage++; updateNav(); }
+});
   // Wire up page-jump input
   const pageInp = $('specPageInput');
   if (pageInp) {
@@ -3189,22 +3234,15 @@ updateNav();
    TEMPORARY VIDEO ALBUM — Manual (no sheet fetch)
    🔑 Set USE_VIDEO_ALBUM_VIEW = false to hide entirely
    ===================================================== */
-const USE_VIDEO_ALBUM_VIEW = false;
+const USE_VIDEO_ALBUM_VIEW = true;
 
 const SPECIAL_VIDEOS = [
   {
-    title: 'Farewell Ceremony Highlights',
+    title: 'Farewell Memories',
     thumbnail: 'YOUR_THUMBNAIL_1_URL',   // ← paste your thumbnail image URL
     src:       'YOUR_VIDEO_1_URL',        // ← paste your video URL (Drive direct link or other)
     download:  'YOUR_VIDEO_1_URL',
-    fileName:  'farewell-ceremony.mp4'
-  },
-  {
-    title: 'Memory Montage',
-    thumbnail: 'YOUR_THUMBNAIL_2_URL',   // ← paste your thumbnail image URL
-    src:       'YOUR_VIDEO_2_URL',        // ← paste your video URL
-    download:  'YOUR_VIDEO_2_URL',
-    fileName:  'memory-montage.mp4'
+    fileName:  'SSC 2026 - Farewel-Police-Line-Secondary-School-Jashore.mp4'
   }
 ];
 
@@ -3217,7 +3255,7 @@ function renderVideoAlbum() {
   container.className = 'video-album-container';
   container.id = 'videoAlbumContainer';
   container.innerHTML = `
-    <div class="video-album-header"><h3>🎬 Video Memories</h3></div>
+    <div class="video-album-header"><h3>Video Memories</h3></div>
     <div class="video-album-grid" id="videoAlbumGrid"></div>`;
   wrap.appendChild(container);
 
@@ -3621,16 +3659,21 @@ function renderLb() {
     
     // 🎨 Smooth Crossfade Logic
 // Universal crossfade — applies to manual nav AND slideshow
-    img.style.transition = 'opacity 0.15s ease';
-    img.style.opacity = '0';
-    setTimeout(() => {
-      img.src = previewUrl;
-      img.alt = altTxt;
-      const fadeIn = () => { img.style.transition = 'opacity 0.4s ease'; img.style.opacity = '1'; };
-      // Cached images fire no onload — check immediately
-      if (img.complete && img.naturalWidth > 0) { fadeIn(); }
-      else { img.onload = fadeIn; img.onerror = fadeIn; }
-    }, 150);
+   // Nostalgic zoom-fade: image drifts in from slightly larger
+img.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+img.style.opacity = '0';
+img.style.transform = 'scale(1.045)';
+setTimeout(() => {
+  img.src = previewUrl;
+  img.alt = altTxt;
+  const fadeIn = () => {
+    img.style.transition = 'opacity 0.55s ease, transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    img.style.opacity = '1';
+    img.style.transform = 'scale(1)';
+  };
+  if (img.complete && img.naturalWidth > 0) { fadeIn(); }
+  else { img.onload = fadeIn; img.onerror = () => { img.style.opacity='1'; img.style.transform='scale(1)'; }; }
+}, 180);
   }
   
   const dlBtn = $('lbDlBtn'); dlBtn.dataset.url = dlUrl; dlBtn.dataset.filename = fileName;
