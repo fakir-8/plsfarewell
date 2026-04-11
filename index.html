@@ -3214,12 +3214,41 @@ const updateNav = () => {
 updateNav();
 
 // FIX: Wire up prev/next page buttons
+// Wire up prev/next page buttons
 $('specPrev').addEventListener('click', () => {
   if (_specialPage > 0) { _specialPage--; updateNav(); }
 });
 $('specNext').addEventListener('click', () => {
   if (_specialPage < totalPages - 1) { _specialPage++; updateNav(); }
 });
+
+// Initial render — wait for ALL first-page images to load before
+// measuring height, so the viewport isn't locked to a collapsed size
+const _firstPageImgs = [...track.querySelectorAll('.special-page:first-child img')];
+if (_firstPageImgs.length === 0) {
+  updateNav();
+} else {
+  // Set a provisional height immediately so page isn't invisible
+  updateNav();
+  let _loaded = 0;
+  const _onLoad = () => {
+    _loaded++;
+    if (_loaded >= _firstPageImgs.length) {
+      // All images decoded — re-measure with real dimensions
+      updateNav();
+    }
+  };
+  _firstPageImgs.forEach(img => {
+    if (img.complete && img.naturalHeight > 0) { _onLoad(); }
+    else {
+      img.addEventListener('load',  _onLoad, { once: true });
+      img.addEventListener('error', _onLoad, { once: true });
+    }
+  });
+  // Safety net: force re-measure at 800ms and 1600ms regardless
+  setTimeout(updateNav, 800);
+  setTimeout(updateNav, 1600);
+}
   // Wire up page-jump input
   const pageInp = $('specPageInput');
   if (pageInp) {
@@ -3251,7 +3280,7 @@ const SPECIAL_VIDEOS = [
   {
     title: 'Farewell Memories',
     thumbnail: 'https://drive.google.com/thumbnail?id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z&sz=w1000',   // ← paste your thumbnail image URL
-    src:       'https://drive.google.com/uc?export=download&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',        // ← paste your video URL (Drive direct link or other)
+    src:       'https://drive.google.com/uc?export=view&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',        // ← paste your video URL (Drive direct link or other)
     download:  'https://drive.google.com/uc?export=download&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',
     fileName:  'SSC 2026 - Farewel-Police-Line-Secondary-School-Jashore.mp4'
   }
@@ -3583,17 +3612,63 @@ function(){$('dlAllOneByOneBtn').disabled=false;$('dlAllModal').classList.remove
 VIDEO MODAL
 ===================================================== */
 let _vidDlUrl='',_vidFn='';
-function openVidModal(url,poster,fileName,dlUrl){
-const vid=$('vidEl');vid.src=url;if(poster)vid.poster=poster;
-$('vidTitle').textContent=fileName||'Video Player';
-_vidDlUrl=dlUrl||url;_vidFn=fileName||'video.mp4';
-$('vidModal').classList.add('active');document.body.style.overflow='hidden';vid.play().catch(function(){});
+
+const VID_BODY_ORIGINAL_HTML = '<video id="vidEl" controls playsinline preload="metadata" style="width:100%;height:auto;display:block;max-height:70vh;"></video>';
+
+function openVidModal(url, poster, fileName, dlUrl) {
+  const vidBody = document.querySelector('.vid-body');
+  const driveId = extractDriveId(url);
+
+  // Always restore clean state first before injecting anything
+  vidBody.innerHTML = VID_BODY_ORIGINAL_HTML;
+
+  _vidDlUrl = dlUrl || url;
+  _vidFn = fileName || 'video.mp4';
+  $('vidTitle').textContent = fileName || 'Video Player';
+
+  if (driveId) {
+    // Drive file — use iframe player (handles large files, seeking, quality)
+    vidBody.innerHTML = `<iframe
+      src="https://drive.google.com/file/d/${driveId}/preview"
+      width="100%"
+      style="aspect-ratio:16/9;border:none;display:block;max-height:70vh;"
+      allow="autoplay"
+      allowfullscreen>
+    </iframe>`;
+  } else {
+    // Non-Drive — use native video element
+    const vid = $('vidEl');
+    if (poster) vid.poster = poster;
+    vid.src = url;
+    vid.play().catch(function(){});
+  }
+
+  $('vidModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
-function closeVidModal(){$('vidEl').pause();$('vidEl').src='';$('vidModal').classList.remove('active');document.body.style.overflow='';}
+
+function closeVidModal() {
+  const vidBody = document.querySelector('.vid-body');
+
+  // Destroy whatever is playing — iframe or video — stops audio immediately
+  vidBody.innerHTML = VID_BODY_ORIGINAL_HTML;
+
+  // Re-wire native video events after DOM restore
+  const vid = $('vidEl');
+  if (vid) {
+    vid.onended = function() { S.vidPlaying = false; updatePlayBtn(); };
+  }
+
+  $('vidModal').classList.remove('active');
+  document.body.style.overflow = '';
+  S.vidPlaying = false;
+}
+
 function initVidModal(){
-$('vidClose').onclick=closeVidModal;$('vidCloseBtn').onclick=closeVidModal;
-$('vidModal').addEventListener('click',function(e){if(e.target.id==='vidModal')closeVidModal();});
-$('vidDlBtn').onclick=function(){downloadFile(_vidDlUrl,_vidFn);};
+  $('vidClose').onclick = closeVidModal;
+  $('vidCloseBtn').onclick = closeVidModal;
+  $('vidModal').addEventListener('click', function(e){ if(e.target.id==='vidModal') closeVidModal(); });
+  $('vidDlBtn').onclick = function(){ downloadFile(_vidDlUrl, _vidFn); };
 }
 
 /* =====================================================
