@@ -1684,18 +1684,31 @@ section { padding:56px 16px; }
 .special-page .alb-img:hover {
   box-shadow: 0 8px 24px rgba(31,182,255,0.2);
 }
+/* Add inside .special-page .alb-img img */
 .special-page .alb-img img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 10px;
-  object-fit: unset;
+  max-height: 340px;
+  object-fit: cover;
 }
 
 /* Allow viewport to breathe with varying column heights */
 
 
-.special-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; padding: 0 24px; }
+/* Find .special-nav and REPLACE with: */
+.special-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 24px;
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  background: rgba(3, 4, 10, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--gb);
+  margin-top: 0;
+}
 .spec-btn {
   width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
   background: var(--glass); border: 1px solid var(--gb); border-radius: 50%;
@@ -3113,7 +3126,7 @@ ALBUMS
    ===================================================== */
 const USE_SPECIAL_ALBUM_VIEW = true; // 🔑 Set to FALSE to instantly revert to original albums
 const SPECIAL_ROWS_MOBILE = 4;    // 2 cols × 4 rows = 8 per page
-const SPECIAL_ROWS_DESKTOP = 4;   // 4 cols × 4 rows = 16 per page      // 4 cols × 5 rows = 20 per page (change to 10 if preferred)
+const SPECIAL_ROWS_DESKTOP = 3;   // 4 cols × 4 rows = 16 per page      // 4 cols × 5 rows = 20 per page (change to 10 if preferred)
 let _specialPage = 0;
 
 function getSpecialPageSize() {
@@ -3277,6 +3290,14 @@ if (_firstPageImgs.length === 0) {
 const USE_VIDEO_ALBUM_VIEW = true;
 
 const SPECIAL_VIDEOS = [
+  {
+    title: 'Farewell Memories',
+    thumbnail: 'https://drive.google.com/thumbnail?id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z&sz=w1000',   // ← paste your thumbnail image URL
+    src:       'https://drive.google.com/uc?export=view&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',        // ← paste your video URL (Drive direct link or other)
+    download:  'https://drive.google.com/uc?export=download&id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z',
+    fileName:  'SSC 2026 - Farewel-Police-Line-Secondary-School-Jashore.mp4'
+  },
+  
   {
     title: 'Farewell Memories',
     thumbnail: 'https://drive.google.com/thumbnail?id=1QMuMBpSLkBgbETYdsE85MoPiGWgwMr7z&sz=w1000',   // ← paste your thumbnail image URL
@@ -4080,7 +4101,10 @@ const icons = {
   email: '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
   others: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>'
 };
-const socialLinks = hasSocial ? Object.entries(c.social).map(function(entry){
+const ORDER = ['email','facebook','instagram','linkedin','website','others'];
+const socialLinks = hasSocial ? Object.entries(c.social).sort(function(a,b){
+  return (ORDER.indexOf(a[0]) + 99) % 99 - (ORDER.indexOf(b[0]) + 99) % 99;
+}).map(function(entry){
 const k = entry[0], v = entry[1];
 const href = k === 'email' ? `mailto:${v}` : v;
 return `<a href="${href}" target="${k==='email'?'_self':'_blank'}" rel="noopener" class="cc-sl" aria-label="${k}">${icons[k] || icons.website}</a>`;
@@ -4344,8 +4368,8 @@ const img = new Image();
 img.onload = function(){
 const ratio = img.width / img.height;
 const photoErr = $('photoErr');
-if(img.width < 300){ photoErr.textContent='Image must be at least 300×300 pixels.'; photoErr.classList.add('show'); imgUp.classList.remove('has-img'); S.photoDataUrl=null; return; }
-if(Math.abs(ratio - 1) >= 0.15){ photoErr.textContent='Image must be square (1:1 ratio).'; photoErr.classList.add('show'); imgUp.classList.remove('has-img'); S.photoDataUrl=null; return; }
+
+
 photoErr.classList.remove('show'); imgPr.src=ev.target.result; imgUp.classList.add('has-img'); S.photoDataUrl=ev.target.result;
 };
 img.src = ev.target.result;
